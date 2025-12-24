@@ -27,7 +27,7 @@ export default function Login() {
         onChange={(e) => setEmail(e.target.value)}
       />
       <input
-        type="password"
+        type="password" 
         placeholder="Password"
         onChange={(e) => setPassword(e.target.value)}
       />
