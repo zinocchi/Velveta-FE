@@ -14,10 +14,10 @@ export default function Login() {
 
       localStorage.setItem("token", res.data.token);
       alert("Login berhasil");
-    } catch {    
+    } catch {     
       alert("Login gagal");
     }
-  };
+  }; 
 
   return (
     <div>
