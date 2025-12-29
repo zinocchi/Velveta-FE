@@ -1,6 +1,4 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+
 
 body {
   font-family: 'Lato', sans-serif;
@@ -52,3 +50,7 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

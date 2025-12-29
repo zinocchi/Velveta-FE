@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import MainLayout from "../../layouts/MainLayout";
 
 const Rewards = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -31,7 +30,7 @@ const Rewards = () => {
   }, []);
 
   return (
-    <MainLayout>
+    <>
       {/* HERO */}
       <section className="pt-32 pb-20 bg-gradient-to-r from-red-700 to-amber-900 text-white text-center">
         <h1 className="text-4xl md:text-6xl font-bold mb-6">
@@ -146,7 +145,7 @@ const Rewards = () => {
           ))}
         </div>
       </section>
-    </MainLayout>
+    </>
   );
 };
 

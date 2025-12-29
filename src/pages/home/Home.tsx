@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import ScrollReveal from "scrollreveal";
 import "animate.css";
-import MainLayout from "../../layouts/MainLayout";
 
 const Home = () => {
   useEffect(() => {
@@ -18,7 +17,7 @@ const Home = () => {
   }, []);
 
   return (
-    <MainLayout>
+    <>
       {/* HERO */}
       <section className="mt-20 md:mt-24 max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 rounded-xl overflow-hidden">
@@ -100,7 +99,7 @@ const Home = () => {
           ))}
         </div>
       </section>
-    </MainLayout>
+    </>
   );
 };
 

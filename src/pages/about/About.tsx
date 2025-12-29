@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import MainLayout from "../../layouts/MainLayout";
 
 const About = () => {
   useEffect(() => {
@@ -28,7 +27,7 @@ const About = () => {
   }, []);
 
   return (
-    <MainLayout>
+    <>
       {/* HERO */}
       <section
         className="relative h-[60vh] mt-20 bg-cover bg-center"
@@ -141,7 +140,7 @@ const About = () => {
           ))}
         </div>
       </section>
-    </MainLayout>
+    </>
   );
 };
 
