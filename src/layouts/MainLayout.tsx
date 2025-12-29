@@ -1,17 +1,14 @@
-import type { ReactNode } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-type Props = {
-  children: ReactNode;
-};
-
-export default function MainLayout({ children }: Props) {
+const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <Navbar />
-      <main className="pt-20 overflow-x-hidden">{children}</main>
+      <main className="min-h-screen">{children}</main>
       <Footer />
     </>
   );
-}
+};
+
+export default MainLayout;
