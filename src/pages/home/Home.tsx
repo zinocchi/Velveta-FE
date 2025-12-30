@@ -1,76 +1,103 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ScrollReveal from "scrollreveal";
 import "animate.css";
 import "../../Global.css";
 
 const Home = () => {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [heroImageError, setHeroImageError] = useState(false);
+
   useEffect(() => {
-    const scrollReveal = ScrollReveal({
-      origin: 'bottom',
-      distance: '30px',
-      duration: 1000,
-      delay: 200,
-      rotate: { x: 0, y: 0, z: 2 },
-      opacity: 0,
-      scale: 0.95,
-      easing: 'cubic-bezier(0.5, 0, 0, 0.1)',
-      mobile: true,
-      reset: false,
-      viewFactor: 0.2,
-      viewOffset: { top: 0, right: 0, bottom: 50, left: 0 }
-    });
+    // Preload gambar utama
+    const img = new Image();
+    img.src = "https://content-prod-live.cert.starbucks.com/binary/v2/asset/137-97315.jpg";
+    img.onload = () => {
+      setIsImageLoaded(true);
+      console.log("Hero image preloaded successfully");
+    };
+    img.onerror = () => {
+      setHeroImageError(true);
+      console.error("Hero image failed to load");
+    };
 
-    scrollReveal.reveal('.animate__animated', {
-      interval: 100,
-      beforeReveal: (el: HTMLElement) => {
-        el.style.opacity = '1';
-        el.style.transform = 'translateY(0) rotateZ(0)';
-        el.style.filter = 'blur(0)';
-      },
-      beforeReset: (el: HTMLElement) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px) rotateZ(2deg)';
-        el.style.filter = 'blur(2px)';
-      }
-    });
+    // Delay inisialisasi ScrollReveal untuk memastikan DOM siap
+    const timer = setTimeout(() => {
+      const scrollReveal = ScrollReveal({
+        origin: 'bottom',
+        distance: '30px',
+        duration: 1000,
+        delay: 200,
+        rotate: { x: 0, y: 0, z: 2 },
+        opacity: 0,
+        scale: 0.95,
+        easing: 'cubic-bezier(0.5, 0, 0, 0.1)',
+        mobile: true,
+        reset: false,
+        viewFactor: 0.2,
+        viewOffset: { top: 0, right: 0, bottom: 50, left: 0 }
+      });
 
-    scrollReveal.reveal('section:nth-child(odd)', {
-      origin: 'left',
-      rotate: { z: -2 }
-    });
+      // Jangan reveal elemen yang sudah visible
+      scrollReveal.reveal('.sr-reveal', {
+        interval: 100,
+        beforeReveal: (el: HTMLElement) => {
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0) rotateZ(0)';
+          el.style.filter = 'blur(0)';
+        },
+        beforeReset: (el: HTMLElement) => {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(30px) rotateZ(2deg)';
+          el.style.filter = 'blur(2px)';
+        }
+      });
 
-    scrollReveal.reveal('section:nth-child(even)', {
-      origin: 'right',
-      rotate: { z: 2 }
-    });
+      scrollReveal.reveal('section:nth-of-type(odd)', {
+        origin: 'left',
+        rotate: { z: -2 }
+      });
 
-    // Intersection Observer for sections
+      scrollReveal.reveal('section:nth-of-type(even)', {
+        origin: 'right',
+        rotate: { z: 2 }
+      });
+    }, 300);
+
+    // Intersection Observer untuk sections - DIUBAH
     const sections = document.querySelectorAll('section');
     const options = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -100px 0px'
+      threshold: 0.05, // Lower threshold
+      rootMargin: '0px 0px -50px 0px'
     };
 
     const sectionObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const target = entry.target as HTMLElement;
-          target.style.transition = 'all 0.8s cubic-bezier(0.22, 1, 0.36, 1)';
-          target.style.opacity = '1';
-          target.style.transform = 'translateY(0) scale(1)';
-          target.style.filter = 'blur(0)';
+          
+          // Hanya terapkan animasi jika belum visible
+          if (target.style.opacity !== '1') {
+            target.style.transition = 'all 0.8s cubic-bezier(0.22, 1, 0.36, 1)';
+            target.style.opacity = '1';
+            target.style.transform = 'translateY(0) scale(1)';
+            target.style.filter = 'blur(0)';
 
-          target.style.boxShadow = '0 0 30px rgba(155, 17, 30, 0.2)';
-          setTimeout(() => {
-            target.style.boxShadow = 'none';
-          }, 1000);
-
+            // Efek glow sementara
+            target.style.boxShadow = '0 0 30px rgba(155, 17, 30, 0.2)';
+            setTimeout(() => {
+              target.style.boxShadow = 'none';
+            }, 1000);
+          }
+          
           observer.unobserve(target);
         }
       });
     }, options);
 
-    sections.forEach(section => {
+    sections.forEach((section, index) => {
+      // Skip hero section dari observer
+      if (index === 0) return;
+      
       const element = section as HTMLElement;
       element.style.opacity = '0';
       element.style.transform = 'translateY(40px) scale(0.98)';
@@ -82,7 +109,7 @@ const Home = () => {
 
     // Logo animation
     const logo = document.querySelector('.logo-img');
-    if (logo) {
+    if (logo) { 
       const logoElement = logo as HTMLElement;
       logoElement.addEventListener('mouseenter', () => {
         logoElement.style.transition = 'all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
@@ -150,31 +177,61 @@ const Home = () => {
         50% { transform: translateY(-10px); }
         100% { transform: translateY(0px); }
       }
+      .hero-image-container {
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-image-fallback {
+        background: linear-gradient(135deg, #8B0000 0%, #B22222 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
     `;
     document.head.appendChild(style);
 
     return () => {
+      clearTimeout(timer);
       document.head.removeChild(style);
     };
   }, []);
 
   return (
-    <main className="pt-16 md:pt-20"> {/* Kurangi padding-top untuk mobile dan desktop */}
-      {/* Hero Section - Sesuaikan margin atas */}
+    <main className="pt-16 md:pt-20">
+      {/* Hero Section - DIUBAH MIRIP DENGAN BLADE */}
       <section className="mt-8 md:mt-12 relative overflow-hidden">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 rounded-xl overflow-hidden">
           <div className="bg-red-700 text-white px-4 sm:px-6 py-12 md:py-20 lg:py-24 flex flex-col justify-center items-center text-center animate__animated animate__fadeInLeft">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-montserrat">The Spring Edit</h1>
-            <p className="text-lg sm:text-xl md:text-2xl mb-6 md:mb-8 max-w-md mx-auto px-2">Fresh flavors, familiar joy.</p>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-montserrat">
+              The Spring Edit
+            </h1>
+            <p className="text-lg sm:text-xl md:text-2xl mb-6 md:mb-8 max-w-md mx-auto px-2">
+              Fresh flavors, familiar joy.
+            </p>
             <button className="px-6 sm:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-red-700 transition-colors hero-btn text-sm sm:text-base">
               View the menu
             </button>
           </div>
 
+          {/* Hero Image - DIUBAH MENGGUNAKAN BG COVER SEPERTI BLADE */}
           <div 
-            className="h-48 sm:h-64 md:h-auto bg-cover bg-center animate__animated animate__fadeInRight min-h-[300px] md:min-h-0" 
-            style={{ backgroundImage: "url('https://content-prod-live.cert.starbucks.com/binary/v2/asset/137-97315.jpg')" }}
-          ></div>
+            className={`h-48 sm:h-64 md:h-auto min-h-[300px] md:min-h-0 bg-cover bg-center animate__animated animate__fadeInRight ${!isImageLoaded && !heroImageError ? 'bg-gray-200 animate-pulse' : ''}`}
+            style={{
+              backgroundImage: heroImageError 
+                ? 'linear-gradient(135deg, #8B0000 0%, #B22222 100%)' 
+                : `url('https://content-prod-live.cert.starbucks.com/binary/v2/asset/137-97315.jpg')`,
+              position: 'relative'
+            }}
+          >
+            {heroImageError && (
+              <div className="absolute inset-0 flex items-center justify-center text-white text-xl font-bold">
+                Velveta Spring Collection
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Floating dots - hide on mobile */}
@@ -183,8 +240,8 @@ const Home = () => {
         <div className="hidden md:block absolute bottom-1/4 left-1/4 w-5 h-5 rounded-full bg-amber-900 opacity-30 floating" style={{ animationDelay: '0.6s' }}></div>
       </section>
 
-      {/* Promotion Section 1 - Sesuaikan spacing untuk mobile */}
-      <section className="my-10 md:my-16 lg:my-24 max-w-7xl mx-auto px-4">
+      {/* Promotion Section 1 */}
+      <section className="my-10 md:my-16 lg:my-24 max-w-7xl mx-auto px-4 sr-reveal">
         <div className="grid grid-cols-1 md:grid-cols-2 rounded-xl overflow-hidden shadow-xl transform transition-all hover:scale-[1.01] duration-500">
           <div 
             className="h-48 sm:h-64 md:h-auto bg-cover bg-center min-h-[250px] md:min-h-0" 
@@ -203,7 +260,7 @@ const Home = () => {
       </section>
 
       {/* Promotion Section 2 */}
-      <section className="my-10 md:my-16 lg:my-24 max-w-7xl mx-auto px-4">
+      <section className="my-10 md:my-16 lg:my-24 max-w-7xl mx-auto px-4 sr-reveal">
         <div className="grid grid-cols-1 md:grid-cols-2 rounded-xl overflow-hidden shadow-xl transform transition-all hover:scale-[1.01] duration-500">
           <div className="order-2 md:order-1 bg-gray-700 text-white px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16 lg:py-20 flex flex-col justify-center items-center text-center">
             <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 font-montserrat px-2">Nondairy milk, no extra charge</h2>
@@ -221,8 +278,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Signature Blends Section - Optimasi untuk mobile */}
-      <section className="my-10 md:my-16 lg:my-24 max-w-7xl mx-auto px-4">
+      {/* Signature Blends Section */}
+      <section className="my-10 md:my-16 lg:my-24 max-w-7xl mx-auto px-4 sr-reveal">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12 font-montserrat">Our Signature Blends</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Card 1 */}
