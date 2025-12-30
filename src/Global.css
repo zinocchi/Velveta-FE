@@ -1,0 +1,29 @@
+/* global.css tambahan */
+@media (max-width: 640px) {
+  .hero-btn {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.875rem;
+  }
+  
+  section {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Ensure images cover properly on mobile */
+.bg-cover {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Better touch targets on mobile */
+@media (max-width: 768px) {
+  button, 
+  .btn,
+  a[role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
