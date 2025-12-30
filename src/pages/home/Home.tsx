@@ -234,6 +234,8 @@ const Home = () => {
           </div>
         </div>
 
+        test
+
         {/* Floating dots - hide on mobile */}
         <div className="hidden md:block absolute top-1/4 left-10 w-8 h-8 rounded-full bg-amber-800 opacity-30 floating" style={{ animationDelay: '0.2s' }}></div>
         <div className="hidden md:block absolute top-1/3 right-20 w-6 h-6 rounded-full bg-amber-600 opacity-40 floating" style={{ animationDelay: '0.4s' }}></div>
