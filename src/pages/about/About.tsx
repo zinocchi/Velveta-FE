@@ -30,7 +30,7 @@ const About = () => {
     <>
       {/* HERO */}
       <section
-        className="relative h-[60vh] mt-20 bg-cover bg-center"
+        className="relative h-[96vh] mt-20 bg-cover bg-center"
         style={{
           backgroundImage:
             "url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085')",
@@ -141,7 +141,7 @@ const About = () => {
         </div>
       </section>
     </>
-  );
+  );  
 };
 
 export default About;
