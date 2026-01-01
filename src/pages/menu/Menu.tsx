@@ -1,22 +1,11 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import MenuSidebar from "../../components/MenuSidebar";
 
 const Menu = () => {
-  const [activeCategory, setActiveCategory] = useState<string>("");
-
-  // Reset active category on mount
-  useEffect(() => {
-    setActiveCategory("");
-  }, []);
-
-  const handleCategoryClick = useCallback((categoryId: string) => {
-    setActiveCategory(categoryId);
-  }, []);
-
   useEffect(() => {
     // Animation for menu items
-    const menuItems = document.querySelectorAll('.menu-item');
+    const menuItems = document.querySelectorAll('.menu-page-item');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -30,34 +19,34 @@ const Menu = () => {
       observer.observe(item);
     });
 
-    // Track scroll untuk active category
-    const categoryObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const id = entry.target.id;
-          if (id) {
-            setActiveCategory(id);
-          }
-        }
-      });
-    }, {
-      rootMargin: '-20% 0px -50% 0px',
-      threshold: 0.1
-    });
-
-    // Observe semua category elements
-    const allCategories = [...drinkCategories, ...foodCategories];
-    allCategories.forEach(category => {
-      const element = document.getElementById(category.id);
-      if (element) {
-        categoryObserver.observe(element);
+    // Add CSS for menu item hover effects
+    const style = document.createElement('style');
+    style.textContent = `
+      .menu-page-item:hover .menu-img {
+        transform: scale(1.05) rotate(-2deg);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
       }
-    });
+      .menu-img {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .category-title {
+        position: relative;
+        display: inline-block;
+      }
+      .category-title::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: #9B111E;
+      }
+    `;
+    document.head.appendChild(style);
 
-    // Cleanup
     return () => {
-      observer.disconnect();
-      categoryObserver.disconnect();
+      document.head.removeChild(style);
     };
   }, []);
 
@@ -92,7 +81,7 @@ const Menu = () => {
     },
     {
       id: "hot-chocolate",
-      name: "Hot Chocolate & More",
+      name: "Hot Chocolate",
       description: "Rich, creamy chocolate drinks",
       image: "https://globalassets.starbucks.com/digitalassets/products/bev/HotChocolate.jpg",
       route: "/menu/drinks/hot-chocolate"
@@ -125,7 +114,7 @@ const Menu = () => {
       id: "lunch",
       name: "Lunch",
       description: "Satisfying midday meals",
-      image: "https://globalassets.starbucks.com/digitalassets/products/food/SBX20220207_GrilledCheaseOnSourdough_US.jpg",
+      image: "https://globalassets.starbucks.com/digitalassets/products/food/SBX20220207_GrilledCheeseOnSourdough_US.jpg",
       route: "/menu/food/lunch"
     },
     {
@@ -138,118 +127,95 @@ const Menu = () => {
   ];
 
   return (
-    <main className="min-h-screen">
-      {/* Hero/Header Section */}
-      <div className="pt-24 pb-12 bg-gradient-to-r from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-montserrat">
-              Our Menu
-            </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Discover our premium selection of coffees and delicious food pairings
-            </p>
-          </div>
-        </div>
-      </div>
+    <main className="pt-28 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col md:flex-row">
+        {/* Sidebar */}
+        <MenuSidebar />
+        
+        {/* Main Content */}
+        <div className="flex-1">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 font-montserrat">Our Menu</h1>
+          <p className="text-gray-600 mb-8">Discover our premium selection of coffees and delicious food pairings</p>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row">
-          {/* Sidebar */}
-          <div className="lg:w-1/4 mb-8 lg:mb-0 lg:pr-8">
-            <MenuSidebar 
-              activeCategory={activeCategory}
-              onCategoryClick={handleCategoryClick}
-            />
-          </div>
-          
-          {/* Menu Content */}
-          <div className="lg:w-3/4">
-            {/* Drinks Section */}
-            <section id="drinks" className="mb-16 scroll-mt-24">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 font-montserrat border-b pb-3">
-                Drinks
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {drinkCategories.map((category) => (
-                  <Link 
-                    key={category.id}
-                    to={category.route}
-                    id={category.id}
-                    className="menu-item group block"
-                  >
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden h-full flex flex-col hover:shadow-lg transition-all duration-300 border border-gray-100">
-                      <div className="relative overflow-hidden h-56">
-                        <img 
-                          src={category.image} 
-                          alt={category.name}
-                          className="menu-img w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = "https://via.placeholder.com/400x300/E5E7EB/6B7280?text=" + encodeURIComponent(category.name);
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-                      <div className="p-5 flex-1">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">{category.name}</h3>
-                        <p className="text-gray-600 mb-4">{category.description}</p>
-                        <div className="text-red-700 font-medium text-sm flex items-center">
-                          Explore
-                          <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                          </svg>
-                        </div>
-                      </div>
+          {/* Drinks Section */}
+          <section id="drinks" className="mb-16">
+            <h2 className="category-title text-2xl md:text-3xl font-bold text-gray-900 mb-8 font-montserrat">Drinks</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {drinkCategories.map((category) => (
+                <Link 
+                  key={category.id}
+                  to={category.route}
+                  id={category.id}
+                  className="menu-item group"
+                >
+                  <div className="bg-white rounded-xl shadow-sm overflow-hidden p-4 h-full flex flex-col hover:shadow-md transition-shadow duration-300">
+                    <div className="relative overflow-hidden rounded-lg mb-4">
+                      <img 
+                        src={category.image} 
+                        alt={category.name}
+                        className="menu-img w-full h-40 sm:h-48 object-cover rounded-lg"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{category.name}</h3>
+                    <p className="text-gray-600 text-sm">{category.description}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
 
-            {/* Food Section */}
-            <section id="food" className="mb-16 scroll-mt-24">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 font-montserrat border-b pb-3">
-                Food
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {foodCategories.map((category) => (
-                  <Link 
-                    key={category.id}
-                    to={category.route}
-                    id={category.id}
-                    className="menu-item group block"
-                  >
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden h-full flex flex-col hover:shadow-lg transition-all duration-300 border border-gray-100">
-                      <div className="relative overflow-hidden h-56">
-                        <img 
-                          src={category.image} 
-                          alt={category.name}
-                          className="menu-img w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = "https://via.placeholder.com/400x300/E5E7EB/6B7280?text=" + encodeURIComponent(category.name);
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-                      <div className="p-5 flex-1">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">{category.name}</h3>
-                        <p className="text-gray-600 mb-4">{category.description}</p>
-                        <div className="text-red-700 font-medium text-sm flex items-center">
-                          Explore
-                          <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                          </svg>
-                        </div>
-                      </div>
+          {/* Food Section */}
+          <section id="food" className="mb-16">
+            <h2 className="category-title text-2xl md:text-3xl font-bold text-gray-900 mb-8 font-montserrat">Food</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {foodCategories.map((category) => (
+                <Link 
+                  key={category.id}
+                  to={category.route}
+                  id={category.id}
+                  className="menu-item group"
+                >
+                  <div className="bg-white rounded-xl shadow-sm overflow-hidden p-4 h-full flex flex-col hover:shadow-md transition-shadow duration-300">
+                    <div className="relative overflow-hidden rounded-lg mb-4">
+                      <img 
+                        src={category.image} 
+                        alt={category.name}
+                        className="menu-img w-full h-40 sm:h-48 object-cover rounded-lg"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{category.name}</h3>
+                    <p className="text-gray-600 text-sm">{category.description}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          {/* Mobile Snack Category (separate for better mobile display) */}
+          <section className="md:hidden mt-8">
+            <div className="grid grid-cols-1 gap-6">
+              <Link 
+                to="/menu/food/snack"
+                id="snack"
+                className="menu-item group"
+              >
+                <div className="bg-white rounded-xl shadow-sm overflow-hidden p-4 h-full flex flex-col hover:shadow-md transition-shadow duration-300">
+                  <div className="relative overflow-hidden rounded-lg mb-4">
+                    <img 
+                      src="https://globalassets.starbucks.com/digitalassets/products/food/SBX20190903_SmokedTurkeyProteinBox.jpg" 
+                      alt="Snacks"
+                      className="menu-img w-full h-48 object-cover rounded-lg"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">Snacks</h3>
+                  <p className="text-gray-600 text-sm">Light bites and savory snacks</p>
+                </div>
+              </Link>
+            </div>
+          </section>
         </div>
       </div>
     </main>
