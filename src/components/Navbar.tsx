@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "../Navbar.css";
 import VelvetaLogo from "../assets/icon/velveta.png";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -19,6 +20,9 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Check if current page is not home page
+  const isNotHomePage = location.pathname !== "/";
 
   return (
     <header className={`fixed top-0 w-full bg-white z-50 transition-all duration-300 ${scrolled ? 'shadow-md border-b border-gray-200' : ''}`}>
@@ -39,6 +43,18 @@ const Navbar = () => {
                 />
               </Link>
             </div>
+            
+            {/* Tombol Back to Home untuk desktop - hanya muncul di halaman lain */}
+            {isNotHomePage && (
+              <div className="hidden md:block">
+                <Link 
+                  to="/"
+                className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
+                  >
+                  Home
+                </Link>
+              </div>
+            )}
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-8">
@@ -111,6 +127,29 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-4">
+            {/* Tombol Back to Home untuk mobile - hanya muncul di halaman lain */}
+            {isNotHomePage && (
+              <Link 
+                to="/"
+                className="flex items-center text-gray-700 hover:text-red-700 transition-colors duration-300 text-sm font-medium"
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  className="h-5 w-5" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+                  />
+                </svg>
+              </Link>
+            )}
+            
             <button 
               onClick={toggleMobileMenu}
               className="text-gray-700 hover:text-red-700 focus:outline-none"
@@ -132,6 +171,31 @@ const Navbar = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-gray-200 py-4 animate-fadeIn">
             <div className="flex flex-col space-y-4">
+              {/* Tombol Back to Home dalam mobile menu - hanya muncul di halaman lain */}
+              {isNotHomePage && (
+                <Link 
+                  to="/"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center text-gray-700 hover:text-red-700 transition-colors duration-300 text-sm font-medium py-2"
+                >
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-5 w-5 mr-2" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+                    />
+                  </svg>
+                  Back to Home
+                </Link>
+              )}
+              
               <Link 
                 to="/menu" 
                 onClick={() => setIsMobileMenuOpen(false)}
