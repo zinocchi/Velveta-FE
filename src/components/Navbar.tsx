@@ -51,6 +51,7 @@ const Navbar = () => {
                   to="/"
                 className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
                   >
+
                   Home
                 </Link>
               </div>

@@ -1,0 +1,71 @@
+/* Menu Sidebar Styles */
+.sidebar-link {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.sidebar-link::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 0;
+  background-color: #9B111E;
+  border-radius: 2px;
+  transition: height 0.3s ease;
+}
+
+.sidebar-link.active::before {
+  height: 16px;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent content jump */
+main {
+  min-height: calc(100vh - 80px);
+}
+
+/* Menu item hover effects */
+.menu-item {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menu-img {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.menu-item:hover .menu-img {
+  transform: scale(1.05) rotate(-2deg);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.category-title {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 10px;
+}
+
+.category-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background-color: #9B111E;
+  border-radius: 2px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .sticky {
+    position: static !important;
+  }
+}
