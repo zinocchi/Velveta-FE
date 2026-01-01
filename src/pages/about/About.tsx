@@ -28,25 +28,28 @@ const About = () => {
 
   return (
     <>
-      {/* HERO */}
-      <section
-        className="relative h-[96vh] mt-20 bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085')",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-          <div className="text-center px-4">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
-              Our Story
-            </h1>
-            <p className="text-lg md:text-2xl text-white max-w-2xl mx-auto">
-              Discover the passion behind every cup of Velveta Coffee
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* HERO - Hapus mt-20 dan tambahkan pt-20 untuk kompensasi navbar */}
+      {/* HERO dengan gambar fullscreen tepat di bawah navbar */}
+{/* HERO dengan gambar fullscreen tepat di bawah navbar */}
+<section
+  className="relative h-[calc(96vh-5rem)] bg-cover bg-center"
+  style={{
+    backgroundImage:
+      "url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085')",
+  }}
+>
+  {/* Overlay untuk konten */}
+  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+    <div className="text-center px-4">
+      <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 ">
+        Our Story
+      </h1>
+      <p className="text-lg md:text-2xl text-white max-w-2xl mx-auto ">
+        Discover the passion behind every cup of Velveta Coffee
+      </p>
+    </div>
+  </div>
+</section>
 
       {/* ABOUT */}
       <section className="py-16 bg-white">
@@ -131,6 +134,7 @@ const About = () => {
               <img
                 src={p.img}
                 className="w-full md:w-1/3 h-60 object-cover rounded-lg"
+                alt={p.name}
               />
               <div>
                 <h3 className="text-2xl font-bold mb-2">{p.name}</h3>
