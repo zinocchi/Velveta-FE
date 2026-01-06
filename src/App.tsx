@@ -4,4 +4,6 @@ function App() {
   return <AppRoutes />;
 }
 
+// App.tsx
+
 export default App;

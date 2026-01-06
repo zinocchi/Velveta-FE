@@ -7,6 +7,7 @@ import About from "../pages/about/About";
 import Reward from "../pages/reward/Reward";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Menu from "../pages/menu/Menu";
+import Register from "../pages/Auth/Register";
 
 // Menu detail pages
 // import HotCoffee from "../pages/menu/drinks/HotCoffee";
@@ -25,37 +26,40 @@ import ProtectedRoute from "../components/ProtectedRoute";
 
 const AppRoutes = () => {
   return (
-    <Routes>
-      <Route element={<MainLayout />}>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/reward" element={<Reward />} />
-        <Route path="/menu" element={<Menu />} />
-        
-        {/* Menu Detail Routes */}
-        {/* <Route path="/menu/drinks/hot-coffee" element={<HotCoffee />} />
-        <Route path="/menu/drinks/cold-coffee" element={<ColdCoffee />} />
-        <Route path="/menu/drinks/hot-tea" element={<HotTea />} />
-        <Route path="/menu/drinks/cold-tea" element={<ColdTea />} />
-        <Route path="/menu/drinks/hot-chocolate" element={<HotChocolate />} />
-        <Route path="/menu/food/breakfast" element={<Breakfast />} />
-        <Route path="/menu/food/bakery" element={<Bakery />} />
-        <Route path="/menu/food/treats" element={<Treats />} />
-        <Route path="/menu/food/lunch" element={<Lunch />} />
-        <Route path="/menu/food/snack" element={<Snacks />} /> */}
-      </Route>
+    <>
+      <Routes>
+        <Route element={<MainLayout />}>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/reward" element={<Reward />} />
+          <Route path="/menu" element={<Menu />} />
+          
+          {/* Menu Detail Routes */}
+          {/* <Route path="/menu/drinks/hot-coffee" element={<HotCoffee />} />
+          <Route path="/menu/drinks/cold-coffee" element={<ColdCoffee />} />
+          <Route path="/menu/drinks/hot-tea" element={<HotTea />} />
+          <Route path="/menu/drinks/cold-tea" element={<ColdTea />} />
+          <Route path="/menu/drinks/hot-chocolate" element={<HotChocolate />} />
+          <Route path="/menu/food/breakfast" element={<Breakfast />} />
+          <Route path="/menu/food/bakery" element={<Bakery />} />
+          <Route path="/menu/food/treats" element={<Treats />} />
+          <Route path="/menu/food/lunch" element={<Lunch />} />
+          <Route path="/menu/food/snack" element={<Snacks />} /> */}
 
-      {/* Protected Routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+          {/* Protected Routes */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </>
   );
 };
 

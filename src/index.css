@@ -51,6 +51,19 @@ body {
   transform: translateY(0);
 }
 
+.input {
+  @apply w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-300;
+}
+
+.btn-primary {
+  @apply px-6 py-3 bg-red-600 text-white rounded-full;
+}
+
+.btn-outline {
+  @apply px-6 py-3 border border-red-600 text-red-600 rounded-full;
+}
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
