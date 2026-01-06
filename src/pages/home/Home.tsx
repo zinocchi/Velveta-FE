@@ -8,7 +8,6 @@ const Home = () => {
   const [heroImageError, setHeroImageError] = useState(false);
 
   useEffect(() => {
-    // Preload gambar utama
     const img = new Image();
     img.src = "https://content-prod-live.cert.starbucks.com/binary/v2/asset/137-97315.jpg";
     img.onload = () => {
@@ -20,7 +19,6 @@ const Home = () => {
       console.error("Hero image failed to load");
     };
 
-    // Delay inisialisasi ScrollReveal untuk memastikan DOM siap
     const timer = setTimeout(() => {
       const scrollReveal = ScrollReveal({
         origin: 'bottom',
@@ -233,7 +231,7 @@ const Home = () => {
             )}
           </div>
         </div>
-        
+
         {/* Floating dots - hide on mobile */}
         <div className="hidden md:block absolute top-1/4 left-10 w-8 h-8 rounded-full bg-amber-800 opacity-30 floating" style={{ animationDelay: '0.2s' }}></div>
         <div className="hidden md:block absolute top-1/3 right-20 w-6 h-6 rounded-full bg-amber-600 opacity-40 floating" style={{ animationDelay: '0.4s' }}></div>
