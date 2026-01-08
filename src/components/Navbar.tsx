@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../Navbar.css";
 import VelvetaLogo from "../assets/icon/velveta.png";
+// import { useAuth } from "../hooks/useAuth";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  // const { isLoggedIn, user} = useAuth();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -43,6 +45,7 @@ const Navbar = () => {
                 />
               </Link>
             </div>
+
             
             {/* Tombol Back to Home untuk desktop - hanya muncul di halaman lain */}
             {isNotHomePage && (
