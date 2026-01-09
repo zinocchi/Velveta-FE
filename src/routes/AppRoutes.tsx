@@ -59,6 +59,7 @@ const AppRoutes = () => {
           />
         </Route>
         <Route path="/register" element={<Register />} />
+         <Route path="/login" element={<Login />} />
       </Routes>
 
     {/* <Route path="/login" element={<Login />}>

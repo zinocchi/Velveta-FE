@@ -1,4 +1,4 @@
-import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
+import axios, { AxiosError } from "axios";
 
 const api = axios.create({
   baseURL: "http://127.0.0.1:8000/api",
@@ -11,16 +11,15 @@ const api = axios.create({
  * Request interceptor
  * Attach token if exists
  */
-api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+
   },
   (error: AxiosError) => Promise.reject(error)
 );
+
 
 /**
  * Response interceptor

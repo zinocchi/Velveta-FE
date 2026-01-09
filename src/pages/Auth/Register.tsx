@@ -273,7 +273,7 @@ const Register = () => {
               <div className="pt-8 flex justify-end space-x-4">
                 <button
                   type="button"
-                  onClick={() => navigate("/login")}
+                  onClick={() => navigate("/")}
                   className="px-6 py-3 bg-white text-red-600 font-medium rounded-full shadow-sm border border-red-600 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300"
                 >
                   Back to Login

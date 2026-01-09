@@ -1,9 +1,15 @@
 // Login.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useAuth from '../../Auth/useAuth';
+import '../../api/axios'; // Ensure axios interceptors are set up
+import VelvetaLogo from "../../assets/icon/velveta.png";
+// import '../../hooks/useAuth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { login, loading, error } = useAuth(); // Gunakan hook useAuth
+  
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
   const [formData, setFormData] = useState({
@@ -11,12 +17,34 @@ const Login: React.FC = () => {
     password: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Handler untuk submit form yang menggunakan useAuth
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login submitted:', formData, keepSignedIn);
-    // Navigate after successful login
-    // navigate('/dashboard');
+    
+    if (!formData.login || !formData.password) {
+      alert('Username/email dan password harus diisi');
+      return;
+    }
+
+    try {
+      // Gunakan fungsi login dari useAuth
+      await login(formData.login, formData.password);
+      
+      // Jika berhasil, akan otomatis redirect dari useAuth
+      console.log('Login berhasil');
+      
+      // Opsional: Simpan preferensi "keep signed in"
+      if (keepSignedIn) {
+        // Implementasi sesuai kebutuhan
+        console.log('Keep signed in diaktifkan');
+      }
+
+      navigate('/'); // Redirect ke halaman utama setelah login sukses
+      
+    } catch (err) {
+      // Error sudah ditangani di useAuth, tapi bisa tambahkan handling khusus di sini
+      console.error('Login gagal:', err);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +63,7 @@ const Login: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="fixed top-0 left-0 w-full bg-white text-black py-3 px-6 shadow-md z-50 flex justify-between items-center">
         <div className="logo">
-          <img src="/velveta.png" alt="Logo" className="h-14" />
+          <img src={VelvetaLogo} alt="Logo" className="h-14" />
         </div>
         <div className="nav-right flex gap-6 items-center">
           {/* Navigation items can be added here */}
@@ -51,7 +79,14 @@ const Login: React.FC = () => {
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
             <p className="text-sm text-gray-500 mb-8">* indicates required field</p>
             
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={onSubmit} className="space-y-6">
+              {/* Tampilkan error dari useAuth jika ada */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  {error}
+                </div>
+              )}
+              
               <div>
                 <label htmlFor="login" className="block text-sm font-medium mb-2 text-gray-700">
                   * Username or Email
@@ -61,9 +96,10 @@ const Login: React.FC = () => {
                   id="login"
                   name="login"
                   required
+                  disabled={loading}
                   value={formData.login}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition duration-200"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="Enter your username or email"
                 />
               </div>
@@ -78,15 +114,17 @@ const Login: React.FC = () => {
                     id="password"
                     name="password"
                     required
+                    disabled={loading}
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition duration-200"
+                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     placeholder="Enter your password"
                   />
                   <button
                     type="button"
                     onClick={togglePasswordVisibility}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-500 hover:text-red-600 transition duration-200"
+                    disabled={loading}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-500 hover:text-red-600 transition duration-200 disabled:cursor-not-allowed"
                   >
                     {showPassword ? '🔒' : '👁️'}
                   </button>
@@ -98,8 +136,9 @@ const Login: React.FC = () => {
                   type="checkbox"
                   id="keep-signed-in"
                   checked={keepSignedIn}
+                  disabled={loading}
                   onChange={(e) => setKeepSignedIn(e.target.checked)}
-                  className="w-5 h-5 text-red-600 rounded focus:ring-red-300 border-gray-300"
+                  className="w-5 h-5 text-red-600 rounded focus:ring-red-300 border-gray-300 disabled:cursor-not-allowed"
                 />
                 <label htmlFor="keep-signed-in" className="ml-3 text-gray-700">
                   Keep me signed in
@@ -112,7 +151,7 @@ const Login: React.FC = () => {
                   className="block text-sm text-red-600 hover:text-red-800 transition duration-200"
                   onClick={(e) => {
                     e.preventDefault();
-                    // Handle forgot username
+                    navigate('/forgot-username');
                   }}
                 >
                   Forgot your username?
@@ -122,7 +161,7 @@ const Login: React.FC = () => {
                   className="block text-sm text-red-600 hover:text-red-800 transition duration-200"
                   onClick={(e) => {
                     e.preventDefault();
-                    // Handle forgot password
+                    navigate('/forgot-password');
                   }}
                 >
                   Forgot your password?
@@ -132,9 +171,20 @@ const Login: React.FC = () => {
               <div className="pt-6 flex justify-end">
                 <button
                   type="submit"
-                  className="px-8 py-3 bg-red-600 text-white font-medium rounded-full shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300 text-base"
+                  disabled={loading}
+                  className="px-8 py-3 bg-red-600 text-white font-medium rounded-full shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300 text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Sign in
+                  {loading ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Signing in...
+                    </span>
+                  ) : (
+                    'Sign in'
+                  )}
                 </button>
               </div>
             </form>
