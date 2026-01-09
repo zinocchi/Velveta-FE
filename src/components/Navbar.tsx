@@ -2,13 +2,21 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../Navbar.css";
 import VelvetaLogo from "../assets/icon/velveta.png";
-// import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  // const { isLoggedIn, user} = useAuth();
+  const { isLoggedIn, user} = useAuth();
+  // const [token, setToken] = useState<string | null>(null);
+  const [openMenu, setOpenMenu] = useState(false);
+  const navigate = useNavigate();
+
+
+  
+
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -46,6 +54,7 @@ const Navbar = () => {
               </Link>
             </div>
 
+          
             
             {/* Tombol Back to Home untuk desktop - hanya muncul di halaman lain */}
             {isNotHomePage && (
@@ -114,45 +123,70 @@ const Navbar = () => {
               Find a store
             </a>
 
-            {/* Tombol Sign in dan Join Now - Sama persis dengan Blade */}
-            <Link 
-              to="/login"
-              className="px-4 py-2 border border-gray-800 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors duration-300"
-            >
-              Sign in
-            </Link>
-            <Link 
-              to="/register"
-              className="px-4 py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-700 transition-colors duration-300"
-            >
-              Join now
-            </Link>
-          </div>
+<div className="relative">
+  {isLoggedIn ? (
+    <div className="relative">
+      <button
+        onClick={() => setOpenMenu(!openMenu)}
+        className="flex items-center"
+      >
+        <img
+          src={
+            user?.avatar ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              user?.fullname || "User"
+            )}`
+          }
+          className="h-10 w-10 rounded-full object-cover border"
+        />
+      </button>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center space-x-4">
-            {/* Tombol Back to Home untuk mobile - hanya muncul di halaman lain */}
-            {isNotHomePage && (
-              <Link 
-                to="/"
-                className="flex items-center text-gray-700 hover:text-red-700 transition-colors duration-300 text-sm font-medium"
-              >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className="h-5 w-5" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18" 
-                  />
-                </svg>
-              </Link>
-            )}
+      {openMenu && (
+        <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg py-2 z-50">
+          <Link
+            to="/dashboard"
+            className="block px-4 py-2 hover:bg-gray-100 text-sm"
+            onClick={() => setOpenMenu(false)}
+          >
+            Dashboard
+          </Link>
+          <Link
+            to="/profile"
+            className="block px-4 py-2 hover:bg-gray-100 text-sm"
+            onClick={() => setOpenMenu(false)}
+          >
+            Profile
+          </Link>
+          <button
+            onClick={() => {
+              localStorage.removeItem("token");
+              navigate("/");
+              setOpenMenu(false);
+            }}
+            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-red-600 font-semibold"
+          >
+            Logout
+          </button>
+        </div>
+      )}
+    </div>
+  ) : (
+    <div className="flex items-center space-x-3"> {/* Tambah container dengan flex dan space-x-3 */}
+      <Link
+        to="/login"
+        className="px-4 py-2 border border-gray-800 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors duration-300"
+      >
+        Sign in
+      </Link>
+      <Link
+        to="/register"
+        className="px-4 py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-700 transition-colors duration-300"
+      >
+        Join now
+      </Link>
+    </div>
+  )}
+</div>
             
             <button 
               onClick={toggleMobileMenu}
@@ -163,9 +197,9 @@ const Navbar = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                // <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+                // </svg>
               )}
             </button>
           </div>

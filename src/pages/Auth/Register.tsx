@@ -41,7 +41,12 @@ const Register = () => {
     setErrors({});
 
     try {
-      await api.post("/register", form);
+      const res = await api.post("/register", form);
+      const token = res.data.token;
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
       navigate("/");
     } catch (err: unknown) {
       if (err && typeof err === "object" && "response" in err) {

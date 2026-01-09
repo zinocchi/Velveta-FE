@@ -8,6 +8,7 @@ import Reward from "../pages/reward/Reward";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Menu from "../pages/menu/Menu";
 import Register from "../pages/Auth/Register";
+import Login from "../pages/Auth/Login";
 
 // Menu detail pages
 // import HotCoffee from "../pages/menu/drinks/HotCoffee";
@@ -59,7 +60,12 @@ const AppRoutes = () => {
         </Route>
         <Route path="/register" element={<Register />} />
       </Routes>
+
+    {/* <Route path="/login" element={<Login />}>
+    </Route> */}
     </>
+
+  
   );
 };
 
