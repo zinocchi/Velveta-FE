@@ -1,7 +1,7 @@
 // Login.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useAuth from '../../Auth/useAuth';
+import {useAuth} from '../../Auth/useAuth';
 import '../../api/axios'; // Ensure axios interceptors are set up
 import VelvetaLogo from "../../assets/icon/velveta.png";
 // import '../../hooks/useAuth';

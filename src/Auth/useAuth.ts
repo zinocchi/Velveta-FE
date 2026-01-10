@@ -1,21 +1,34 @@
+import { useState, useEffect, useCallback } from "react";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
-import React from "react";
-import { useState } from "react";
-
 
 type User = {
   id: number;
-  name: string;
+  fullname?: string;
   email?: string;
-  photo?: string;
+  avatar?: string;
 };
-export default function useAuth() {
+
+export const useAuth = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
-  const login = async (loginInput: string, password: string) => {
+  /** Load user from localStorage on app start */
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const usr = localStorage.getItem("user");
+
+    if (token && usr) {
+      setIsLoggedIn(true);
+      setUser(JSON.parse(usr));
+    }
+  }, []);
+
+  /** LOGIN FUNCTION */
+  const login = useCallback(async (loginInput: string, password: string) => {
     setLoading(true);
     setError("");
 
@@ -25,73 +38,42 @@ export default function useAuth() {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      setLoading(false);
-      return { success: true, user: res.data.user };
+      setUser(res.data.user);
+      setIsLoggedIn(true);
+
+      navigate("/"); // redirect DI SINI
     } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || "Login gagal");
+    }
+    finally {
       setLoading(false);
-      type AxiosError = { response?: { data?: { message?: string } } };
-      setError(
-        err && typeof err === "object" && "response" in err
-          ? ((err as AxiosError).response?.data?.message || "Login gagal")
-          : "Login gagal"
-      );
-      return { success: false };
     }
-  };
+  }, [navigate]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
-    const target = e.target as typeof e.target & {
-      login: { value: string };   // bisa email atau username
-      password: { value: string };
-    };
-    
-    const loginInput = target.login.value;
-    const password = target.password.value;
-
-    if (!loginInput || !password) {
-      alert("Username/email dan password harus diisi");
-      return;
-    }
-
-    try {
-      const result = await login(loginInput, password);
-
-      if (result.success) {
-        console.log("Login berhasil:", result.user);
-        navigate("/");   // redirect kalau sukses
-      } else {
-        console.log("Login gagal");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-    }
-  };
-
-  const logout = async () => {
+  /** LOGOUT FUNCTION */
+  const logout = useCallback(async () => {
     try {
       await api.post("/logout");
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error("Logout error:", err);
     }
-    
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.location.href = "/login";
-  };
 
-  const token = localStorage.getItem("token");
+    setUser(null);
+    setIsLoggedIn(false);
 
-  const user: User | null = token ? JSON.parse(localStorage.getItem("user") || "null") : null;
+    navigate("/login");
+  }, [navigate]);
 
   return {
     user,
+    isLoggedIn,
     login,
     logout,
-    handleSubmit,
-    isAuthenticated: !!token,
     loading,
-    error,
+    error
   };
-}
+};

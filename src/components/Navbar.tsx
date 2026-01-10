@@ -2,21 +2,17 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../Navbar.css";
 import VelvetaLogo from "../assets/icon/velveta.png";
-import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../Auth/useAuth";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const { isLoggedIn, user} = useAuth();
+  const { isLoggedIn, user } = useAuth();
   // const [token, setToken] = useState<string | null>(null);
   const [openMenu, setOpenMenu] = useState(false);
   const navigate = useNavigate();
-
-
-  
-
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -35,56 +31,58 @@ const Navbar = () => {
   const isNotHomePage = location.pathname !== "/";
 
   return (
-    <header className={`fixed top-0 w-full bg-white z-50 transition-all duration-300 ${scrolled ? 'shadow-md border-b border-gray-200' : ''}`}>
+    <header
+      className={`fixed top-0 w-full bg-white z-50 transition-all duration-300 ${
+        scrolled ? "shadow-md border-b border-gray-200" : ""
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo and Desktop Navigation */}
           <div className="flex items-center space-x-8">
             <div className="logo">
               <Link to="/">
-                <img 
-                  src={VelvetaLogo} 
+                <img
+                  src={VelvetaLogo}
                   alt="Velveta Logo"
                   className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover transition-transform duration-300 hover:rotate-12"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = "https://via.placeholder.com/56/9B111E/FFFFFF?text=V";
+                    target.src =
+                      "https://via.placeholder.com/56/9B111E/FFFFFF?text=V";
                   }}
                 />
               </Link>
             </div>
 
-          
-            
             {/* Tombol Back to Home untuk desktop - hanya muncul di halaman lain */}
             {isNotHomePage && (
               <div className="hidden md:block">
-                <Link 
+                <Link
                   to="/"
-                className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
-                  >
-
+                  className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
+                >
                   Home
                 </Link>
               </div>
             )}
-            
+
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-8">
-              <Link 
-                to="/menu" 
+              <Link
+                to="/menu"
                 className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
               >
                 Menu
               </Link>
-              <Link 
-                to="/about" 
+              <Link
+                to="/about"
                 className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
               >
                 About Us
               </Link>
-              <Link 
-                to="/reward" 
+              <Link
+                to="/reward"
                 className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
               >
                 Reward
@@ -94,111 +92,176 @@ const Navbar = () => {
 
           {/* Desktop Right Side - Sama persis dengan Blade */}
           <div className="hidden md:flex items-center space-x-4">
-            <a 
-              href="https://www.google.com/maps" 
-              target="_blank" 
+            <a
+              href="https://www.google.com/maps"
+              target="_blank"
               rel="noopener noreferrer"
               className="flex items-center text-gray-700 hover:text-red-700 transition-colors duration-300 text-sm font-medium"
             >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-5 w-5 mr-1" 
-                fill="none" 
-                viewBox="0 0 24 24" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-1"
+                fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth="2" 
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                 />
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth="2" 
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
               Find a store
             </a>
 
-<div className="relative">
-  {isLoggedIn ? (
-    <div className="relative">
-      <button
-        onClick={() => setOpenMenu(!openMenu)}
-        className="flex items-center"
-      >
-        <img
-          src={
-            user?.avatar ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              user?.fullname || "User"
-            )}`
-          }
-          className="h-10 w-10 rounded-full object-cover border"
-        />
-      </button>
+            <div className="relative">
+              {isLoggedIn ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setOpenMenu(!openMenu)}
+                    className="flex items-center"
+                  >
+                    <img
+                      src={
+                        user?.avatar ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          user?.fullname || "User"
+                        )}&background=random&color=fff&bold=true`
+                      }
+                      className="h-10 w-10 rounded-full object-cover border-2 border-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                      alt={user?.fullname || "User"}
+                    />
+                  </button>
 
-      {openMenu && (
-        <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg py-2 z-50">
-          <Link
-            to="/dashboard"
-            className="block px-4 py-2 hover:bg-gray-100 text-sm"
-            onClick={() => setOpenMenu(false)}
-          >
-            Dashboard
-          </Link>
-          <Link
-            to="/profile"
-            className="block px-4 py-2 hover:bg-gray-100 text-sm"
-            onClick={() => setOpenMenu(false)}
-          >
-            Profile
-          </Link>
-          <button
-            onClick={() => {
-              localStorage.removeItem("token");
-              navigate("/");
-              setOpenMenu(false);
-            }}
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-red-600 font-semibold"
-          >
-            Logout
-          </button>
-        </div>
-      )}
-    </div>
-  ) : (
-    <div className="flex items-center space-x-3"> {/* Tambah container dengan flex dan space-x-3 */}
-      <Link
-        to="/login"
-        className="px-4 py-2 border border-gray-800 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors duration-300"
-      >
-        Sign in
-      </Link>
-      <Link
-        to="/register"
-        className="px-4 py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-700 transition-colors duration-300"
-      >
-        Join now
-      </Link>
-    </div>
-  )}
-</div>
-            
-            <button 
+                  {openMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl py-2 z-50 transition-all duration-200 animate-fadeIn">
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="font-medium text-gray-900 text-sm truncate">
+                          {user?.fullname || "User"}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {user?.email || ""}
+                        </p>
+                      </div>
+                      <Link
+                        to="/dashboard"
+                        className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
+                        onClick={() => setOpenMenu(false)}
+                      >
+                        <svg
+                          className="w-4 h-4 mr-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                          />
+                        </svg>{" "}
+                        Dashboard
+                      </Link>
+                      <Link
+                        to="/profile"
+                        className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
+                        onClick={() => setOpenMenu(false)}
+                      >
+                        <svg
+                          className="w-4 h-4 mr-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                        Profile
+                      </Link>
+                      <button
+                        onClick={() => {
+                          localStorage.removeItem("token");
+                          navigate("/");
+                          setOpenMenu(false);
+                        }}
+                        className="flex items-center w-full text-left px-4 py-3 hover:bg-red-50 text-sm text-red-600 font-medium transition-colors duration-150"
+                      >
+                        <svg
+                          className="w-4 h-4 mr-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                          />
+                        </svg>
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center space-x-3">
+                  {" "}
+                  {/* Tambah container dengan flex dan space-x-3 */}
+                  <Link
+                    to="/login"
+                    className="px-4 py-2 border border-gray-800 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors duration-300"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="px-4 py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-700 transition-colors duration-300"
+                  >
+                    Join now
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            <button
               onClick={toggleMobileMenu}
               className="text-gray-700 hover:text-red-700 focus:outline-none"
             >
               {isMobileMenuOpen ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               ) : (
                 // <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
                 // </svg>
               )}
             </button>
@@ -211,90 +274,90 @@ const Navbar = () => {
             <div className="flex flex-col space-y-4">
               {/* Tombol Back to Home dalam mobile menu - hanya muncul di halaman lain */}
               {isNotHomePage && (
-                <Link 
+                <Link
                   to="/"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center text-gray-700 hover:text-red-700 transition-colors duration-300 text-sm font-medium py-2"
                 >
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="h-5 w-5 mr-2" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
                     />
                   </svg>
                   Back to Home
                 </Link>
               )}
-              
-              <Link 
-                to="/menu" 
+
+              <Link
+                to="/menu"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300 py-2"
               >
                 Menu
               </Link>
-              <Link 
-                to="/about" 
+              <Link
+                to="/about"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300 py-2"
               >
                 About Us
               </Link>
-              <Link 
-                to="/reward" 
+              <Link
+                to="/reward"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300 py-2"
               >
                 Reward
               </Link>
-              
+
               <div className="pt-4 border-t border-gray-200">
-                <a 
-                  href="https://www.google.com/maps" 
-                  target="_blank" 
+                <a
+                  href="https://www.google.com/maps"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center text-gray-700 hover:text-red-700 transition-colors duration-300 text-sm font-medium mb-4"
                 >
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="h-5 w-5 mr-1" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth="2" 
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" 
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                     />
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth="2" 
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" 
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                     />
                   </svg>
                   Find a store
                 </a>
-                
+
                 <div className="flex space-x-3">
-                  <Link 
+                  <Link
                     to="/login"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex-1 px-4 py-2 border border-gray-800 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors duration-300 text-center"
                   >
                     Sign in
                   </Link>
-                  <Link 
+                  <Link
                     to="/register"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex-1 px-4 py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-700 transition-colors duration-300 text-center"
