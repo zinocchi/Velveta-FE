@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api/axios"; 
+import api from "../../api/axios";
 import type { AxiosError } from "axios";
 import VelvetaLogo from "../../assets/icon/velveta.png";
 
@@ -30,13 +30,13 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validasi terms
     if (!form.terms) {
       setErrors({ terms: ["You must agree to the terms"] });
       return;
     }
-    
+
     setLoading(true);
     setErrors({});
 
@@ -75,14 +75,18 @@ const Register = () => {
           </h2>
 
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-            <p className="text-sm text-gray-500 mb-8">* indicates required field</p>
+            <p className="text-sm text-gray-500 mb-8">
+              * indicates required field
+            </p>
 
             {Object.keys(errors).length > 0 && (
               <div className="text-red-500 mb-4">
                 <ul>
-                  {Object.values(errors).flat().map((error, index) => (
-                    <li key={index}>• {error}</li>
-                  ))}
+                  {Object.values(errors)
+                    .flat()
+                    .map((error, index) => (
+                      <li key={index}>• {error}</li>
+                    ))}
                 </ul>
               </div>
             )}
@@ -95,7 +99,10 @@ const Register = () => {
                 </h3>
 
                 <div>
-                  <label htmlFor="fullname" className="block text-sm font-medium mb-2 text-gray-700">
+                  <label
+                    htmlFor="fullname"
+                    className="block text-sm font-medium mb-2 text-gray-700"
+                  >
                     * Full Name
                   </label>
                   <input
@@ -111,7 +118,10 @@ const Register = () => {
                 </div>
 
                 <div className="mt-5">
-                  <label htmlFor="email" className="block text-sm font-medium mb-2 text-gray-700">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium mb-2 text-gray-700"
+                  >
                     * Email Address
                   </label>
                   <input
@@ -134,7 +144,10 @@ const Register = () => {
                 </h3>
 
                 <div>
-                  <label htmlFor="username" className="block text-sm font-medium mb-2 text-gray-700">
+                  <label
+                    htmlFor="username"
+                    className="block text-sm font-medium mb-2 text-gray-700"
+                  >
                     * Username
                   </label>
                   <input
@@ -147,12 +160,17 @@ const Register = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200"
                     placeholder="Choose a username"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Username must be 4-20 characters</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Username must be 4-20 characters
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
                   <div>
-                    <label htmlFor="password" className="block text-sm font-medium mb-2 text-gray-700">
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium mb-2 text-gray-700"
+                    >
                       * Password
                     </label>
                     <div className="relative">
@@ -170,7 +188,10 @@ const Register = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="password_confirmation" className="block text-sm font-medium mb-2 text-gray-700">
+                    <label
+                      htmlFor="password_confirmation"
+                      className="block text-sm font-medium mb-2 text-gray-700"
+                    >
                       * Confirm Password
                     </label>
                     <div className="relative">
@@ -188,8 +209,9 @@ const Register = () => {
                   </div>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  Password must be at least 8 characters long and include at least one uppercase letter,
-                  one lowercase letter, and one number.
+                  Password must be at least 8 characters long and include at
+                  least one uppercase letter, one lowercase letter, and one
+                  number.
                 </p>
               </div>
 
@@ -252,7 +274,11 @@ const Register = () => {
                 href="http://localhost:8000/auth/google"
                 className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg w-full transition"
               >
-                <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                <svg
+                  className="w-5 h-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 48 48"
+                >
                   <path
                     fill="#EA4335"
                     d="M24 9.5c3.5 0 6.3 1.5 8.2 2.8l6-6C34.9 2.7 29.8 0 24 0 14.7 0 6.7 5.4 2.8 13.2l7 5.5C11.7 13.2 17.3 9.5 24 9.5z"

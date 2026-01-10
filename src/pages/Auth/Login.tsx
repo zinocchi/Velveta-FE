@@ -1,57 +1,56 @@
 // Login.tsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {useAuth} from '../../Auth/useAuth';
-import '../../api/axios'; // Ensure axios interceptors are set up
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../Auth/useAuth";
+import "../../api/axios"; // Ensure axios interceptors are set up
 import VelvetaLogo from "../../assets/icon/velveta.png";
 // import '../../hooks/useAuth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login, loading, error } = useAuth(); // Gunakan hook useAuth
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
   const [formData, setFormData] = useState({
-    login: '',
-    password: '',
+    login: "",
+    password: "",
   });
 
   // Handler untuk submit form yang menggunakan useAuth
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.login || !formData.password) {
-      alert('Username/email dan password harus diisi');
+      alert("Username/email dan password harus diisi");
       return;
     }
 
     try {
       // Gunakan fungsi login dari useAuth
       await login(formData.login, formData.password);
-      
+
       // Jika berhasil, akan otomatis redirect dari useAuth
-      console.log('Login berhasil');
-      
+      console.log("Login berhasil");
+
       // Opsional: Simpan preferensi "keep signed in"
       if (keepSignedIn) {
         // Implementasi sesuai kebutuhan
-        console.log('Keep signed in diaktifkan');
+        console.log("Keep signed in diaktifkan");
       }
 
-      navigate('/'); // Redirect ke halaman utama setelah login sukses
-      
+      navigate("/"); // Redirect ke halaman utama setelah login sukses
     } catch (err) {
       // Error sudah ditangani di useAuth, tapi bisa tambahkan handling khusus di sini
-      console.error('Login gagal:', err);
+      console.error("Login gagal:", err);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -75,10 +74,12 @@ const Login: React.FC = () => {
           <h2 className="text-2xl font-bold text-center mb-10 font-['Montserrat'] text-gray-800">
             Log in to Your Account
           </h2>
-          
+
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-            <p className="text-sm text-gray-500 mb-8">* indicates required field</p>
-            
+            <p className="text-sm text-gray-500 mb-8">
+              * indicates required field
+            </p>
+
             <form onSubmit={onSubmit} className="space-y-6">
               {/* Tampilkan error dari useAuth jika ada */}
               {error && (
@@ -86,9 +87,12 @@ const Login: React.FC = () => {
                   {error}
                 </div>
               )}
-              
+
               <div>
-                <label htmlFor="login" className="block text-sm font-medium mb-2 text-gray-700">
+                <label
+                  htmlFor="login"
+                  className="block text-sm font-medium mb-2 text-gray-700"
+                >
                   * Username or Email
                 </label>
                 <input
@@ -103,14 +107,17 @@ const Login: React.FC = () => {
                   placeholder="Enter your username or email"
                 />
               </div>
-              
+
               <div>
-                <label htmlFor="password" className="block text-sm font-medium mb-2 text-gray-700">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium mb-2 text-gray-700"
+                >
                   * Password
                 </label>
                 <div className="relative">
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     id="password"
                     name="password"
                     required
@@ -126,7 +133,7 @@ const Login: React.FC = () => {
                     disabled={loading}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-500 hover:text-red-600 transition duration-200 disabled:cursor-not-allowed"
                   >
-                    {showPassword ? '🔒' : '👁️'}
+                    {showPassword ? "🔒" : "👁️"}
                   </button>
                 </div>
               </div>
@@ -146,28 +153,28 @@ const Login: React.FC = () => {
               </div>
 
               <div className="space-y-2 pt-2">
-                <a 
-                  href="#" 
+                <a
+                  href="#"
                   className="block text-sm text-red-600 hover:text-red-800 transition duration-200"
                   onClick={(e) => {
                     e.preventDefault();
-                    navigate('/forgot-username');
+                    navigate("/forgot-username");
                   }}
                 >
                   Forgot your username?
                 </a>
-                <a 
-                  href="#" 
+                <a
+                  href="#"
                   className="block text-sm text-red-600 hover:text-red-800 transition duration-200"
                   onClick={(e) => {
                     e.preventDefault();
-                    navigate('/forgot-password');
+                    navigate("/forgot-password");
                   }}
                 >
                   Forgot your password?
                 </a>
               </div>
-              
+
               <div className="pt-6 flex justify-end">
                 <button
                   type="submit"
@@ -176,14 +183,30 @@ const Login: React.FC = () => {
                 >
                   {loading ? (
                     <span className="flex items-center justify-center">
-                      <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin h-5 w-5 mr-2 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       Signing in...
                     </span>
                   ) : (
-                    'Sign in'
+                    "Sign in"
                   )}
                 </button>
               </div>
@@ -192,13 +215,13 @@ const Login: React.FC = () => {
 
           <div className="text-center mt-8">
             <p className="text-gray-600">
-              Don't have an account?{' '}
-              <a 
-                href="#" 
+              Don't have an account?{" "}
+              <a
+                href="#"
                 className="text-red-600 font-medium hover:text-red-800 transition duration-200"
                 onClick={(e) => {
                   e.preventDefault();
-                  navigate('/register');
+                  navigate("/register");
                 }}
               >
                 Register now

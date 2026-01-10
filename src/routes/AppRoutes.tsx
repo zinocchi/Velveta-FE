@@ -35,7 +35,7 @@ const AppRoutes = () => {
           <Route path="/about" element={<About />} />
           <Route path="/reward" element={<Reward />} />
           <Route path="/menu" element={<Menu />} />
-          
+
           {/* Menu Detail Routes */}
           {/* <Route path="/menu/drinks/hot-coffee" element={<HotCoffee />} />
           <Route path="/menu/drinks/cold-coffee" element={<ColdCoffee />} />
@@ -59,14 +59,12 @@ const AppRoutes = () => {
           />
         </Route>
         <Route path="/register" element={<Register />} />
-         <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
 
-    {/* <Route path="/login" element={<Login />}>
+      {/* <Route path="/login" element={<Login />}>
     </Route> */}
     </>
-
-  
   );
 };
 

@@ -28,28 +28,30 @@ export const useAuth = () => {
   }, []);
 
   /** LOGIN FUNCTION */
-  const login = useCallback(async (loginInput: string, password: string) => {
-    setLoading(true);
-    setError("");
+  const login = useCallback(
+    async (loginInput: string, password: string) => {
+      setLoading(true);
+      setError("");
 
-    try {
-      const res = await api.post("/login", { login: loginInput, password });
+      try {
+        const res = await api.post("/login", { login: loginInput, password });
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      setUser(res.data.user);
-      setIsLoggedIn(true);
+        setUser(res.data.user);
+        setIsLoggedIn(true);
 
-      navigate("/"); // redirect DI SINI
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || "Login gagal");
-    }
-    finally {
-      setLoading(false);
-    }
-  }, [navigate]);
+        navigate("/"); // redirect DI SINI
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { message?: string } } };
+        setError(error.response?.data?.message || "Login gagal");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate]
+  );
 
   /** LOGOUT FUNCTION */
   const logout = useCallback(async () => {
@@ -74,6 +76,6 @@ export const useAuth = () => {
     login,
     logout,
     loading,
-    error
+    error,
   };
 };
