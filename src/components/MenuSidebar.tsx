@@ -14,7 +14,7 @@ const MenuSidebar = ({ activeCategory, onCategoryClick }: MenuSidebarProps) => {
     { id: "hot-coffee", label: "Hot Coffee" },
     { id: "cold-coffee", label: "Cold Coffee" },
     { id: "hot-tea", label: "Hot Tea" },
-    { id: "cold-tea", label: "Cold Tea" },
+    { id: "cold-tea", label: "Cold Tea" },  
     { id: "hot-chocolate", label: "Hot Chocolate & More" },
   ];
 
