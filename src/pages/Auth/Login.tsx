@@ -2,13 +2,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Auth/useAuth";
-import "../../api/axios"; // Ensure axios interceptors are set up
+import "../../api/axios";
 import VelvetaLogo from "../../assets/icon/velveta.png";
-// import '../../hooks/useAuth';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login, loading, error } = useAuth(); // Gunakan hook useAuth
+  const { login, loading, error } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
@@ -16,33 +15,68 @@ const Login: React.FC = () => {
     login: "",
     password: "",
   });
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState<"error" | "success">("error");
 
-  // Handler untuk submit form yang menggunakan useAuth
+  const showCustomAlert = (
+    message: string,
+    type: "error" | "success" = "error"
+  ) => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setShowAlert(true);
+
+    // Auto hide
+    const timer = setTimeout(() => {
+      setShowAlert(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  };
+
+  // Login.tsx - Tambah debugging
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.login || !formData.password) {
-      alert("Username/email dan password harus diisi");
+    console.log("DEBUG: onSubmit called");
+
+    // Reset alert dulu
+    setShowAlert(false);
+
+    if (!formData.login.trim() || !formData.password.trim()) {
+      console.log("DEBUG: Fields empty");
+      showCustomAlert("Username/email dan password harus diisi");
       return;
     }
 
     try {
-      // Gunakan fungsi login dari useAuth
-      await login(formData.login, formData.password);
+      console.log("DEBUG: Calling login function...");
 
-      // Jika berhasil, akan otomatis redirect dari useAuth
-      console.log("Login berhasil");
+      // Panggil login function
+      const result = await login(formData.login, formData.password);
 
-      // Opsional: Simpan preferensi "keep signed in"
-      if (keepSignedIn) {
-        // Implementasi sesuai kebutuhan
-        console.log("Keep signed in diaktifkan");
-      }
+      console.log("DEBUG: Login successful, result:", result);
 
-      navigate("/"); // Redirect ke halaman utama setelah login sukses
-    } catch (err) {
-      // Error sudah ditangani di useAuth, tapi bisa tambahkan handling khusus di sini
-      console.error("Login gagal:", err);
+      // Tampilkan success alert
+      showCustomAlert("Login berhasil! Mengalihkan...", "success");
+
+      // Tunggu 1.5 detik lalu redirect
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
+    } catch (err: any) {
+      console.log("DEBUG: Error caught in onSubmit:", {
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+      });
+
+      // Tampilkan error alert
+      showCustomAlert(err.message || "Login gagal. Silakan coba lagi.");
+
+      // Clear password field
+      setFormData((prev) => ({ ...prev, password: "" }));
     }
   };
 
@@ -60,12 +94,104 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="fixed top-0 left-0 w-full bg-white text-black py-3 px-6 shadow-md z-50 flex justify-between items-center">
+      {/* Custom Alert Notification */}
+      {showAlert && (
+        <div className="fixed top-24 right-4 z-50 animate-slideIn">
+          <div
+            className={`border-l-4 rounded-r-lg shadow-lg p-4 max-w-sm ${
+              alertType === "error"
+                ? "bg-red-50 border-red-500"
+                : "bg-green-50 border-green-500"
+            }`}
+          >
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                {alertType === "error" ? (
+                  <svg
+                    className="h-6 w-6 text-red-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="h-6 w-6 text-green-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                )}
+              </div>
+              <div className="ml-3">
+                <p
+                  className={`text-sm font-medium ${
+                    alertType === "error" ? "text-red-700" : "text-green-700"
+                  }`}
+                >
+                  {alertMessage}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowAlert(false)}
+                className={`ml-auto -mx-1.5 -my-1.5 rounded-lg p-1.5 focus:outline-none focus:ring-2 ${
+                  alertType === "error"
+                    ? "bg-red-50 text-red-500 hover:bg-red-100 focus:ring-red-300"
+                    : "bg-green-50 text-green-500 hover:bg-green-100 focus:ring-green-300"
+                }`}
+              >
+                <span className="sr-only">Close</span>
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .animate-slideIn {
+          animation: slideIn 0.3s ease-out;
+        }
+      `}</style>
+
+      <header className="fixed top-0 left-0 w-full bg-white text-black py-3 px-6 shadow-md z-40 flex justify-between items-center">
         <div className="logo">
           <img src={VelvetaLogo} alt="Logo" className="h-14" />
-        </div>
-        <div className="nav-right flex gap-6 items-center">
-          {/* Navigation items can be added here */}
         </div>
       </header>
 
@@ -80,14 +206,14 @@ const Login: React.FC = () => {
               * indicates required field
             </p>
 
-            <form onSubmit={onSubmit} className="space-y-6">
-              {/* Tampilkan error dari useAuth jika ada */}
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                  {error}
-                </div>
-              )}
+            {/* Tampilkan error dari useAuth jika ada */}
+            {error && !showAlert && (
+              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
 
+            <form onSubmit={onSubmit} className="space-y-6">
               <div>
                 <label
                   htmlFor="login"

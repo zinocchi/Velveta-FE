@@ -34,7 +34,13 @@ export const useAuth = () => {
       setError("");
 
       try {
-        const res = await api.post("/login", { login: loginInput, password });
+        console.log("Sending login request...");
+        const res = await api.post("/login", { 
+          login: loginInput, 
+          password 
+        });
+
+        console.log("Login response:", res.data);
 
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("user", JSON.stringify(res.data.user));
@@ -42,15 +48,44 @@ export const useAuth = () => {
         setUser(res.data.user);
         setIsLoggedIn(true);
 
-        navigate("/"); // redirect DI SINI
-      } catch (err: unknown) {
-        const error = err as { response?: { data?: { message?: string } } };
-        setError(error.response?.data?.message || "Login gagal");
+        // Kembalikan data sukses - JANGAN redirect di sini
+        return {
+          success: true,
+          user: res.data.user,
+          token: res.data.token
+        };
+      } catch (err: any) {
+        console.log("Login error in useAuth:", err);
+        
+        let errorMessage = "Login gagal";
+        
+        // Cek berbagai format error
+        if (err.response) {
+          // Server responded with error
+          if (err.response.data) {
+            errorMessage = err.response.data.message || 
+                          err.response.data.error || 
+                          `Error ${err.response.status}: ${err.response.statusText}`;
+          } else {
+            errorMessage = `Error ${err.response.status}: ${err.response.statusText}`;
+          }
+        } else if (err.request) {
+          // Request dibuat tapi tidak ada response
+          errorMessage = "Tidak ada response dari server. Periksa koneksi internet.";
+        } else if (err.message) {
+          // Error lain
+          errorMessage = err.message;
+        }
+        
+        setError(errorMessage);
+        
+        // THROW ERROR agar bisa ditangkap di component
+        throw new Error(errorMessage);
       } finally {
         setLoading(false);
       }
     },
-    [navigate]
+    [] // Tidak perlu navigate di dependencies
   );
 
   /** LOGOUT FUNCTION */

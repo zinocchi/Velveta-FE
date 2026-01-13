@@ -2,10 +2,46 @@ import { useEffect, useState } from "react";
 import ScrollReveal from "scrollreveal";
 import "animate.css";
 import "../../Global.css";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../Auth/useAuth";
 
 const Home = () => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [heroImageError, setHeroImageError] = useState(false);
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState<"info" | "success" | "error">(
+    "info"
+  );
+
+  const showCustomAlert = (
+    message: string,
+    type: "info" | "success" | "error" = "info"
+  ) => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setShowAlert(true);
+
+    // Auto hide setelah 4 detik
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 4000);
+  };
+
+  const handleJoinClick = () => {
+    if (isLoggedIn) {
+      showCustomAlert("Anda sudah login! Mengalihkan ke dashboard...", "info");
+
+      // Tunggu sebentar sebelum redirect agar alert terlihat
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
+    } else {
+      navigate("/register");
+    }
+  };
 
   useEffect(() => {
     const img = new Image();
@@ -194,6 +230,30 @@ const Home = () => {
         font-size: 1.5rem;
         font-weight: bold;
       }
+      @keyframes slideDown {
+        from {
+          transform: translate(-50%, -100%);
+          opacity: 0;
+        }
+        to {
+          transform: translate(-50%, 0);
+          opacity: 1;
+        }
+      }
+      @keyframes progress {
+        from {
+          width: 100%;
+        }
+        to {
+          width: 0%;
+        }
+      }
+      .animate-slideDown {
+        animation: slideDown 0.4s ease-out forwards;
+      }
+      .animate-progress {
+        animation: progress 4s linear forwards;
+      }
     `;
     document.head.appendChild(style);
 
@@ -205,7 +265,136 @@ const Home = () => {
 
   return (
     <main className="pt-16 md:pt-20">
-      {/* Hero Section - DIUBAH MIRIP DENGAN BLADE */}
+      {/* Global Alert Notification - DI LUAR SEMUA SECTION */}
+      {showAlert && (
+        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-[9999] w-full max-w-md">
+          <div
+            className={`
+              mx-4 rounded-xl shadow-lg p-4 backdrop-blur-sm border animate-slideDown
+              ${
+                alertType === "info"
+                  ? "bg-white/95 border-red-200"
+                  : alertType === "success"
+                  ? "bg-green-50/95 border-green-200"
+                  : "bg-red-50/95 border-red-200"
+              }
+            `}
+          >
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                {alertType === "info" ? (
+                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="h-5 w-5 text-red-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                ) : alertType === "success" ? (
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="h-5 w-5 text-green-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="h-5 w-5 text-red-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                )}
+              </div>
+              <div className="ml-3 flex-1">
+                <p
+                  className={`
+                    text-sm font-medium
+                    ${
+                      alertType === "info"
+                        ? "text-gray-900"
+                        : alertType === "success"
+                        ? "text-green-800"
+                        : "text-red-800"
+                    }
+                  `}
+                >
+                  {alertType === "info"
+                    ? "Already Signed In"
+                    : alertType === "success"
+                    ? "Success!"
+                    : "Attention"}
+                </p>
+                <p className="mt-1 text-sm text-gray-600">{alertMessage}</p>
+              </div>
+              <button
+                onClick={() => setShowAlert(false)}
+                className="ml-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            {/* Progress bar untuk auto-hide */}
+            <div className="mt-3">
+              <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className={`
+                    h-full rounded-full animate-progress
+                    ${
+                      alertType === "info"
+                        ? "bg-red-500"
+                        : alertType === "success"
+                        ? "bg-green-500"
+                        : "bg-red-500"
+                    }
+                  `}
+                  style={{ animationDuration: "4s" }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hero Section */}
       <section className="mt-8 md:mt-12 relative overflow-hidden">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 rounded-xl overflow-hidden">
           <div className="bg-red-700 text-white px-4 sm:px-6 py-12 md:py-20 lg:py-24 flex flex-col justify-center items-center text-center animate__animated animate__fadeInLeft">
@@ -215,12 +404,15 @@ const Home = () => {
             <p className="text-lg sm:text-xl md:text-2xl mb-6 md:mb-8 max-w-md mx-auto px-2">
               Fresh flavors, familiar joy.
             </p>
-            <button className="px-6 sm:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-red-700 transition-colors hero-btn text-sm sm:text-base">
+            <button
+              onClick={() => navigate("/menu")}
+              className="px-6 sm:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-red-700 transition-colors hero-btn text-sm sm:text-base"
+            >
               View the menu
             </button>
           </div>
 
-          {/* Hero Image - DIUBAH MENGGUNAKAN BG COVER SEPERTI BLADE */}
+          {/* Hero Image */}
           <div
             className={`h-48 sm:h-64 md:h-auto min-h-[300px] md:min-h-0 bg-cover bg-center animate__animated animate__fadeInRight ${
               !isImageLoaded && !heroImageError
@@ -276,7 +468,10 @@ const Home = () => {
               us. Join now and enjoy a free handcrafted drink with a qualifying
               purchase during your first week.*
             </p>
-            <button className="px-6 sm:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-amber-800 transition-colors duration-300 hero-btn text-sm sm:text-base">
+            <button
+              onClick={handleJoinClick}
+              className="px-6 sm:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-amber-800 transition-colors duration-300 hero-btn text-sm sm:text-base"
+            >
               Join now
             </button>
           </div>
@@ -294,8 +489,11 @@ const Home = () => {
               Customize your drink with your favorite nondairy milk—like soy,
               coconut, almond or oat—for no additional charge.
             </p>
-            <button className="px-6 sm:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-gray-700 transition-colors duration-300 hero-btn text-sm sm:text-base">
-              Order now
+            <button
+              onClick={() => navigate("/menu")}
+              className="px-6 sm:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-gray-700 transition-colors duration-300 hero-btn text-sm sm:text-base"
+            >
+              Order now 
             </button>
           </div>
           <div
@@ -311,24 +509,24 @@ const Home = () => {
       {/* Signature Blends Section */}
       <section className="my-10 md:my-16 lg:my-24 max-w-7xl mx-auto px-4 sr-reveal">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12 font-montserrat">
-          Our Signature Blends
+          Top Customer Favorite
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Card 1 */}
           <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1 md:hover:-translate-y-2">
             <div
-              className="h-48 sm:h-56 md:h-64 bg-cover bg-center"
+              className="aspect-[4/3] bg-cover bg-center"
               style={{
                 backgroundImage:
-                  "url('https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
+                  "url('https://globalassets.starbucks.com/digitalassets/products/bev/IcedShakenEspresso.jpg?impolicy=1by1_wide_topcrop_630')",
               }}
             ></div>
             <div className="p-4 sm:p-6">
               <h3 className="text-lg sm:text-xl font-bold mb-2">
-                Velveta Black
+                Iced Shaken Espresso
               </h3>
               <p className="text-gray-600 text-sm sm:text-base mb-3 md:mb-4">
-                Our signature dark roast with notes of chocolate and caramel.
+                Cold Brew over ice, bold and smooth
               </p>
               <button className="text-red-700 font-semibold hover:underline text-sm sm:text-base">
                 Learn more
@@ -339,18 +537,18 @@ const Home = () => {
           {/* Card 2 */}
           <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1 md:hover:-translate-y-2">
             <div
-              className="h-48 sm:h-56 md:h-64 bg-cover bg-center"
+              className="aspect-[4/3] bg-cover bg-center"
               style={{
                 backgroundImage:
-                  "url('https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
+                  "url('https://globalassets.starbucks.com/digitalassets/products/bev/IcedMatchaTeaLatte.jpg?impolicy=1by1_wide_topcrop_630')",
               }}
             ></div>
             <div className="p-4 sm:p-6">
               <h3 className="text-lg sm:text-xl font-bold mb-2">
-                Caramel Cloud
+                Matcha Latte
               </h3>
               <p className="text-gray-600 text-sm sm:text-base mb-3 md:mb-4">
-                Creamy caramel meets our premium espresso in this fan favorite.
+                Ceremonial grade matcha from Japan.
               </p>
               <button className="text-red-700 font-semibold hover:underline text-sm sm:text-base">
                 Learn more
@@ -361,18 +559,18 @@ const Home = () => {
           {/* Card 3 */}
           <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1 md:hover:-translate-y-2 sm:col-span-2 lg:col-span-1">
             <div
-              className="h-48 sm:h-56 md:h-64 bg-cover bg-center"
+              className="aspect-[4/3] bg-cover bg-center"
               style={{
                 backgroundImage:
-                  "url('https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
+                  "url('https://globalassets.starbucks.com/digitalassets/products/bev/IcedBrownSugarOatmilkShakenEspresso.jpg?impolicy=1by1_wide_topcrop_630')",
               }}
             ></div>
             <div className="p-4 sm:p-6">
               <h3 className="text-lg sm:text-xl font-bold mb-2">
-                Spring Bloom
+                Iced Brown Sugar Oatmilk Shaken Espresso
               </h3>
               <p className="text-gray-600 text-sm sm:text-base mb-3 md:mb-4">
-                Limited edition floral notes with a hint of citrus.
+                Brown Sugar With Strong Espresso
               </p>
               <button className="text-red-700 font-semibold hover:underline text-sm sm:text-base">
                 Learn more

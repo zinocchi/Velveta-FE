@@ -217,7 +217,7 @@ const Navbar = () => {
                         </div>
                         <Link
                           to="/dashboard"
-                          className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
+                          className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-100 text-sm text-gray-700 transition-colors duration-150"
                           onClick={() => setOpenMenu(false)}
                         >
                           <svg
@@ -237,41 +237,17 @@ const Navbar = () => {
                         </Link>
                         <Link
                           to="/profile"
-                          className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
+                          className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-100 text-sm text-gray-700 transition-colors duration-150"
                           onClick={() => setOpenMenu(false)}
                         >
-                          <svg
-                            className="w-4 h-4 mr-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                            />
-                          </svg>
+                          <i className="fas fa-user mr-3"></i>
                           Profile
                         </Link>
                         <button
                           onClick={handleLogout}
                           className="flex items-center w-full text-left px-4 py-3 hover:bg-red-50 text-sm text-red-600 font-medium transition-colors duration-150"
                         >
-                          <svg
-                            className="w-4 h-4 mr-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                            />
-                          </svg>
+                          <i className="fas fa-sign-out-alt mr-2"></i>
                           Logout
                         </button>
                       </div>
