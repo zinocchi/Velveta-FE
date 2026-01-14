@@ -9,6 +9,8 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import Menu from "../pages/menu/Menu";
 import Register from "../pages/Auth/Register";
 import Login from "../pages/Auth/Login";
+import GoogleSuccess from "../pages/Auth/Login";
+import AuthCallback from "../pages/Auth/AuthCallback";
 
 // auth
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -17,8 +19,7 @@ import ScrollToTop from "../components/ScrollToTop"; // <-- ⬅️ TAMBAH INI
 const AppRoutes = () => {
   return (
     <>
-      <ScrollToTop />  {/* <-- ⬅️ TAMBAH INI */}
-
+      <ScrollToTop /> {/* <-- ⬅️ TAMBAH INI */}
       <Routes>
         <Route element={<MainLayout />}>
           {/* Public Routes */}
@@ -37,9 +38,10 @@ const AppRoutes = () => {
             }
           />
         </Route>
-
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        import AuthCallback from "../pages/Auth/AuthCallback";
+        <Route path="/auth/callback" element={<AuthCallback />} />
       </Routes>
     </>
   );

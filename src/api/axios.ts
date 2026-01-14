@@ -11,15 +11,14 @@ const api = axios.create({
  * Request interceptor
  * Attach token if exists
  */
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
   },
   (error: AxiosError) => Promise.reject(error)
 );
-
 
 /**
  * Response interceptor

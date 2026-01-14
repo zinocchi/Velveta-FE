@@ -493,7 +493,7 @@ const Home = () => {
               onClick={() => navigate("/menu")}
               className="px-6 sm:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-gray-700 transition-colors duration-300 hero-btn text-sm sm:text-base"
             >
-              Order now 
+              Order now
             </button>
           </div>
           <div

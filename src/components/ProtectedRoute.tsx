@@ -1,14 +1,30 @@
-import type { JSX } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
+import { useEffect, useState, type JSX } from "react";
 
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const token = localStorage.getItem("token");
+const ProtectedRoute = ({ children }: { children?: JSX.Element }) => {
+  const [isChecking, setIsChecking] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  if (!token) {
-    return <Navigate to="/" replace />;
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+    setIsChecking(false);
+  }, []);
+
+  // Biar ga langsung lompat ke /login sebelum selesai ngecek
+  if (isChecking) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <p className="text-gray-600 text-sm animate-pulse">Checking access...</p>
+      </div>
+    );
   }
 
-  return children;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;

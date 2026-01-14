@@ -9,6 +9,10 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login, loading, error } = useAuth();
 
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:8000/api/auth/google/redirect";
+  };
+
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
   const [formData, setFormData] = useState({
