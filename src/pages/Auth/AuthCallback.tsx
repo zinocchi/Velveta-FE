@@ -5,7 +5,7 @@ import { useAuth } from "../../Auth/useAuth";
 
 const AuthCallback = () => {
   const navigate = useNavigate();
-  const { setUser, setIsLoggedIn } = useAuth(); // Tambahkan setIsLoggedIn
+  const { setUser, setIsLoggedIn } = useAuth();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -21,14 +21,12 @@ const AuthCallback = () => {
         })
         .then((res) => {
           const userData = res.data.user;
-          
-          // SIMPAN KE LOCALSTORAGE juga
+
           localStorage.setItem("user", JSON.stringify(userData));
-          
-          // Update state auth
+
           setUser(userData);
-          setIsLoggedIn(true); // TAMBAHKAN INI
-          
+          setIsLoggedIn(true);
+
           navigate("/");
         })
         .catch(() => {

@@ -4,7 +4,6 @@ import MenuSidebar from "../../components/MenuSidebar";
 
 const Menu = () => {
   useEffect(() => {
-    // Animation for menu items
     const menuItems = document.querySelectorAll(".menu-page-item");
     const observer = new IntersectionObserver(
       (entries) => {
