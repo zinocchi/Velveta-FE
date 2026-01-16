@@ -35,4 +35,7 @@ api.interceptors.response.use(
   }
 );
 
+axios.defaults.headers.common["Authorization"] = `Bearer ${localStorage.getItem("token")}`;
+
+
 export default api;
