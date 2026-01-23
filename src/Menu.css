@@ -63,6 +63,31 @@ main {
   border-radius: 2px;
 }
 
+/* Add these styles */
+.category-title {
+  position: relative;
+  display: inline-block;
+}
+
+.category-title::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background-color: #9B111E;
+}
+
+.menu-page-item:hover .menu-img {
+  transform: scale(1.05) rotate(-2deg);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.menu-img {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .sticky {

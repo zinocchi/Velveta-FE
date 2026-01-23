@@ -1,10 +1,75 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import MenuSidebar from "../../components/MenuSidebar";
+import menuService from "../../services/MenuServices";
+import type { Menu } from "../../types/index";
+import "../../Menu.css";
+
+const CATEGORY_INFO = {
+  // Drinks
+  hot_coffee: {
+    displayName: "Hot Coffee",
+    description: "Rich, aromatic coffee served hot",
+    image:
+      "https://globalassets.starbucks.com/digitalassets/products/bev/CaffeLatte.jpg",
+    section: "drinks" as const,
+  },
+  cold_coffee: {
+    displayName: "Cold Coffee",
+    description: "Refreshing iced coffee creations",
+    image:
+      "https://globalassets.starbucks.com/digitalassets/products/bev/VanillaSweetCreamColdBrew.jpg",
+    section: "drinks" as const,
+  },
+  hot_tea: {
+    displayName: "Hot Tea",
+    description: "Soothing herbal and classic teas",
+    image:
+      "https://globalassets.starbucks.com/digitalassets/products/bev/HoneyCitrusMintTea.jpg",
+    section: "drinks" as const,
+  },
+  cold_tea: {
+    displayName: "Cold Tea",
+    description: "Refreshing iced tea varieties",
+    image:
+      "https://globalassets.starbucks.com/digitalassets/products/bev/IcedBlackTea.jpg",
+    section: "drinks" as const,
+  },
+  // Food
+  bakery: {
+    displayName: "Bakery",
+    description: "Freshly baked pastries and breads",
+    image:
+      "https://globalassets.starbucks.com/digitalassets/products/food/SBX20210915_Croissant-onGreen.jpg",
+    section: "food" as const,
+  },
+  treats: {
+    displayName: "Treats",
+    description: "Sweet indulgences for any time",
+    image:
+      "https://globalassets.starbucks.com/digitalassets/products/food/SBX20181129_BirthdayCakePop.jpg",
+    section: "food" as const,
+  },
+  lunch: {
+    displayName: "Lunch",
+    description: "Satisfying midday meals",
+    image:
+      "https://globalassets.starbucks.com/digitalassets/products/food/SBX20220207_GrilledCheeseOnSourdough_US.jpg",
+    section: "food" as const,
+  },
+};
 
 const Menu = () => {
+  const [menuData, setMenuData] = useState<Menu[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [groupedCategories, setGroupedCategories] = useState<
+    Record<string, Menu[]>
+  >({});
+
   useEffect(() => {
-    // Animation for menu items
+    fetchMenuData();
+
+    // Animation code
     const menuItems = document.querySelectorAll(".menu-page-item");
     const observer = new IntersectionObserver(
       (entries) => {
@@ -14,7 +79,7 @@ const Menu = () => {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     menuItems.forEach((item) => {
@@ -22,135 +87,127 @@ const Menu = () => {
         "opacity-0",
         "translate-y-6",
         "transition-all",
-        "duration-700"
+        "duration-700",
       );
       observer.observe(item);
     });
 
-    // Add CSS for menu item hover effects
-    const style = document.createElement("style");
-    style.textContent = `
-      .menu-page-item:hover .menu-img {
-        transform: scale(1.05) rotate(-2deg);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      }
-      .menu-img {
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      }
-      .category-title {
-        position: relative;
-        display: inline-block;
-      }
-      .category-title::after {
-        content: '';
-        position: absolute;
-        bottom: -5px;
-        left: 0;
-        width: 50px;
-        height: 3px;
-        background-color: #9B111E;
-      }
-    `;
-    document.head.appendChild(style);
-
+    // Cleanup
     return () => {
-      document.head.removeChild(style);
+      observer.disconnect();
     };
   }, []);
 
-  const drinkCategories = [
-    {
-      id: "hot-coffee",
-      name: "Hot Coffee",
-      description: "Rich, aromatic coffee served hot",
-      image:
-        "https://globalassets.starbucks.com/digitalassets/products/bev/CaffeLatte.jpg",
-      route: "/menu/drinks/hot-coffee",
-    },
-    {
-      id: "cold-coffee",
-      name: "Cold Coffee",
-      description: "Refreshing iced coffee creations",
-      image:
-        "https://globalassets.starbucks.com/digitalassets/products/bev/VanillaSweetCreamColdBrew.jpg",
-      route: "/menu/drinks/cold-coffee",
-    },
-    {
-      id: "hot-tea",
-      name: "Hot Tea",
-      description: "Soothing herbal and classic teas",
-      image:
-        "https://globalassets.starbucks.com/digitalassets/products/bev/HoneyCitrusMintTea.jpg",
-      route: "/menu/drinks/hot-tea",
-    },
-    {
-      id: "cold-tea",
-      name: "Cold Tea",
-      description: "Refreshing iced tea varieties",
-      image:
-        "https://globalassets.starbucks.com/digitalassets/products/bev/IcedBlackTea.jpg",
-      route: "/menu/drinks/cold-tea",
-    },
-    {
-      id: "hot-chocolate",
-      name: "Hot Chocolate",
-      description: "Rich, creamy chocolate drinks",
-      image:
-        "https://globalassets.starbucks.com/digitalassets/products/bev/HotChocolate.jpg",
-      route: "/menu/drinks/hot-chocolate",
-    },
-  ];
+  const fetchMenuData = async () => {
+    try {
+      setLoading(true);
+      const data = await menuService.getAllMenu();
+      console.log("Fetched menu data:", data); // Debug log
 
-  const foodCategories = [
-    {
-      id: "breakfast",
-      name: "Breakfast",
-      description: "Morning favorites to start your day",
-      image:
-        "https://globalassets.starbucks.com/digitalassets/products/food/EggPestoMozzarellaSandwich.jpg",
-      route: "/menu/food/breakfast",
-    },
-    {
-      id: "bakery",
-      name: "Bakery",
-      description: "Freshly baked pastries and breads",
-      image:
-        "https://globalassets.starbucks.com/digitalassets/products/food/SBX20210915_Croissant-onGreen.jpg",
-      route: "/menu/food/bakery",
-    },
-    {
-      id: "treats",
-      name: "Treats",
-      description: "Sweet indulgences for any time",
-      image:
-        "https://globalassets.starbucks.com/digitalassets/products/food/SBX20181129_BirthdayCakePop.jpg",
-      route: "/menu/food/treats",
-    },
-    {
-      id: "lunch",
-      name: "Lunch",
-      description: "Satisfying midday meals",
-      image:
-        "https://globalassets.starbucks.com/digitalassets/products/food/SBX20220207_GrilledCheeseOnSourdough_US.jpg",
-      route: "/menu/food/lunch",
-    },
-    {
-      id: "snack",
-      name: "Snacks",
-      description: "Light bites and savory snacks",
-      image:
-        "https://globalassets.starbucks.com/digitalassets/products/food/SBX20190903_SmokedTurkeyProteinBox.jpg",
-      route: "/menu/food/snack",
-    },
-  ];
+      setMenuData(data);
+
+      // Group by category
+      const grouped = data.reduce((acc: Record<string, Menu[]>, menu) => {
+        const category = menu.category?.trim() || "uncategorized";
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+        acc[category].push(menu);
+        return acc;
+      }, {});
+
+      console.log("Grouped categories:", Object.keys(grouped)); // Debug log
+      setGroupedCategories(grouped);
+    } catch (error) {
+      console.error("Error fetching menu data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const drinkCategories = Object.keys(groupedCategories).filter(
+    (category) =>
+      CATEGORY_INFO[category as keyof typeof CATEGORY_INFO]?.section ===
+      "drinks",
+  );
+
+  const foodCategories = Object.keys(groupedCategories).filter(
+    (category) =>
+      CATEGORY_INFO[category as keyof typeof CATEGORY_INFO]?.section === "food",
+  );
+
+  console.log("Drink categories:", drinkCategories);
+  console.log("Food categories:", foodCategories);
+
+  if (loading) {
+    return (
+      <main className="pt-28 pb-16 max-w-7xl mx-auto px-4">
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-700"></div>
+          <p className="mt-4 text-gray-600">Loading menu...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Helper function to get category info
+  const getCategoryInfo = (category: string) => {
+    const info = CATEGORY_INFO[category as keyof typeof CATEGORY_INFO];
+    if (info) return info;
+
+    // Fallback for unknown categories
+    return {
+      displayName: category
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" "),
+      description: `${groupedCategories[category]?.length || 0} items available`,
+      image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085",
+      section: "food" as const, // default to food
+    };
+  };
+
+  const renderCategoryCard = (category: string) => {
+    const info = getCategoryInfo(category);
+    const menu = groupedCategories[category] || [];
+
+    return (
+      <Link
+        key={category}
+        to={`/category/${category}`} // buat route baru di React
+        state={{
+          category,
+          menu,
+          displayName: info.displayName,
+        }}
+        className="menu-page-item group"
+      >
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden p-4 h-full flex flex-col hover:shadow-md transition-shadow duration-300">
+          <div className="relative overflow-hidden rounded-lg mb-4">
+            <img
+              src={info.image}
+              alt={info.displayName}
+              className="menu-img w-full h-40 sm:h-48 object-cover rounded-lg"
+            />
+            {/* <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute top-2 right-2 bg-red-700 text-white text-xs font-bold px-2 py-1 rounded-full">
+              {menu.length} items
+            </div> */}
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+            {info.displayName}
+          </h3>
+          <p className="text-gray-600 text-sm">{info.description}</p>
+        </div>
+      </Link>
+    );
+  };
 
   return (
     <main className="pt-28 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col md:flex-row">
-        {/* Sidebar */}
         <MenuSidebar />
 
-        {/* Main Content */}
         <div className="flex-1">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 font-montserrat">
             Our Menu
@@ -160,101 +217,61 @@ const Menu = () => {
             pairings
           </p>
 
+          {/* Total categories debug */}
+          {/* <div className="mb-4 text-sm text-gray-500">
+            Total categories found: {Object.keys(groupedCategories).length}
+          </div> */}
+
           {/* Drinks Section */}
-          <section id="drinks" className="mb-16">
-            <h2 className="category-title text-2xl md:text-3xl font-bold text-gray-900 mb-8 font-montserrat">
-              Drinks
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {drinkCategories.map((category) => (
-                <Link
-                  key={category.id}
-                  to={category.route}
-                  id={category.id}
-                  className="menu-item group"
-                >
-                  <div className="bg-white rounded-xl shadow-sm overflow-hidden p-4 h-full flex flex-col hover:shadow-md transition-shadow duration-300">
-                    <div className="relative overflow-hidden rounded-lg mb-4">
-                      <img
-                        src={category.image}
-                        alt={category.name}
-                        className="menu-img w-full h-40 sm:h-48 object-cover rounded-lg"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      {category.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      {category.description}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
+          {drinkCategories.length > 0 && (
+            <section id="drinks" className="mb-16">
+              <h2 className="category-title text-2xl md:text-3xl font-bold text-gray-900 mb-8 font-montserrat">
+                Drinks
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {drinkCategories.map(renderCategoryCard)}
+              </div>
+            </section>
+          )}
 
           {/* Food Section */}
-          <section id="food" className="mb-16">
-            <h2 className="category-title text-2xl md:text-3xl font-bold text-gray-900 mb-8 font-montserrat">
-              Food
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {foodCategories.map((category) => (
-                <Link
-                  key={category.id}
-                  to={category.route}
-                  id={category.id}
-                  className="menu-item group"
-                >
-                  <div className="bg-white rounded-xl shadow-sm overflow-hidden p-4 h-full flex flex-col hover:shadow-md transition-shadow duration-300">
-                    <div className="relative overflow-hidden rounded-lg mb-4">
-                      <img
-                        src={category.image}
-                        alt={category.name}
-                        className="menu-img w-full h-40 sm:h-48 object-cover rounded-lg"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      {category.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      {category.description}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
+          {foodCategories.length > 0 && (
+            <section id="food" className="mb-16">
+              <h2 className="category-title text-2xl md:text-3xl font-bold text-gray-900 mb-8 font-montserrat">
+                Food
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {foodCategories.map(renderCategoryCard)}
+              </div>
+            </section>
+          )}
 
-          {/* Mobile Snack Category (separate for better mobile display) */}
-          <section className="md:hidden mt-8">
-            <div className="grid grid-cols-1 gap-6">
-              <Link
-                to="/menu/food/snack"
-                id="snack"
-                className="menu-item group"
-              >
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden p-4 h-full flex flex-col hover:shadow-md transition-shadow duration-300">
-                  <div className="relative overflow-hidden rounded-lg mb-4">
-                    <img
-                      src="https://globalassets.starbucks.com/digitalassets/products/food/SBX20190903_SmokedTurkeyProteinBox.jpg"
-                      alt="Snacks"
-                      className="menu-img w-full h-48 object-cover rounded-lg"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                    Snacks
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    Light bites and savory snacks
-                  </p>
+          {/* Show categories not mapped */}
+          {Object.keys(groupedCategories).length > 0 &&
+            drinkCategories.length === 0 &&
+            foodCategories.length === 0 && (
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  All Categories
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Object.keys(groupedCategories).map(renderCategoryCard)}
                 </div>
-              </Link>
+              </div>
+            )}
+
+          {/* Empty State */}
+          {Object.keys(groupedCategories).length === 0 && (
+            <div className="text-center py-12 bg-gray-50 rounded-xl">
+              <p className="text-gray-600">No menu categories available.</p>
+              <button
+                onClick={fetchMenuData}
+                className="mt-4 px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800"
+              >
+                Retry
+              </button>
             </div>
-          </section>
+          )}
         </div>
       </div>
     </main>

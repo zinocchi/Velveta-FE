@@ -1,23 +1,22 @@
 import axios, { AxiosError } from "axios";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api",
+  baseURL: "http://localhost:8000/api",
   headers: {
     Accept: "application/json",
+    "Content-Type": "application/json",
   },
 });
 
-/**
- * Request interceptor
- * Attach token if exists
- */
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
-  },
-  (error: AxiosError) => Promise.reject(error)
+  },  
+  (error: AxiosError) => Promise.reject(error),
 );
 
 /**
@@ -29,13 +28,13 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
-      window.location.href = "/login";
+      // Redirect to login only if not already on login page
+      if (!window.location.pathname.includes("/login")) {
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
-  }
+  },
 );
-
-axios.defaults.headers.common["Authorization"] = `Bearer ${localStorage.getItem("token")}`;
-
 
 export default api;
