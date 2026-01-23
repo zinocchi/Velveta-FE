@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import type { AxiosError } from "axios";
 import VelvetaLogo from "../../assets/icon/velveta.png";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Register = () => {
   const navigate = useNavigate();
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8000/api/auth/google/redirect";
+    window.location.href = "http://localhost:8000/auth/google/redirect";
   };
 
   const [form, setForm] = useState({
@@ -30,6 +31,13 @@ const Register = () => {
       ...form,
       [name]: type === "checkbox" ? checked : value,
     });
+  };
+  
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -179,7 +187,7 @@ const Register = () => {
                     </label>
                     <div className="relative">
                       <input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         id="password"
                         name="password"
                         required
@@ -188,6 +196,18 @@ const Register = () => {
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200"
                         placeholder="Create a password"
                       />
+                      <button
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        disabled={loading}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-500 hover:text-red-600 transition duration-200 disabled:cursor-not-allowed"
+                      >
+                        {showPassword ? (
+                          <EyeSlashIcon className="w-5 h-5 text-gray-700" />
+                        ) : (
+                          <EyeIcon className="w-5 h-5 text-gray-700" />
+                        )}
+                      </button>
                     </div>
                   </div>
 
@@ -200,7 +220,7 @@ const Register = () => {
                     </label>
                     <div className="relative">
                       <input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         id="password_confirmation"
                         name="password_confirmation"
                         required
@@ -209,6 +229,18 @@ const Register = () => {
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200"
                         placeholder="Confirm your password"
                       />
+                      <button
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        disabled={loading}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-500 hover:text-red-600 transition duration-200 disabled:cursor-not-allowed"
+                      >
+                        {showPassword ? (
+                          <EyeSlashIcon className="w-5 h-5 text-gray-700" />
+                        ) : (
+                          <EyeIcon className="w-5 h-5 text-gray-700" />
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -275,9 +307,7 @@ const Register = () => {
 
               {/* Google Login Button */}
               <button
-                onClick={() => {
-                  window.location.href = "http://localhost:8000/auth/google/redirect";
-                }}
+                onClick={handleGoogleLogin}
                 className="flex items-center justify-center gap-2 w-full bg-red-600 text-white rounded-md py-3 mt-4"
               >
                 <svg

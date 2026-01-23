@@ -67,9 +67,12 @@ const Menu = () => {
   >({});
 
   useEffect(() => {
+<<<<<<< HEAD
     fetchMenuData();
 
     // Animation code
+=======
+>>>>>>> 588a11454478c6518544a05c388f6d088425e437
     const menuItems = document.querySelectorAll(".menu-page-item");
     const observer = new IntersectionObserver(
       (entries) => {

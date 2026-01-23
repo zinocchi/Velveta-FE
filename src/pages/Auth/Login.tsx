@@ -4,13 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Auth/useAuth";
 import "../../api/axios";
 import VelvetaLogo from "../../assets/icon/velveta.png";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login, loading, error } = useAuth();
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8000/api/auth/google/redirect";
+    window.location.href = "http://localhost:8000/auth/google/redirect";
   };
 
   const [showPassword, setShowPassword] = useState(false);
@@ -262,7 +263,11 @@ const Login: React.FC = () => {
                     disabled={loading}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-500 hover:text-red-600 transition duration-200 disabled:cursor-not-allowed"
                   >
-                    {showPassword ? "🔒" : "👁️"}
+                    {showPassword ? (
+                      <EyeSlashIcon className="w-5 h-5 text-gray-700" />
+                    ) : (
+                      <EyeIcon className="w-5 h-5 text-gray-700" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -327,10 +332,7 @@ const Login: React.FC = () => {
 
             {/* Tombol Login Google */}
             <button
-              onClick={() => {
-                window.location.href =
-                  "http://localhost:8000/auth/google/redirect";
-              }}
+              onClick={handleGoogleLogin}
               className="flex items-center justify-center gap-2 w-full bg-red-600 text-white rounded-md py-3 mt-4"
             >
               <svg

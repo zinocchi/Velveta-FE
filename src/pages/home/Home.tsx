@@ -32,7 +32,9 @@ const Home = () => {
 
   const handleJoinClick = () => {
     if (isLoggedIn) {
-      showCustomAlert(" You are already logged in! Redirecting to the dashboard...");
+      showCustomAlert(
+        " You are already logged in! Redirecting to the dashboard..."
+      );
 
       // Tunggu sebentar sebelum redirect agar alert terlihat
       setTimeout(() => {

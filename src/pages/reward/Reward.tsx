@@ -23,7 +23,7 @@ const Rewards = () => {
     // Auto hide setelah 4 detik
     setTimeout(() => {
       setShowAlert(false);
-    }, 4000);
+    }, 5000);
   };
 
   const handleJoinClick = () => {
@@ -32,7 +32,6 @@ const Rewards = () => {
         " You are already logged in! Redirecting to the dashboard..."
       );
 
-      // Tunggu sebentar sebelum redirect agar alert terlihat
       setTimeout(() => {
         navigate("/dashboard");
       }, 1500);
@@ -52,6 +51,8 @@ const Rewards = () => {
         element.style.width = width;
       }, 300);
     });
+    
+    
 
     // Fade in animation
     const observer = new IntersectionObserver(
@@ -124,6 +125,134 @@ const Rewards = () => {
 
   return (
     <>
+      {showAlert && (
+        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-[9999] w-full max-w-md">
+          <div
+            className={`
+              mx-4 rounded-xl shadow-lg p-4 backdrop-blur-sm border animate-slideDown
+              ${
+                alertType === "info"
+                  ? "bg-white/95 border-red-200"
+                  : alertType === "success"
+                  ? "bg-green-50/95 border-green-200"
+                  : "bg-red-50/95 border-red-200"
+              }
+            `}
+          >
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                {alertType === "info" ? (
+                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="h-5 w-5 text-red-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                ) : alertType === "success" ? (
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="h-5 w-5 text-green-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="h-5 w-5 text-red-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                )}
+              </div>
+              <div className="ml-3 flex-1">
+                <p
+                  className={`
+                    text-sm font-medium
+                    ${
+                      alertType === "info"
+                        ? "text-gray-900"
+                        : alertType === "success"
+                        ? "text-green-800"
+                        : "text-red-800"
+                    }
+                  `}
+                >
+                  {alertType === "info"
+                    ? "Already Signed In"
+                    : alertType === "success"
+                    ? "Success!"
+                    : "Attention"}
+                </p>
+                <p className="mt-1 text-sm text-gray-600">{alertMessage}</p>
+              </div>
+              <button
+                onClick={() => setShowAlert(false)}
+                className="ml-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            {/* Progress bar untuk auto-hide */}
+            <div className="mt-3">
+              <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className={`
+                    h-full rounded-full animate-progress
+                    ${
+                      alertType === "info"
+                        ? "bg-red-500"
+                        : alertType === "success"
+                        ? "bg-green-500"
+                        : "bg-red-500"
+                    }
+                  `}
+                  style={{ animationDuration: "4s" }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* HERO SECTION */}
       <section className="pt-32 pb-20 bg-gradient-to-r from-red-700 to-amber-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -135,12 +264,12 @@ const Rewards = () => {
             purchase and unlock exclusive benefits.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link
-              to="/register"
+            <button
+              onClick={handleJoinClick}
               className="px-8 py-3 bg-white text-red-700 rounded-full font-bold hover:bg-gray-100 transition-colors duration-300"
             >
               Join Now
-            </Link>
+            </button>
             <a
               href="#how-it-works"
               className="px-8 py-3 border-2 border-white text-white rounded-full font-bold hover:bg-white hover:text-red-700 transition-colors duration-300"
