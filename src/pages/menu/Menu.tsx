@@ -67,12 +67,11 @@ const Menu = () => {
   >({});
 
   useEffect(() => {
-<<<<<<< HEAD
     fetchMenuData();
+  }, []);
 
-    // Animation code
-=======
->>>>>>> 588a11454478c6518544a05c388f6d088425e437
+  useEffect(() => {
+    // Animation for menu items
     const menuItems = document.querySelectorAll(".menu-page-item");
     const observer = new IntersectionObserver(
       (entries) => {
@@ -209,9 +208,8 @@ const Menu = () => {
   return (
     <main className="pt-28 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col md:flex-row">
-        <MenuSidebar />
 
-        <div className="flex-1">
+        <div className="flex-1 pt-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 font-montserrat">
             Our Menu
           </h1>

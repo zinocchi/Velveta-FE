@@ -32,7 +32,6 @@ const Register = () => {
       [name]: type === "checkbox" ? checked : value,
     });
   };
-  
 
   const [showPassword, setShowPassword] = useState(false);
 

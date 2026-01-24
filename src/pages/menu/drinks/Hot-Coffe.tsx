@@ -1,103 +1,57 @@
-import { useEffect, useState } from 'react';
-import { useParams, useLocation, Link } from 'react-router-dom';
-import MenuCard from '../../../components/menu/MenuCard';
-import menuService from '../../../services/MenuServices';
-import type { Menu } from '../../../types/index';
-import { ChevronLeft } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useParams, useLocation, Link } from "react-router-dom";
+import MenuCard from "../../../components/menu/MenuCard";
+import menuService from "../../../services/MenuServices";
+import type { Menu } from "../../../types/index";
+import MenuSidebar from "../../../components/MenuSidebar";
+import { ChevronLeft } from "lucide-react";
+import "../../../Menu.css";
 
-const CategoryPage = () => {
-  const { category } = useParams<{ category: string }>();
-  const location = useLocation();
-  const [menus, setMenus] = useState<Menu[]>([]);
-  const [loading, setLoading] = useState(true);
+const HotCoffe = () => {
+  const [menuData, setMenuData] = useState<Menu[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    fetchMenusByCategory();
-  }, [category]);
+useEffect(() => {
+    fetchMenuData();
+  }, []);
 
-  const fetchMenusByCategory = async () => {
+  const fetchMenuData = async () => {
     try {
       setLoading(true);
-      const data = await menuService.getAllMenu();
-      
-      // Filter hanya menu dengan kategori yang sesuai
-      const filteredMenus = data.filter(menu => 
-        menu.category?.trim() === category
-      );
-      
-      setMenus(filteredMenus);
+
+      const data = await menuService.getMenuByCategory("hot-coffee");
+      console.log("Fetched menu data:", data);
+
+      setMenuData(data);
     } catch (error) {
-      console.error('Error fetching category menus:', error);
+      console.error("Error fetching hot coffee menu data:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Format category name untuk display
-  const formatCategoryName = (cat: string | undefined): string => {
-    if (!cat) return '';
-    return cat.split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  };
 
-  const categoryName = formatCategoryName(category);
-  const displayName = location.state?.displayName || categoryName;
 
   if (loading) {
-    return (
-      <main className="pt-28 pb-16 max-w-7xl mx-auto px-4">
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-700"></div>
-          <p className="mt-4 text-gray-600">Loading {categoryName}...</p>
-        </div>
-      </main>
-    );
+    return <div className="p-4 md:p-8 lg:p-12">Loading...</div>;
   }
 
   return (
-    <main className="pt-28 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Back Button */}
-      <div className="mb-8">
-        <Link
-          to="/menu"
-          className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          <ChevronLeft size={20} className="mr-1" />
-          Back to Menu
+    <div className="p-4 md:p-8 lg:p-12">
+      <div className="mb-6 flex items-center">
+        <Link to="/menu/drinks" className="mr-2">
+          <ChevronLeft className="h-6 w-6" />
         </Link>
+        <h1 className="text-2xl font-bold">Hot Coffee</h1>
       </div>
-
-      {/* Category Header */}
-      <div className="mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 font-montserrat">
-          {displayName}
-        </h1>
-        <p className="text-gray-600 mb-6">
-          {menus.length} {menus.length === 1 ? 'item' : 'items'} available
-        </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {menuData.map((item) => (
+          <MenuCard key={item.id} menu={item} />
+        ))}
       </div>
-
-      {/* Menu Items Grid - SAMA PERSIS dengan Menu utama */}
-      {menus.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {menus.map((menu) => (
-            <MenuCard key={menu.id} menu={menu} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-xl">
-          <p className="text-gray-600">No items found in {categoryName}.</p>
-          <Link
-            to="/menu"
-            className="mt-4 inline-block px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800"
-          >
-            Back to Menu
-          </Link>
-        </div>
-      )}
-    </main>
+    </div>
   );
 };
 
-export default CategoryPage;
+
+export default HotCoffe;

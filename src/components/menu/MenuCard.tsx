@@ -4,6 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 
 interface MenuCardProps {
   menu: Menu;
+  item?: never;
 }
 
 const MenuCard: React.FC<MenuCardProps> = ({ menu }) => {

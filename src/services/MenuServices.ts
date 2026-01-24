@@ -41,7 +41,7 @@ const menuService = {
     }
   },
 
-  async getMenusByCategory(category: string): Promise<Menu[]> {
+  async getMenuByCategory(category: string): Promise<Menu[]> {
     try {
       const response = await api.get<ApiResponse<Menu[]>>(
         `/menu?category=${category}`,

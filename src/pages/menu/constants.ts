@@ -6,6 +6,8 @@ export interface MenuCategory {
   route: string;
 }
 
+
+
 export const DRINK_CATEGORIES: MenuCategory[] = [
   {
     id: "hot-coffee",
@@ -83,3 +85,13 @@ export const FOOD_CATEGORIES: MenuCategory[] = [
 ];
 
 export const ALL_CATEGORIES = [...DRINK_CATEGORIES, ...FOOD_CATEGORIES];
+
+export const getCategoryFallbackImage = (category?: string) => {
+  if (!category) return "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085";
+
+  return (
+    ALL_CATEGORIES.find(cat => cat.id === category)?.image ??
+    "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085"
+  );
+};
+
