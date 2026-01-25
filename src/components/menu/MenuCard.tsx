@@ -1,6 +1,6 @@
 import React from "react";
 import { type Menu } from "../../types/index";
-import AddIcon from "@mui/icons-material/Add";
+import { useCart } from "../../context/CartContext";
 
 interface MenuCardProps {
   menu: Menu;
@@ -8,79 +8,75 @@ interface MenuCardProps {
 }
 
 const MenuCard: React.FC<MenuCardProps> = ({ menu }) => {
+  const { addToCart } = useCart();
+
+  const handleAddToCart = () => {
+    addToCart(menu);
+  };
+
   const formatPrice = (price: number): string => {
     return `Rp ${price.toLocaleString("id-ID")}`;
   };
 
-  // Handle add to cart (placeholder for now)
-  const handleAddToCart = () => {
-    console.log("Add to cart clicked for:", menu.name);
-    alert(
-      `"${menu.name}" added to cart! (Cart feature will be available in next phase)`,
-    );
-  };
-
   return (
-    <div className="menu-item bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
-      {/* Image with hover effect */}
-      <div className="relative overflow-hidden rounded-t-xl aspect-square">
+    <div className="menu-item bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 border border-gray-100">
+      {/* Image with fixed aspect ratio */}
+      <div className="relative overflow-hidden">
         <img
           src={
             menu.image_url ||
             "https://globalassets.starbucks.com/digitalassets/products/bev/LavenderOatmilkLatte.jpg"
           }
           alt={menu.name}
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+          className="w-full h-48 object-cover"
         />
-
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-          <span className="text-white font-semibold text-sm">View Details</span>
-        </div>
-
-        {/* Stock badge */}
-        {menu.stock <= 10 && menu.stock > 0 && (
-          <div className="absolute top-2 left-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-            Only {menu.stock} left
-          </div>
-        )}
-
-        {menu.stock === 0 && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-            Out of stock
-          </div>
-        )}
       </div>
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-          {menu.name}
-        </h3>
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-          {menu.description || "No description available"}
-        </p>
+        <div className="mb-3">
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+            {menu.name}
+          </h3>
+          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+            {menu.description || "No description available"}
+          </p>
+        </div>
 
         <div className="flex justify-between items-center">
-          <span className="font-bold text-red-700">
-            {formatPrice(menu.price)}
-          </span>
+          <div className="flex flex-col">
+            <span className="font-bold text-gray-900 text-lg">
+              {formatPrice(menu.price)}
+            </span>
+            
+            {/* Stock status - only show if low or out of stock */}
+            {menu.stock <= 10 && menu.stock > 0 && (
+              <span className="text-amber-600 text-xs font-medium mt-1">
+                Only {menu.stock} left
+              </span>
+            )}
+            
+            {menu.stock === 0 && (
+              <span className="text-red-600 text-xs font-medium mt-1">
+                Out of stock
+              </span>
+            )}
+          </div>
 
           <button
             onClick={handleAddToCart}
             disabled={menu.stock === 0}
             className={`
-              flex items-center gap-1 px-3 py-1.5 rounded-full text-sm 
-              font-medium transition-colors duration-300
+              px-4 py-2 rounded-lg text-sm font-medium 
+              transition-all duration-200 min-w-[80px]
               ${
                 menu.stock === 0
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-red-700 text-white hover:bg-red-800 active:bg-red-900"
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : "bg-[#FFE8E8] text-[#C51605] hover:bg-[#FFD6D6] active:scale-95"
               }
             `}
           >
-            <AddIcon fontSize="small" />
-            Add
+            + Add
           </button>
         </div>
       </div>

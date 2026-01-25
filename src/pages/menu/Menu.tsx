@@ -108,7 +108,6 @@ const Menu = () => {
 
       setMenuData(data);
 
-      // Group by category
       const grouped = data.reduce((acc: Record<string, Menu[]>, menu) => {
         const category = menu.category?.trim() || "uncategorized";
         if (!acc[category]) {
@@ -206,7 +205,7 @@ const Menu = () => {
   };
 
   return (
-    <main className="pt-28 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main className="pt-12 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col md:flex-row">
 
         <div className="flex-1 pt-12">
