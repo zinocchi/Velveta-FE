@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../Auth/useAuth";
+import { useAuth } from "../../auth/useAuth";
 
 const Rewards = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -9,12 +9,12 @@ const Rewards = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState<"info" | "success" | "error">(
-    "info"
+    "info",
   );
 
   const showCustomAlert = (
     message: string,
-    type: "info" | "success" | "error" = "info"
+    type: "info" | "success" | "error" = "info",
   ) => {
     setAlertMessage(message);
     setAlertType(type);
@@ -29,7 +29,7 @@ const Rewards = () => {
   const handleJoinClick = () => {
     if (isLoggedIn) {
       showCustomAlert(
-        " You are already logged in! Redirecting to the dashboard..."
+        " You are already logged in! Redirecting to the dashboard...",
       );
 
       setTimeout(() => {
@@ -51,8 +51,6 @@ const Rewards = () => {
         element.style.width = width;
       }, 300);
     });
-    
-    
 
     // Fade in animation
     const observer = new IntersectionObserver(
@@ -65,7 +63,7 @@ const Rewards = () => {
       },
       {
         threshold: 0.1,
-      }
+      },
     );
 
     document.querySelectorAll(".fade-in").forEach((el, index) => {
@@ -134,8 +132,8 @@ const Rewards = () => {
                 alertType === "info"
                   ? "bg-white/95 border-red-200"
                   : alertType === "success"
-                  ? "bg-green-50/95 border-green-200"
-                  : "bg-red-50/95 border-red-200"
+                    ? "bg-green-50/95 border-green-200"
+                    : "bg-red-50/95 border-red-200"
               }
             `}
           >
@@ -199,16 +197,16 @@ const Rewards = () => {
                       alertType === "info"
                         ? "text-gray-900"
                         : alertType === "success"
-                        ? "text-green-800"
-                        : "text-red-800"
+                          ? "text-green-800"
+                          : "text-red-800"
                     }
                   `}
                 >
                   {alertType === "info"
                     ? "Already Signed In"
                     : alertType === "success"
-                    ? "Success!"
-                    : "Attention"}
+                      ? "Success!"
+                      : "Attention"}
                 </p>
                 <p className="mt-1 text-sm text-gray-600">{alertMessage}</p>
               </div>
@@ -241,8 +239,8 @@ const Rewards = () => {
                       alertType === "info"
                         ? "bg-red-500"
                         : alertType === "success"
-                        ? "bg-green-500"
-                        : "bg-red-500"
+                          ? "bg-green-500"
+                          : "bg-red-500"
                     }
                   `}
                   style={{ animationDuration: "4s" }}

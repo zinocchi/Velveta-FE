@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import ScrollReveal from "scrollreveal";
 import "animate.css";
-import "../../Global.css";
+import "../../styles/Global.css";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../Auth/useAuth";
+import { useAuth } from "../../auth/useAuth";
 
 const Home = () => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -13,12 +13,12 @@ const Home = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState<"info" | "success" | "error">(
-    "info"
+    "info",
   );
 
   const showCustomAlert = (
     message: string,
-    type: "info" | "success" | "error" = "info"
+    type: "info" | "success" | "error" = "info",
   ) => {
     setAlertMessage(message);
     setAlertType(type);
@@ -33,7 +33,7 @@ const Home = () => {
   const handleJoinClick = () => {
     if (isLoggedIn) {
       showCustomAlert(
-        " You are already logged in! Redirecting to the dashboard..."
+        " You are already logged in! Redirecting to the dashboard...",
       );
 
       // Tunggu sebentar sebelum redirect agar alert terlihat
@@ -277,8 +277,8 @@ const Home = () => {
                 alertType === "info"
                   ? "bg-white/95 border-red-200"
                   : alertType === "success"
-                  ? "bg-green-50/95 border-green-200"
-                  : "bg-red-50/95 border-red-200"
+                    ? "bg-green-50/95 border-green-200"
+                    : "bg-red-50/95 border-red-200"
               }
             `}
           >
@@ -342,16 +342,16 @@ const Home = () => {
                       alertType === "info"
                         ? "text-gray-900"
                         : alertType === "success"
-                        ? "text-green-800"
-                        : "text-red-800"
+                          ? "text-green-800"
+                          : "text-red-800"
                     }
                   `}
                 >
                   {alertType === "info"
                     ? "Already Signed In"
                     : alertType === "success"
-                    ? "Success!"
-                    : "Attention"}
+                      ? "Success!"
+                      : "Attention"}
                 </p>
                 <p className="mt-1 text-sm text-gray-600">{alertMessage}</p>
               </div>
@@ -384,8 +384,8 @@ const Home = () => {
                       alertType === "info"
                         ? "bg-red-500"
                         : alertType === "success"
-                        ? "bg-green-500"
-                        : "bg-red-500"
+                          ? "bg-green-500"
+                          : "bg-red-500"
                     }
                   `}
                   style={{ animationDuration: "4s" }}

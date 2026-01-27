@@ -1,6 +1,5 @@
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import MenuSidebar from "../components/MenuSidebar";
+import MenuSidebar from "../components/menu/MenuSidebar";
 import { Outlet } from "react-router-dom";
 
 const MenuLayout = () => {
@@ -10,8 +9,7 @@ const MenuLayout = () => {
 
       <main className="bg-gray-50 min-h-screen pt-0  ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-10">
-
-          <aside className="w-64 shrink-0"> 
+          <aside className="w-64 shrink-0">
             <div className="fixed top-24 w-64">
               <MenuSidebar />
             </div>
@@ -20,10 +18,8 @@ const MenuLayout = () => {
           <section className="flex-1">
             <Outlet />
           </section>
-
         </div>
       </main>
-
     </>
   );
 };

@@ -1,7 +1,7 @@
 // Login.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../Auth/useAuth";
+import { useAuth } from "../../auth/useAuth";
 import "../../api/axios";
 import VelvetaLogo from "../../assets/icon/velveta.png";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
@@ -26,7 +26,7 @@ const Login: React.FC = () => {
 
   const showCustomAlert = (
     message: string,
-    type: "error" | "success" = "error"
+    type: "error" | "success" = "error",
   ) => {
     setAlertMessage(message);
     setAlertType(type);

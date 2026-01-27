@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import "../Navbar.css";
+import "../styles/Navbar.css";
 import VelvetaLogo from "../assets/icon/velveta.png";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../Auth/useAuth";
+import { useAuth } from "../auth/useAuth";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -192,7 +192,7 @@ const Navbar = () => {
                       src={
                         user?.avatar ||
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          user?.fullname || "User"
+                          user?.fullname || "User",
                         )}&background=random&color=fff&bold=true`
                       }
                       className="h-10 w-10 rounded-full object-cover border-2 border-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import MenuSidebar from "../../components/MenuSidebar";
+import MenuSidebar from "../../components/menu/MenuSidebar";
 import menuService from "../../services/MenuServices";
 import type { Menu } from "../../types/index";
-import "../../Menu.css";
+import "../../styles/Menu.css";
 
 const CATEGORY_INFO = {
   // Drinks
@@ -35,6 +35,13 @@ const CATEGORY_INFO = {
       "https://globalassets.starbucks.com/digitalassets/products/bev/IcedBlackTea.jpg",
     section: "drinks" as const,
   },
+  hot_chocolate: {
+    displayName: "Hot Chocolate",
+    description: "Creamy and indulgent hot chocolate",
+    image:
+      "https://globalassets.starbucks.com/digitalassets/products/bev/HotChocolate.jpg",
+    section: "drinks" as const,
+  },
   // Food
   bakery: {
     displayName: "Bakery",
@@ -55,6 +62,13 @@ const CATEGORY_INFO = {
     description: "Satisfying midday meals",
     image:
       "https://globalassets.starbucks.com/digitalassets/products/food/SBX20220207_GrilledCheeseOnSourdough_US.jpg",
+    section: "food" as const,
+  },
+  breakfast: {
+    displayName: "Breakfast",
+    description: "Hearty morning options",
+    image:
+      "https://globalassets.starbucks.com/digitalassets/products/food/SBX20190814_AvocadoSpread.jpg?impolicy=1by1_medium_630",
     section: "food" as const,
   },
 };
@@ -207,7 +221,6 @@ const Menu = () => {
   return (
     <main className="pt-12 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col md:flex-row">
-
         <div className="flex-1 pt-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 font-montserrat">
             Our Menu

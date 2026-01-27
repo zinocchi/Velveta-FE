@@ -9,9 +9,9 @@ import Reward from "../pages/reward/Reward";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Menu from "../pages/menu/Menu";
 import CategoryPage from "../pages/menu/CategoryPage";
-import Register from "../pages/Auth/Register";
-import Login from "../pages/Auth/Login";
-import AuthCallback from "../pages/Auth/AuthCallback";
+import Register from "../pages/auth/Register";
+import Login from "../pages/auth/Login";
+import AuthCallback from "../pages/auth/AuthCallback";
 
 // auth
 import ProtectedRoute from "../components/ProtectedRoute";

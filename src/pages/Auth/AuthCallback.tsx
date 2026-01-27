@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
-import { useAuth } from "../../Auth/useAuth";
+import { useAuth } from "../../auth/useAuth";
 
 const AuthCallback = () => {
   const navigate = useNavigate();
