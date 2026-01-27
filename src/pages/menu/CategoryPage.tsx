@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import type { Menu } from "../../types";
 import axios from "axios";
+import { useCart } from "../../context/CartContext";
 import { getCategoryFallbackImage } from "./constants";
 
 export default function CategoryPage() {
@@ -68,6 +69,11 @@ export default function CategoryPage() {
     description: "Delicious menu items available in this category.",
   };
 
+  const { dispatch } = useCart();
+
+  const { state } = useCart();
+  console.log("Cart State:", state);
+
   if (loading) {
     return (
       <main className="pt-28 pb-16 max-w-7xl mx-auto px-4">
@@ -99,41 +105,52 @@ export default function CategoryPage() {
         <p className="text-gray-600 mt-2">{info.description}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {menus.map((item) => (
           <div
             key={item.id}
-            className="menu-item bg-white rounded-xl shadow-sm overflow-hidden"
+            className="bg-white rounded-xl shadow-sm overflow-hidden p-4 h-full flex flex-col hover:shadow-md transition-shadow duration-300"
           >
-            {/* Image Container */}
-            <div className="relative overflow-hidden">
+            {/* Image */}
+            <div className="relative overflow-hidden rounded-lg mb-4">
               <img
                 src={item.image_url ?? getCategoryFallbackImage(category)}
                 alt={item.name}
-                className="menu-img w-full h-40 sm:h-48 object-cover rounded-lg"
+                className="menu-img w-full h-40 object-cover rounded-lg"
               />
             </div>
 
-            {/* Content Container */}
-            <div className="p-5">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                  {item.name}
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  {item.description}
-                </p>
-              </div>
+            {/* Title */}
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+              {item.name}
+            </h3>
 
-              {/* Price and Button Section */}
-              <div className="flex items-center justify-between">
-                <p className="text-lg font-bold text-gray-900">
-                  Rp {item.price.toLocaleString("id-ID")}
-                </p>
-                <button className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors duration-300">
-                  + Add
-                </button>
-              </div>
+            {/* Description */}
+            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+              {item.description}
+            </p>
+
+            {/* Spacer biar tombol selalu di bawah */}
+            <div className="mt-auto flex items-center justify-between">
+              <p className="text-base font-bold text-gray-900">
+                Rp {item.price.toLocaleString("id-ID")}
+              </p>
+              <button
+              className="bg-red-700 hover:bg-red-700 text-white text-sm font-medium py-1.5 px-4 rounded-md transition-colors duration-300"
+                onClick={() =>
+                  dispatch({
+                    type: "ADD_TO_CART",
+                    payload: {
+                      id: item.id,
+                      name: item.name,
+                      price: item.price,
+                      image_url: item.image_url,
+                    },
+                  })
+                }
+              >
+                Add
+              </button>
             </div>
           </div>
         ))}

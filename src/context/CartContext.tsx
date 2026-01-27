@@ -1,41 +1,106 @@
-import { createContext, useContext, useState } from "react";
-import type { Menu } from "../types";
+import React, { createContext, useContext, useReducer, type ReactNode } from "react";
 
-interface CartItem extends Menu {
+/* ================= TYPES ================= */
+
+export interface CartItem {
+  id: number;
+  name: string;
+  price: number;
+  image_url?: string | null;
   qty: number;
 }
 
-interface CartContextType {
-  cart: CartItem[];
-  addToCart: (item: Menu) => void;
-}
+type CartState = {
+  items: CartItem[];
+};
 
-const CartContext = createContext<CartContextType | null>(null);
+type CartAction =
+  | { type: "ADD_TO_CART"; payload: Omit<CartItem, "qty"> }
+  | { type: "INCREMENT"; payload: number }
+  | { type: "DECREMENT"; payload: number }
+  | { type: "REMOVE"; payload: number }
+  | { type: "CLEAR_CART" };
 
-export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+/* ================= REDUCER ================= */
 
-  const addToCart = (item: Menu) => {
-    setCart((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
+const cartReducer = (state: CartState, action: CartAction): CartState => {
+  switch (action.type) {
+    case "ADD_TO_CART": {
+      const existing = state.items.find(
+        (item) => item.id === action.payload.id
+      );
+
       if (existing) {
-        return prev.map((i) =>
-          i.id === item.id ? { ...i, qty: i.qty + 1 } : i,
-        );
+        return {
+          items: state.items.map((item) =>
+            item.id === action.payload.id
+              ? { ...item, qty: item.qty + 1 }
+              : item
+          ),
+        };
       }
-      return [...prev, { ...item, qty: 1 }];
-    });
-  };
+
+      return {
+        items: [...state.items, { ...action.payload, qty: 1 }],
+      };
+    }
+
+    case "INCREMENT":
+      return {
+        items: state.items.map((item) =>
+          item.id === action.payload
+            ? { ...item, qty: item.qty + 1 }
+            : item
+        ),
+      };
+
+    case "DECREMENT":
+      return {
+        items: state.items
+          .map((item) =>
+            item.id === action.payload
+              ? { ...item, qty: item.qty - 1 }
+              : item
+          )
+          .filter((item) => item.qty > 0),
+      };
+
+    case "REMOVE":
+      return {
+        items: state.items.filter((item) => item.id !== action.payload),
+      };
+
+    case "CLEAR_CART":
+      return { items: [] };
+
+    default:
+      return state;
+  }
+};
+
+/* ================= CONTEXT ================= */
+
+const CartContext = createContext<{
+  state: CartState;
+  dispatch: React.Dispatch<CartAction>;
+} | null>(null);
+
+/* ================= PROVIDER ================= */
+
+export const CartProvider = ({ children }: { children: ReactNode }) => {
+  const [state, dispatch] = useReducer(cartReducer, { items: [] });
 
   return (
-    <CartContext.Provider value={{ cart, addToCart }}>
+    <CartContext.Provider value={{ state, dispatch }}>
       {children}
     </CartContext.Provider>
   );
 };
 
+/* ================= HOOK ================= */
+
 export const useCart = () => {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used inside CartProvider");
-  return ctx;
+  const context = useContext(CartContext);
+  if (!context) throw new Error("useCart must be used inside CartProvider");
+  return context;
 };
