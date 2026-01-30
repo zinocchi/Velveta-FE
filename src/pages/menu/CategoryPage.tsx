@@ -4,6 +4,8 @@ import type { Menu } from "../../types";
 import axios from "axios";
 import { useCart } from "../../context/CartContext";
 import { getCategoryFallbackImage } from "./constants";
+import { useRef } from "react";
+import { flyToCart } from "../../utils/FlyToCart";
 
 export default function CategoryPage() {
   const { category } = useParams<{ category: string }>();
@@ -69,6 +71,7 @@ export default function CategoryPage() {
     description: "Delicious menu items available in this category.",
   };
 
+  const imgRef = useRef<HTMLImageElement>(null);
   const { dispatch } = useCart();
 
   const { state } = useCart();
@@ -109,11 +112,12 @@ export default function CategoryPage() {
         {menus.map((item) => (
           <div
             key={item.id}
-            className="bg-white rounded-xl shadow-sm overflow-hidden p-4 h-full flex flex-col hover:shadow-md transition-shadow duration-300"
+            className="cart-source bg-white rounded-xl shadow-sm overflow-hidden p-4 h-full flex flex-col hover:shadow-md transition-shadow duration-300"
           >
             {/* Image */}
             <div className="relative overflow-hidden rounded-lg mb-4">
               <img
+                ref={imgRef}
                 src={item.image_url ?? getCategoryFallbackImage(category)}
                 alt={item.name}
                 className="menu-img w-full h-40 object-cover rounded-lg"
@@ -136,8 +140,11 @@ export default function CategoryPage() {
                 Rp {item.price.toLocaleString("id-ID")}
               </p>
               <button
-              className="bg-red-700 hover:bg-red-700 text-white text-sm font-medium py-1.5 px-4 rounded-md transition-colors duration-300"
-                onClick={() =>
+                className="bg-red-700 hover:bg-red-700 text-white text-sm font-medium py-1.5 px-4 rounded-md transition-colors duration-300"
+                onClick={(e) => {
+                  flyToCart(
+                    e.currentTarget.closest(".cart-source") as HTMLElement,
+                  );
                   dispatch({
                     type: "ADD_TO_CART",
                     payload: {
@@ -146,8 +153,8 @@ export default function CategoryPage() {
                       price: item.price,
                       image_url: item.image_url,
                     },
-                  })
-                }
+                  });
+                }}
               >
                 Add
               </button>

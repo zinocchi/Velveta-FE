@@ -188,6 +188,7 @@ const Navbar = () => {
                     onClick={() => setOpenMenu(!openMenu)}
                     className="flex items-center"
                   >
+                    <div id = "cart-icon"></div>
                     <img
                       src={
                         user?.avatar ||

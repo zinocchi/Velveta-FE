@@ -16,6 +16,7 @@ import AuthCallback from "../pages/auth/AuthCallback";
 // auth
 import ProtectedRoute from "../components/ProtectedRoute";
 import ScrollToTop from "../components/ScrollToTop";
+import DashboardLayout from "../layouts/DashboardLayout";
 
 const AppRoutes = () => {
   return (
@@ -34,7 +35,7 @@ const AppRoutes = () => {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <DashboardLayout />
               </ProtectedRoute>
             }
           />
