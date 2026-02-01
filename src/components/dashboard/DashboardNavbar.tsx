@@ -3,17 +3,17 @@ import VelvetaLogo from "../../assets/icon/velveta.png";
 import { useAuth } from "../../auth/useAuth";
 import { useNavigate } from "react-router-dom";
 
-interface User {
-  name: string;
-  username: string;
-  photo?: string;
-  email?: string;
-  fullname?: string;
-  avatar?: string;
-}
+// interface User {
+//   name: string;
+//   username: string;
+//   photo?: string;
+//   email?: string;
+//   fullname?: string;
+//   avatar?: string;
+// }
 
 interface DashboardNavbarProps {
-  user: User;
+  // user: User;
   cartCount?: number;
   notificationCount?: number;
   onNotificationClick?: () => void;
@@ -26,7 +26,7 @@ interface DashboardNavbarProps {
 }
 
 const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
-  user,
+  // user,
   cartCount = 0,
   notificationCount = 0,
   onNotificationClick,
@@ -42,6 +42,7 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { isLoggedIn, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   // Close dropdown when clicking outside
@@ -106,11 +107,11 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
     document.body.classList.remove("modal-open");
   };
 
-  const getInitial = () => {
-    return user?.username?.charAt(0).toUpperCase() || 
-           user?.name?.charAt(0).toUpperCase() || 
-           "U";
-  };
+  // const getInitial = () => {
+  //   return user?.username?.charAt(0).toUpperCase() || 
+  //          user?.name?.charAt(0).toUpperCase() || 
+  //          "U";
+  // };
 
   return (
     <>
@@ -190,24 +191,24 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                     src={
                       user?.avatar ||
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        user?.fullname || user?.name || "User"
+                        user?.fullname || user?.fullname || "User"
                       )}&background=random&color=fff&bold=true`
                     }
                     className="h-10 w-10 rounded-full object-cover border-2 border-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-                    alt={user?.fullname || user?.name || "User"}
+                    alt={user?.fullname || user?.fullname || "User"}
                   />
                 </button>
 
                 {/* Dropdown Menu */}
                 {dropdownOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 transition-all duration-200 animate-fadeIn">
+                  <div className="absolute right-0 top-full mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50 transition-all duration-200 animate-fadeIn">
                     {/* User info section */}
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="font-medium text-gray-900 text-sm truncate">
-                        {user?.fullname || user?.name || "User"}
+                        {user?.fullname }
                       </p>
                       <p className="text-gray-500 text-xs truncate">
-                        {user?.email || "user@example.com"}
+                        {user?.email }
                       </p>
                     </div>
 

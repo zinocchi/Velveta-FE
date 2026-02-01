@@ -5,7 +5,7 @@ import axios from "axios";
 import { useCart } from "../../context/CartContext";
 import { getCategoryFallbackImage } from "./constants";
 import { useRef } from "react";
-import { flyToCart } from "../../utils/FlyToCart";
+import { flyToCart } from "../../utils/flyToCart";
 
 export default function CategoryPage() {
   const { category } = useParams<{ category: string }>();

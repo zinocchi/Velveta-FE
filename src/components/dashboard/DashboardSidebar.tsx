@@ -7,7 +7,7 @@ interface MenuItem {
   hasBadge?: boolean;
   badgeCount?: number;
 }
-
+    
 interface DashboardSidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;

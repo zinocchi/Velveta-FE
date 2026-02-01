@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../auth/useAuth';
 
 interface RecentOrder {
   id: string;
@@ -9,7 +10,6 @@ interface RecentOrder {
 }
 
 interface DashboardContentProps {
-  userName: string;
   activeTab: string;
   totalOrders?: number;
   pointsEarned?: number;
@@ -18,7 +18,6 @@ interface DashboardContentProps {
 }
 
 const DashboardContent: React.FC<DashboardContentProps> = ({
-  userName,
   activeTab,
   totalOrders = 12,
   pointsEarned = 350,
@@ -38,7 +37,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     { id: '4', date: '2024-01-12', items: 'Espresso, Bagel', total: 65000, status: 'completed' },
   ]);
 
+  const { user } = useAuth();
+
+  // Update stats if props change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStats({
       totalOrders,
       pointsEarned,
@@ -49,6 +52,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   // Update orders if props change
   useEffect(() => {
     if (recentOrders.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setOrders(recentOrders);
     }
   }, [recentOrders]);
@@ -101,7 +105,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     <div className="dashboard-content active">
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2 font-montserrat">
-          Welcome, <span id="welcomeName" className="text-red-600">{userName}</span>!
+          Welcome, <span id="welcomeName" className="text-red-600">{user?.fullname || "User"}</span>!
         </h2>
         <p className="text-gray-600">Ready to explore our premium coffee selection?</p>
       </div>
