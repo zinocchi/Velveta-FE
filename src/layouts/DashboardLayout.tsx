@@ -1,15 +1,12 @@
-// layouts/DashboardLayout.tsx
 import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import DashboardNavbar from "../components/dashboard/DashboardNavbar";
 import DashboardSidebar from "../components/dashboard/DashboardSidebar";
-// import { useAuth } from '../contexts/AuthContext'; // Optional: if you have auth context
 
 const DashboardLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get active tab from URL
   const getActiveTab = () => {
     const path = location.pathname.split("/").pop();
     switch (path) {
@@ -54,7 +51,6 @@ const DashboardLayout: React.FC = () => {
   };
 
   const handleLogout = () => {
-    // Implement logout logic
     localStorage.removeItem("token");
     navigate("/login");
   };
@@ -75,8 +71,7 @@ const DashboardLayout: React.FC = () => {
 
       <div className="flex pt-16">
         <DashboardSidebar
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
+          onBackToHome={() => navigate("/")}
           ordersCount={stats.totalOrders}
           favoritesCount={stats.favoriteDrinksCount}
         />

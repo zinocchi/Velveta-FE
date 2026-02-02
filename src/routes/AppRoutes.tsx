@@ -1,23 +1,32 @@
+//layout
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import MenuLayout from "../layouts/MenuLayouts";
+import DashboardLayout from "../layouts/DashboardLayout";
 
 // pages
 import Home from "../pages/home/Home";
 import About from "../pages/about/About";
 import Reward from "../pages/reward/Reward";
-// import Dashboard from "../pages/dashboard/Dashboard";
+
+//component
+import ScrollToTop from "../components/ScrollToTop";
+import ProtectedRoute from "../components/ProtectedRoute";
+
+//menu
 import Menu from "../pages/menu/Menu";
 import CategoryPage from "../pages/menu/CategoryPage";
+
+// auth
 import Register from "../pages/auth/Register";
 import Login from "../pages/auth/Login";
 import AuthCallback from "../pages/auth/AuthCallback";
 
-// auth
-import ProtectedRoute from "../components/ProtectedRoute";
-import ScrollToTop from "../components/ScrollToTop";
-import DashboardLayout from "../layouts/DashboardLayout";
-// import Dashboard from "../pages/dashboard/Dashboard";
+//dashboard
+import DashboardPage from "../pages/dashboard/Dashboard";
+import Orders from "../pages/dashboard/Orders";
+import Favorites from "../pages/dashboard/Favorites";
+import Profile from "../pages/dashboard/Profile";
 
 const AppRoutes = () => {
   return (
@@ -37,15 +46,15 @@ const AppRoutes = () => {
           <Route path="/menu" element={<Menu />} />
         </Route>
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-
-          }
-        />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="menu" element={<Menu />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="favorites" element={<Favorites />} />
+            <Route path="profile" element={<Profile />} />
+          </Route>
+        </Route>
 
         {/* Auth */}
         <Route path="/register" element={<Register />} />

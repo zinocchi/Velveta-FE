@@ -79,8 +79,8 @@ export default function CategoryPage() {
 
   if (loading) {
     return (
-      <main className="pt-28 pb-16 max-w-7xl mx-auto px-4">
-        <div className="text-center py-12">
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-700"></div>
           <p className="mt-4 text-gray-600">Loading menu...</p>
         </div>

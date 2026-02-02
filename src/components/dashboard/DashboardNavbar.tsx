@@ -41,9 +41,25 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
   const [openMenu, setOpenMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const confirmRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const { isLoggedIn, logout } = useAuth();
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScrollClose = () => {
+      setDropdownOpen(false);
+      setOpenMenu(false);
+      setIsMobileMenuOpen(false);
+    };
+
+    window.addEventListener("scroll", handleScrollClose, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScrollClose);
+    };
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -62,6 +78,10 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
     };
   }, []);
 
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
   useEffect(() => {
     if (showLogoutConfirm) {
       document.body.classList.add("modal-open");
@@ -75,10 +95,6 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
     };
   }, [showLogoutConfirm]);
 
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
-
   const handleLogout = () => {
     setShowLogoutConfirm(true);
     setOpenMenu(false);
@@ -86,18 +102,12 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
   };
 
   const confirmLogout = () => {
-    if (logout) {
-      logout();
-    }
-    
-    if (onLogout) {
-      onLogout();
-    }
+    logout();
 
     document.body.classList.remove("modal-open");
 
     localStorage.removeItem("token");
-    setShowLogoutConfirm(false);
+    setShowLogoutConfirm(true);
     navigate("/");
     window.location.reload();
   };
@@ -106,10 +116,9 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
     setShowLogoutConfirm(false);
     document.body.classList.remove("modal-open");
   };
-
   // const getInitial = () => {
-  //   return user?.username?.charAt(0).toUpperCase() || 
-  //          user?.name?.charAt(0).toUpperCase() || 
+  //   return user?.username?.charAt(0).toUpperCase() ||
+  //          user?.name?.charAt(0).toUpperCase() ||
   //          "U";
   // };
 
@@ -191,7 +200,7 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                     src={
                       user?.avatar ||
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        user?.fullname || user?.fullname || "User"
+                        user?.fullname || user?.fullname || "User",
                       )}&background=random&color=fff&bold=true`
                     }
                     className="h-10 w-10 rounded-full object-cover border-2 border-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
@@ -205,10 +214,10 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                     {/* User info section */}
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="font-medium text-gray-900 text-sm truncate">
-                        {user?.fullname }
+                        {user?.fullname}
                       </p>
                       <p className="text-gray-500 text-xs truncate">
-                        {user?.email }
+                        {user?.email}
                       </p>
                     </div>
 
@@ -268,33 +277,66 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Confirm Logout
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to logout?
-            </p>
+        <>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[60] "
+            onClick={cancelLogout}
+          />
+
+          {/* Modal Konfirmasi */}
+          <div
+            ref={confirmRef}
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 bg-white rounded-xl shadow-2xl z-[70] p-6 animate-scaleIn"
+          >
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-6 h-6 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.73-.833-2.464 0L4.196 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Logout Confirmation
+              </h3>
+              <p className="text-sm text-gray-500">
+                Are you sure you want to logout? You'll need to sign in again to
+                access your account.
+              </p>
+            </div>
+
             <div className="flex space-x-3">
               <button
                 onClick={cancelLogout}
-                className="flex-1 py-2.5 px-4 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmLogout}
-                className="flex-1 py-2.5 px-4 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium"
               >
-                Logout
+                Yes, Logout
               </button>
             </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );
 };
 
 export default DashboardNavbar;
+
+function setScrolled(arg0: boolean) {
+  throw new Error("Function not implemented.");
+}

@@ -10,12 +10,10 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { isLoggedIn, user, logout } = useAuth();
-  // const [token, setToken] = useState<string | null>(null);
   const [openMenu, setOpenMenu] = useState(false);
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const confirmRef = useRef<HTMLDivElement>(null);
-  // const dropdownRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const toggleMobileMenu = () => {

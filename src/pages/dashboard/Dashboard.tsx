@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../auth/useAuth';
+import { useLocation } from 'react-router-dom';
 
 interface RecentOrder {
   id: string;
@@ -9,26 +10,14 @@ interface RecentOrder {
   status: 'completed' | 'pending' | 'processing';
 }
 
-interface DashboardContentProps {
-  activeTab: string;
-  totalOrders?: number;
-  pointsEarned?: number;
-  favoriteDrinksCount?: number;
-  recentOrders?: RecentOrder[];
-}
+const DashboardContent: React.FC = () => {
+  const location = useLocation();
+  const activeTab = location.pathname.split("/")[2] || "dashboard";
 
-const DashboardContent: React.FC<DashboardContentProps> = ({
-  activeTab,
-  totalOrders = 12,
-  pointsEarned = 350,
-  favoriteDrinksCount = 8,
-  recentOrders = [],
-}) => {
-  const [stats, setStats] = useState({
-    totalOrders,
-    pointsEarned,
-    favoriteDrinksCount,
-  });
+  const totalOrders = 12;
+  const pointsEarned = 350;
+  const favoriteDrinksCount = 8;
+  const recentOrders: RecentOrder[] = [];
 
   const [orders, setOrders] = useState<RecentOrder[]>([
     { id: '1', date: '2024-01-15', items: 'Americano, Croissant', total: 85000, status: 'completed' },
@@ -39,23 +28,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
   const { user } = useAuth();
 
-  // Update stats if props change
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setStats({
-      totalOrders,
-      pointsEarned,
-      favoriteDrinksCount,
-    });
-  }, [totalOrders, pointsEarned, favoriteDrinksCount]);
 
-  // Update orders if props change
-  useEffect(() => {
-    if (recentOrders.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setOrders(recentOrders);
-    }
-  }, [recentOrders]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -117,7 +90,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             <div>
               <p className="text-sm font-medium text-gray-600">Total Orders</p>
               <p id="totalOrdersCount" className="text-2xl font-bold text-gray-900">
-                {stats.totalOrders}
+                {/* {stats.totalOrders} */}
               </p>
             </div>
             <div className="p-3 bg-red-100 rounded-full">
@@ -134,7 +107,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             <div>
               <p className="text-sm font-medium text-gray-600">Points Earned</p>
               <p id="pointsEarned" className="text-2xl font-bold text-gray-900">
-                {stats.pointsEarned}
+                {/* {stats.pointsEarned} */}
               </p>
             </div>
             <div className="p-3 bg-yellow-100 rounded-full">
@@ -151,7 +124,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             <div>
               <p className="text-sm font-medium text-gray-600">Favorite Drinks</p>
               <p id="favoriteDrinksCount" className="text-2xl font-bold text-gray-900">
-                {stats.favoriteDrinksCount}
+                {/* {stats.favoriteDrinksCount} */}
               </p>
             </div>
             <div className="p-3 bg-blue-100 rounded-full">
