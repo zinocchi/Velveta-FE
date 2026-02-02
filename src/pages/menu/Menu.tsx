@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import MenuSidebar from "../../components/menu/MenuSidebar";
 import menuService from "../../services/MenuServices";
 import type { Menu } from "../../types/index";
 import "../../styles/Menu.css";

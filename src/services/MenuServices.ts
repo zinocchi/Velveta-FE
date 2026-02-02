@@ -11,7 +11,7 @@ const menuService = {
 
       if (filters?.category && filters.category !== "all") {
         params.append("category", filters.category);
-      }
+      }  
 
       if (filters?.search) {
         params.append("search", filters.search);
@@ -31,6 +31,7 @@ const menuService = {
   /**
    * Get single menu by ID
    */
+
   async getMenuById(id: number): Promise<Menu> {
     try {
       const response = await api.get<ApiResponse<Menu>>(`/menu/${id}`);
