@@ -11,8 +11,7 @@ const ProtectedRoute = ({ children }: { children?: JSX.Element }) => {
     setIsChecking(false);
   }, []);
 
-  // Biar ga langsung lompat ke /login sebelum selesai ngecek
-  if (isChecking) {
+    if (isChecking) {
     return (
       <div className="w-full h-screen flex items-center justify-center">
         <p className="text-gray-600 text-sm animate-pulse">Checking access...</p>

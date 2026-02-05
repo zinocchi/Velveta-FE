@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useReducer, type ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  type ReactNode,
+} from "react";
 
 /* ================= TYPES ================= */
 
@@ -6,7 +11,7 @@ export interface CartItem {
   id: number;
   name: string;
   price: number;
-  image_url?: string | null;
+  image_url: string | null; // samakan dengan Menu
   qty: number;
 }
 
@@ -83,6 +88,8 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
 const CartContext = createContext<{
   state: CartState;
   dispatch: React.Dispatch<CartAction>;
+  totalItems: number;
+  totalPrice: number;
 } | null>(null);
 
 /* ================= PROVIDER ================= */
@@ -90,8 +97,18 @@ const CartContext = createContext<{
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(cartReducer, { items: [] });
 
+  // 🔥 SELECTORS (inti upgrade)
+  const totalItems = state.items.reduce((sum, item) => sum + item.qty, 0);
+
+  const totalPrice = state.items.reduce(
+    (sum, item) => sum + item.price * item.qty,
+    0
+  );
+
   return (
-    <CartContext.Provider value={{ state, dispatch }}>
+    <CartContext.Provider
+      value={{ state, dispatch, totalItems, totalPrice }}
+    >
       {children}
     </CartContext.Provider>
   );

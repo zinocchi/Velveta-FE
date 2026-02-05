@@ -20,10 +20,10 @@ const DashboardContent: React.FC = () => {
   const recentOrders: RecentOrder[] = [];
 
   const [orders, setOrders] = useState<RecentOrder[]>([
-    { id: '1', date: '2024-01-15', items: 'Americano, Croissant', total: 85000, status: 'completed' },
-    { id: '2', date: '2024-01-14', items: 'Latte, Chocolate Cake', total: 95000, status: 'completed' },
-    { id: '3', date: '2024-01-13', items: 'Cappuccino x2', total: 70000, status: 'pending' },
-    { id: '4', date: '2024-01-12', items: 'Espresso, Bagel', total: 65000, status: 'completed' },
+    { id: '1', date: '2026-01-28', items: 'Americano, Croissant', total: 85000, status: 'completed' },
+    { id: '2', date: '2026-01-14', items: 'Latte, Chocolate Cake', total: 95000, status: 'completed' },
+    { id: '3', date: '2026-01-13', items: 'Cappuccino x2', total: 70000, status: 'pending' },
+    { id: '4', date: '2026-01-12', items: 'Espresso, Bagel', total: 65000, status: 'completed' },
   ]);
 
   const { user } = useAuth();

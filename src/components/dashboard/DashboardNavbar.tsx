@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import VelvetaLogo from "../../assets/icon/velveta.png";
 import { useAuth } from "../../auth/useAuth";
 import { useNavigate } from "react-router-dom";
+import CartModal from "../../pages/dashboard/CartModal";
+import { useCart } from "../../context/CartContext";
 
 // interface User {
 //   name: string;
@@ -46,6 +48,8 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
   const { isLoggedIn, logout } = useAuth();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { totalItems } = useCart();
 
   useEffect(() => {
     const handleScrollClose = () => {
@@ -167,11 +171,11 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
 
               {/* Cart Button */}
               <button
-                onClick={onCartClick}
-                className="relative p-2 text-gray-600 hover:text-red-700 transition-colors duration-300"
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-2 hover:bg-gray-100 rounded-full"
               >
                 <svg
-                  className="w-6 h-6"
+                  className="w-6 h-6 text-gray-700"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -179,16 +183,22 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 10H3m4 3a2 2 0 104 0 2 2 0 00-4 0zm10 0a2 2 0 104 0 2 2 0 00-4 0z"
+                    strokeWidth={2}
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                   />
                 </svg>
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartCount > 9 ? "9+" : cartCount}
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {totalItems}
                   </span>
                 )}
               </button>
+
+              {/* Modal Cart */}
+              <CartModal
+                isOpen={isCartOpen}
+                onClose={() => setIsCartOpen(false)}
+              />
 
               {/* Profile Dropdown */}
               <div className="relative" ref={dropdownRef}>
