@@ -6,8 +6,6 @@ export interface MenuCategory {
   route: string;
 }
 
-
-
 export const DRINK_CATEGORIES: MenuCategory[] = [
   {
     id: "hot-coffee",
