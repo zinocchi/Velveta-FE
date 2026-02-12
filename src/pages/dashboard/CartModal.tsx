@@ -1,6 +1,7 @@
 // CartModal.tsx
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef} from "react";
 import { useCart } from "../../context/CartContext";
+import api from "../../api/axios";
 
 interface CartModalProps {
   isOpen: boolean;
@@ -8,7 +9,7 @@ interface CartModalProps {
 }
 
 const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
-  const { state, dispatch, totalPrice, totalItems } = useCart();
+  const { totalPrice, totalItems } = useCart();
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,6 +47,24 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const { state, dispatch } = useCart();
+
+  const handleCheckout = async () => {
+    try {
+      await api.post("/checkout", {
+        items: state.items.map((item) => ({
+          id: item.id,
+          qty: item.qty,
+        })),
+      });
+
+      dispatch({ type: "CLEAR_CART" });
+      alert("Checkout berhasil!");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   if (!isOpen) return null;

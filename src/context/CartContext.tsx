@@ -5,6 +5,8 @@ import React, {
   type ReactNode,
 } from "react";
 
+import api from "../api/axios";
+
 /* ================= TYPES ================= */
 
 export interface CartItem {
@@ -32,7 +34,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case "ADD_TO_CART": {
       const existing = state.items.find(
-        (item) => item.id === action.payload.id
+        (item) => item.id === action.payload.id,
       );
 
       if (existing) {
@@ -40,7 +42,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
           items: state.items.map((item) =>
             item.id === action.payload.id
               ? { ...item, qty: item.qty + 1 }
-              : item
+              : item,
           ),
         };
       }
@@ -53,9 +55,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case "INCREMENT":
       return {
         items: state.items.map((item) =>
-          item.id === action.payload
-            ? { ...item, qty: item.qty + 1 }
-            : item
+          item.id === action.payload ? { ...item, qty: item.qty + 1 } : item,
         ),
       };
 
@@ -63,9 +63,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       return {
         items: state.items
           .map((item) =>
-            item.id === action.payload
-              ? { ...item, qty: item.qty - 1 }
-              : item
+            item.id === action.payload ? { ...item, qty: item.qty - 1 } : item,
           )
           .filter((item) => item.qty > 0),
       };
@@ -102,13 +100,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const totalPrice = state.items.reduce(
     (sum, item) => sum + item.price * item.qty,
-    0
+    0,
   );
 
   return (
-    <CartContext.Provider
-      value={{ state, dispatch, totalItems, totalPrice }}
-    >
+    <CartContext.Provider value={{ state, dispatch, totalItems, totalPrice }}>
       {children}
     </CartContext.Provider>
   );
@@ -121,3 +117,5 @@ export const useCart = () => {
   if (!context) throw new Error("useCart must be used inside CartProvider");
   return context;
 };
+
+
