@@ -1,7 +1,8 @@
 // CartModal.tsx
-import React, { useEffect, useRef} from "react";
+import React, { useEffect, useRef } from "react";
 import { useCart } from "../../context/CartContext";
 import api from "../../api/axios";
+import { useNavigate } from "react-router-dom";
 
 interface CartModalProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden"; // Prevent scrolling
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
@@ -50,21 +51,13 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
   };
 
   const { state, dispatch } = useCart();
+  const navigate = useNavigate();
 
   const handleCheckout = async () => {
-    try {
-      await api.post("/checkout", {
-        items: state.items.map((item) => ({
-          id: item.id,
-          qty: item.qty,
-        })),
-      });
+    if (state.items.length === 0) return;
 
-      dispatch({ type: "CLEAR_CART" });
-      alert("Checkout berhasil!");
-    } catch (err) {
-      console.error(err);
-    }
+    onClose();
+    navigate("/checkout");
   };
 
   if (!isOpen) return null;
@@ -178,10 +171,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
               Clear All
             </button>
             <button
-              onClick={() => {
-                console.log("Checkout:", state.items);
-                onClose();
-              }}
+              onClick={handleCheckout}
               className="flex-1 py-3 bg-red-700 text-white rounded-xl hover:bg-amber-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={state.items.length === 0}
             >

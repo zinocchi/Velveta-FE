@@ -17,7 +17,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import Menu from "../pages/menu/Menu";
 import CategoryPage from "../pages/menu/CategoryPage";
 
-// auth
+//auth
 import Register from "../pages/auth/Register";
 import Login from "../pages/auth/Login";
 import AuthCallback from "../pages/auth/AuthCallback";
@@ -27,6 +27,7 @@ import DashboardPage from "../pages/dashboard/Dashboard";
 import Orders from "../pages/dashboard/Orders";
 import Favorites from "../pages/dashboard/Favorites";
 import Profile from "../pages/dashboard/Profile";
+import CheckoutPages from  "../pages/dashboard/CheckoutPages";
 
 const AppRoutes = () => {
   return (
@@ -53,6 +54,7 @@ const AppRoutes = () => {
             <Route path="orders" element={<Orders />} />
             <Route path="favorites" element={<Favorites />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="checkout" element={<CheckoutPages />} />
           </Route>
         </Route>
 
