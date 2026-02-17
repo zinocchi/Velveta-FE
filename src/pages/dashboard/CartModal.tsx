@@ -24,21 +24,23 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
     };
 
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
+      if (event.key === "Escape") onClose();
     };
 
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      const scrollbarWidth =
+        window.innerWidth - document.documentElement.clientWidth;
+
+      document.addEventListener("click", handleClickOutside);
       document.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "unset";
+      document.body.style.paddingRight = "0px";
     };
   }, [isOpen, onClose]);
 
@@ -57,13 +59,13 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
     if (state.items.length === 0) return;
 
     onClose();
-    navigate("/checkout");
+    navigate("/dashboard/checkout");
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black overflow-y-auto bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div
         ref={modalRef}
         className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] flex flex-col"
