@@ -171,11 +171,16 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
 
               {/* Cart Button */}
               <button
-                onClick={() => setIsCartOpen(true)}
-                className="relative p-2 hover:bg-gray-100 rounded-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCartOpen(true);
+                }}
+                className="relative p-2 text-gray-700 hover:text-red-700 transition-colors duration-300"
+                aria-label="Cart"
+                id="cart-icon"
               >
                 <svg
-                  className="w-6 h-6 text-gray-700"
+                  className="w-6 h-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -189,7 +194,7 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                 </svg>
                 {totalItems > 0 && (
                   <span className="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {totalItems}
+                    {totalItems > 99 ? "99+" : totalItems}
                   </span>
                 )}
               </button>

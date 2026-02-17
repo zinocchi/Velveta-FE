@@ -72,7 +72,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     },
     {
       path: "/dashboard/checkout",
-      label: "Orders",
+      label: "Checkout",
       icon: (
         <svg
           className="w-5 h-5"
