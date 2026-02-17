@@ -21,8 +21,8 @@ const CheckoutPage = () => {
     try {
       setLoading(true);
 
-      const res = await api.post("/orders", {
-        items: state.items.map((item) => ({
+      const res = await api.post("/orders", { 
+        items: state.items.map((item) => ({ 
           id: item.id,
           qty: item.qty,
         })),
