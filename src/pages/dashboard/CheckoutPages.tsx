@@ -1,3 +1,4 @@
+// src/pages/CheckoutPage.tsx
 import { useCart } from "../../context/CartContext";
 import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
@@ -25,8 +26,10 @@ import {
   FaArrowLeft,
   FaMotorcycle,
   FaWalking,
+  FaCheck,
 } from "react-icons/fa";
 import { SiMastercard, SiVisa } from "react-icons/si";
+import OrderStatusModal from "../dashboard/OrderStatusModal";
 
 interface Address {
   id: string;
@@ -53,6 +56,21 @@ interface DeliveryOption {
 const CheckoutPage = () => {
   const { state, dispatch } = useCart();
   const navigate = useNavigate();
+
+  // State untuk Order Status Modal
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [orderSuccessData, setOrderSuccessData] = useState<any>(null);
+
+  // State untuk notifikasi
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
 
   // State untuk pengiriman
   const [deliveryType, setDeliveryType] = useState<"pickup" | "delivery">(
@@ -117,6 +135,19 @@ const CheckoutPage = () => {
     addressId: "",
     addressLabel: "",
   });
+
+  // Fungsi untuk menampilkan notifikasi
+  const showNotification = (
+    message: string,
+    type: "success" | "error" = "success",
+  ) => {
+    setNotification({ show: true, message, type });
+
+    // Auto hide setelah 3 detik
+    setTimeout(() => {
+      setNotification((prev) => ({ ...prev, show: false }));
+    }, 3000);
+  };
 
   // Load saved addresses from localStorage on mount
   useEffect(() => {
@@ -325,14 +356,22 @@ const CheckoutPage = () => {
     setShowAddressForm(true);
   };
 
+  // Handler untuk close modal
+  const handleCloseModal = () => {
+    setShowOrderModal(false);
+    // Optional: redirect ke halaman orders setelah modal ditutup
+    // navigate('/orders/my');
+  };
+
+  // UPDATE HANDLECREATEORDER - Sesuai dengan backend
   const handleCreateOrder = async () => {
     if (state.items.length === 0) return;
     if (!termsAccepted) {
-      alert("Please accept the terms and conditions");
+      showNotification("Please accept the terms and conditions", "error");
       return;
     }
     if (deliveryType === "delivery" && !selectedAddressId) {
-      alert("Please select a shipping address");
+      showNotification("Please select a shipping address", "error");
       return;
     }
 
@@ -346,30 +385,117 @@ const CheckoutPage = () => {
         (opt) => opt.id === selectedDeliveryOption,
       );
 
-      const res = await api.post("/orders", {
-        items: state.items.map((item) => ({
-          id: item.id,
-          qty: item.qty,
-        })),
+      // Format items untuk backend
+      const itemsPayload = state.items.map((item) => ({
+        id: item.id,
+        qty: item.qty,
+        // Backend hanya butuh id dan qty, name dan price tidak perlu
+      }));
+
+      // Format shipping address SESUAI DENGAN BACKEND
+      let shippingAddressPayload = null;
+
+      if (deliveryType === "delivery" && selectedAddress) {
+        // Backend mengharapkan array/object dengan struktur tertentu
+        shippingAddressPayload = {
+          id: selectedAddress.id,
+          label: selectedAddress.label,
+          recipientName: selectedAddress.recipientName,
+          phoneNumber: selectedAddress.phoneNumber,
+          address: selectedAddress.address,
+          detail: selectedAddress.detail || "",
+          city: selectedAddress.city,
+          postalCode: selectedAddress.postalCode,
+          province: "DKI Jakarta",
+          full_address:
+            `${selectedAddress.address}, ${selectedAddress.detail || ""}, ${selectedAddress.city} ${selectedAddress.postalCode}`
+              .replace(/, ,/g, ",")
+              .replace(/,\s*$/, "")
+              .trim(),
+        };
+      }
+
+      // Format delivery option
+      let deliveryOptionPayload = null;
+      if (deliveryOption) {
+        deliveryOptionPayload = {
+          id: deliveryOption.id,
+          name: deliveryOption.name,
+          price: deliveryOption.cost,
+          estimate_minutes: deliveryOption.estimateMinutes, // perhatikan penamaan
+          description: deliveryOption.description,
+        };
+      }
+
+      // Hitung ulang total
+      const itemsTotal = state.items.reduce(
+        (sum, item) => sum + item.price * item.qty,
+        0,
+      );
+      const finalTotal = itemsTotal + shippingCost;
+
+      // Payload SESUAI DENGAN BACKEND
+      const orderPayload = {
+        items: itemsPayload, // Array of {id, qty}
         delivery_type: deliveryType,
-        shipping_address:
-          deliveryType === "delivery"
-            ? {
-                ...selectedAddress,
-                full_address: `${selectedAddress?.address}, ${selectedAddress?.detail}, ${selectedAddress?.city} ${selectedAddress?.postalCode}`,
-              }
-            : null,
-        delivery_option: deliveryOption,
+        shipping_address: shippingAddressPayload, // Harus object/array, bukan string
+        delivery_option: deliveryOptionPayload,
         payment_method: paymentMethod,
         shipping_cost: shippingCost,
-        total: grandTotal,
-      });
+        total: finalTotal,
+      };
 
-      dispatch({ type: "CLEAR_CART" });
-      navigate(`/checkout/pay/${res.data.order_id}`);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to checkout. Please try again.");
+      console.log("Sending order data:", JSON.stringify(orderPayload, null, 2));
+
+      const response = await api.post("/orders", orderPayload);
+
+      console.log("Order response:", response.data);
+
+      // Handle response
+      if (response.data.success || response.data.order_id) {
+        const orderData = {
+          order_id: response.data.order_id || response.data.data?.order_id,
+          status: response.data.status || "PENDING",
+          total: finalTotal,
+          payment_method: paymentMethod,
+          delivery_type: deliveryType,
+          estimated_minutes: deliveryEstimate?.minMinutes || 30,
+          shipping_address: shippingAddressPayload,
+          items: state.items.map((item) => ({
+            name: item.name,
+            qty: item.qty,
+            price: item.price,
+          })),
+          created_at: new Date().toISOString(),
+        };
+
+        setOrderSuccessData(orderData);
+        showNotification(
+          "Payment successful! Your order has been created.",
+          "success",
+        );
+        dispatch({ type: "CLEAR_CART" });
+
+        setTimeout(() => {
+          setShowOrderModal(true);
+        }, 1500);
+      } else {
+        throw new Error(response.data.message || "Failed to create order");
+      }
+    } catch (err: any) {
+      console.error("Full error object:", err);
+      console.error("Error response:", err.response);
+      console.error("Error response data:", err.response?.data);
+      console.error("Error status:", err.response?.status);
+
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        err.message ||
+        "Failed to checkout. Please try again.";
+
+      showNotification(errorMessage, "error");
     } finally {
       setLoading(false);
     }
@@ -393,16 +519,36 @@ const CheckoutPage = () => {
   // Format minutes to readable string
   const formatEstimate = (min: number, max: number) => {
     if (max < 60) {
-      return `${min}-${max} minute`;
+      return `${min}-${max} minutes`;
     } else if (min >= 60) {
-      return `${Math.floor(min / 60)}-${Math.floor(max / 60)} hour`;
+      return `${Math.floor(min / 60)}-${Math.floor(max / 60)} hour${
+        Math.floor(max / 60) > 1 ? "s" : ""
+      }`;
     } else {
-      return `${min} minute - ${Math.floor(max / 60)} hour`;
+      return `${min} minutes - ${Math.floor(max / 60)} hour${
+        Math.floor(max / 60) > 1 ? "s" : ""
+      }`;
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
+      {/* Custom Notification */}
+      {notification.show && (
+        <div
+          className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-slideDown ${
+            notification.type === "success" ? "bg-green-600" : "bg-red-600"
+          } text-white`}
+        >
+          {notification.type === "success" ? (
+            <FaCheckCircle className="w-5 h-5" />
+          ) : (
+            <FaInfoCircle className="w-5 h-5" />
+          )}
+          <span className="font-medium">{notification.message}</span>
+        </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm.show && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -453,6 +599,21 @@ const CheckoutPage = () => {
           </div>
         </div>
       )}
+
+      {/* Order Status Modal */}
+      <OrderStatusModal
+        isOpen={showOrderModal}
+        onClose={handleCloseModal}
+        orderData={
+          orderSuccessData || {
+            order_id: "",
+            status: "PENDING",
+            total: 0,
+            payment_method: "",
+            delivery_type: "",
+          }
+        }
+      />
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -887,7 +1048,7 @@ const CheckoutPage = () => {
               <div className="bg-white rounded-xl shadow-sm border border-red-200 p-6 hover:shadow-md transition-shadow">
                 <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                   <span className="w-1 h-6 bg-red-700 rounded-full"></span>
-                  Pilihan Pengiriman
+                  Shipping Option
                 </h2>
 
                 <div className="space-y-3">
@@ -1038,7 +1199,6 @@ const CheckoutPage = () => {
                       <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
                         <button
                           onClick={() => handleDecreaseQty(item.id)}
-                          // disabled={item.qty <= 1}
                           className="w-8 h-8 flex items-center justify-center bg-gray-50 hover:bg-red-50 text-gray-600 hover:text-red-700 disabled:opacity-50 disabled:hover:bg-gray-50 disabled:hover:text-gray-600 transition-colors"
                         >
                           <FaMinus className="w-3 h-3" />
@@ -1324,11 +1484,31 @@ const CheckoutPage = () => {
       {/* Custom Animations */}
       <style>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
         }
         .animate-fadeIn {
           animation: fadeIn 0.2s ease-out;
+        }
+        
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -100%);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+          }
+        }
+        .animate-slideDown {
+          animation: slideDown 0.3s ease-out;
         }
       `}</style>
     </div>
