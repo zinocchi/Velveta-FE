@@ -4,6 +4,7 @@ import { useAuth } from "../../auth/useAuth";
 import { useNavigate } from "react-router-dom";
 import CartModal from "../../pages/dashboard/CartModal";
 import { useCart } from "../../context/CartContext";
+import OrderStatusModal from "../../pages/dashboard/OrderStatusModal";
 
 // interface User {
 //   name: string;
@@ -28,7 +29,6 @@ interface DashboardNavbarProps {
 }
 
 const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
-  // user,
   cartCount = 0,
   notificationCount = 0,
   onNotificationClick,
@@ -50,6 +50,9 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
   const navigate = useNavigate();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { totalItems } = useCart();
+  const [showOrderStatus, setShowOrderStatus] = useState(false);
+  const [orderSuccessData, setOrderSuccessData] = useState<any>(null);
+  const lastOrderId = orderSuccessData?.order_id;
 
   useEffect(() => {
     const handleScrollClose = () => {
@@ -146,7 +149,7 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
             <div className="flex items-center space-x-4">
               {/* Notification Button */}
               <button
-                onClick={onNotificationClick}
+                onClick={() => setShowOrderStatus(true)}
                 className="relative p-2 text-gray-600 hover:text-red-700 transition-colors duration-300"
               >
                 <svg
@@ -162,13 +165,20 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                   />
                 </svg>
-                {notificationCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {notificationCount > 9 ? "9+" : notificationCount}
+                {/* Badge notifikasi jika ada order baru */}
+                {orderSuccessData && (
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                    1
                   </span>
                 )}
               </button>
 
+              <OrderStatusModal
+                isOpen={showOrderStatus}
+                orderId={lastOrderId}
+                onClose={() => setShowOrderStatus(false)}
+              />
+              
               {/* Cart Button */}
               <button
                 onClick={(e) => {

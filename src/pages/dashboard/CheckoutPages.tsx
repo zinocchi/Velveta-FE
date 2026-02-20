@@ -57,11 +57,11 @@ const CheckoutPage = () => {
   const { state, dispatch } = useCart();
   const navigate = useNavigate();
 
-  // State untuk Order Status Modal
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [orderSuccessData, setOrderSuccessData] = useState<any>(null);
+  const [lastOrderId, setLastOrderId] = useState<string | null>(null);
+  const [lastOrderNumber, setLastOrderNumber] = useState<string | null>(null);
 
-  // State untuk notifikasi
   const [notification, setNotification] = useState<{
     show: boolean;
     message: string;
@@ -72,7 +72,6 @@ const CheckoutPage = () => {
     type: "success",
   });
 
-  // State untuk pengiriman
   const [deliveryType, setDeliveryType] = useState<"pickup" | "delivery">(
     "delivery",
   );
@@ -81,7 +80,6 @@ const CheckoutPage = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
 
-  // State untuk form alamat
   const [addressForm, setAddressForm] = useState({
     label: "",
     recipientName: "",
@@ -94,7 +92,6 @@ const CheckoutPage = () => {
     isDefault: false,
   });
 
-  // State untuk opsi pengiriman dengan estimasi menit
   const [deliveryOptions] = useState<DeliveryOption[]>([
     {
       id: "regular",
@@ -116,7 +113,6 @@ const CheckoutPage = () => {
   const [selectedDeliveryOption, setSelectedDeliveryOption] =
     useState("regular");
 
-  // State untuk estimasi pengiriman dalam menit
   const [deliveryEstimate, setDeliveryEstimate] = useState<{
     minMinutes: number;
     maxMinutes: number;
@@ -356,14 +352,37 @@ const CheckoutPage = () => {
     setShowAddressForm(true);
   };
 
-  // Handler untuk close modal
-  const handleCloseModal = () => {
-    setShowOrderModal(false);
-    // Optional: redirect ke halaman orders setelah modal ditutup
-    // navigate('/orders/my');
+  const fetchOrderDetails = async (orderId: string) => {
+    try {
+      const response = await api.get(`/orders/${orderId}`);
+      const orderData = response.data.data || response.data;
+
+      // Format data untuk modal
+      const formattedData = {
+        order_id: orderData.id,
+        order_number: orderData.order_number || `ORD-${orderData.id}`,
+        status: orderData.status,
+        total: orderData.total_price,
+        payment_method: orderData.payment_method,
+        delivery_type: orderData.delivery_type,
+        estimated_minutes: orderData.estimated_minutes,
+        shipping_address: orderData.shipping_address,
+        items: orderData.items?.map((item: any) => ({
+          name: item.menu?.name || "Menu Item",
+          qty: item.qty,
+          price: item.price,
+        })),
+        created_at: orderData.created_at,
+      };
+
+      setOrderSuccessData(formattedData);
+      setLastOrderNumber(orderData.order_number);
+      setShowOrderModal(true);
+    } catch (error) {
+      console.error("Failed to fetch order details:", error);
+    }
   };
 
-  // UPDATE HANDLECREATEORDER - Sesuai dengan backend
   const handleCreateOrder = async () => {
     if (state.items.length === 0) return;
     if (!termsAccepted) {
@@ -389,14 +408,12 @@ const CheckoutPage = () => {
       const itemsPayload = state.items.map((item) => ({
         id: item.id,
         qty: item.qty,
-        // Backend hanya butuh id dan qty, name dan price tidak perlu
       }));
 
-      // Format shipping address SESUAI DENGAN BACKEND
+      // Format shipping address
       let shippingAddressPayload = null;
 
       if (deliveryType === "delivery" && selectedAddress) {
-        // Backend mengharapkan array/object dengan struktur tertentu
         shippingAddressPayload = {
           id: selectedAddress.id,
           label: selectedAddress.label,
@@ -415,30 +432,28 @@ const CheckoutPage = () => {
         };
       }
 
-      // Format delivery option
       let deliveryOptionPayload = null;
       if (deliveryOption) {
         deliveryOptionPayload = {
           id: deliveryOption.id,
           name: deliveryOption.name,
           price: deliveryOption.cost,
-          estimate_minutes: deliveryOption.estimateMinutes, // perhatikan penamaan
+          estimate_minutes: deliveryOption.estimateMinutes,
           description: deliveryOption.description,
         };
       }
 
-      // Hitung ulang total
       const itemsTotal = state.items.reduce(
         (sum, item) => sum + item.price * item.qty,
         0,
       );
       const finalTotal = itemsTotal + shippingCost;
 
-      // Payload SESUAI DENGAN BACKEND
+      // Payload ke backend
       const orderPayload = {
-        items: itemsPayload, // Array of {id, qty}
+        items: itemsPayload,
         delivery_type: deliveryType,
-        shipping_address: shippingAddressPayload, // Harus object/array, bukan string
+        shipping_address: shippingAddressPayload,
         delivery_option: deliveryOptionPayload,
         payment_method: paymentMethod,
         shipping_cost: shippingCost,
@@ -453,40 +468,28 @@ const CheckoutPage = () => {
 
       // Handle response
       if (response.data.success || response.data.order_id) {
-        const orderData = {
-          order_id: response.data.order_id || response.data.data?.order_id,
-          status: response.data.status || "PENDING",
-          total: finalTotal,
-          payment_method: paymentMethod,
-          delivery_type: deliveryType,
-          estimated_minutes: deliveryEstimate?.minMinutes || 30,
-          shipping_address: shippingAddressPayload,
-          items: state.items.map((item) => ({
-            name: item.name,
-            qty: item.qty,
-            price: item.price,
-          })),
-          created_at: new Date().toISOString(),
-        };
+        const orderId = response.data.order_id || response.data.data?.order_id;
 
-        setOrderSuccessData(orderData);
+        setLastOrderId(orderId);
+
+        // Tampilkan notifikasi sukses
         showNotification(
           "Payment successful! Your order has been created.",
           "success",
         );
+
+        // Clear cart
         dispatch({ type: "CLEAR_CART" });
 
+        // Fetch order details setelah 1 detik
         setTimeout(() => {
-          setShowOrderModal(true);
+          fetchOrderDetails(orderId);
         }, 1500);
       } else {
         throw new Error(response.data.message || "Failed to create order");
       }
     } catch (err: any) {
-      console.error("Full error object:", err);
-      console.error("Error response:", err.response);
-      console.error("Error response data:", err.response?.data);
-      console.error("Error status:", err.response?.status);
+      console.error("Checkout error:", err);
 
       const errorMessage =
         err.response?.data?.message ||
@@ -499,6 +502,13 @@ const CheckoutPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handler untuk close modal
+  const handleCloseModal = () => {
+    setShowOrderModal(false);
+    // Optional: redirect ke halaman orders setelah modal ditutup
+    // navigate('/orders/my');
   };
 
   const paymentMethods = [
@@ -601,7 +611,7 @@ const CheckoutPage = () => {
       )}
 
       {/* Order Status Modal */}
-      <OrderStatusModal
+      {/* <OrderStatusModal
         isOpen={showOrderModal}
         onClose={handleCloseModal}
         orderData={
@@ -613,7 +623,7 @@ const CheckoutPage = () => {
             delivery_type: "",
           }
         }
-      />
+      /> */}
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
