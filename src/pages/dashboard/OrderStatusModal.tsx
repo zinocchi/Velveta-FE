@@ -22,11 +22,7 @@ import {
   FaPhone,
   FaCalendarAlt,
   FaReceipt,
-  FaDownload,
-  FaHome,
-  FaQrcode,
 } from 'react-icons/fa';
-import { SiGooglemaps } from 'react-icons/si';
 import api from '../../api/axios';
 
 interface OrderStatusModalProps {
@@ -42,8 +38,6 @@ interface OrderItem {
   qty: number;
   price: number;
   subtotal?: number;
-  notes?: string;
-  variants?: string[];
 }
 
 interface Order {
@@ -59,13 +53,11 @@ interface Order {
   estimated_minutes?: number;
   paid_at?: string;
   created_at: string;
-  updated_at: string;
   items: OrderItem[];
   user?: {
     name: string;
     email: string;
   };
-  transaction_id?: string;
 }
 
 type ViewMode = 'history' | 'detail';
@@ -81,13 +73,13 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState<string>('');
 
   // Fetch order history when modal opens
   useEffect(() => {
     if (isOpen) {
       fetchOrderHistory();
     } else {
+      // Reset state when modal closes
       setViewMode('history');
       setSelectedOrder(null);
     }
@@ -99,30 +91,6 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
       fetchOrderDetail(orderId);
     }
   }, [orderId, isOpen]);
-
-  // Real-time countdown for estimated time
-  useEffect(() => {
-    if (selectedOrder?.estimated_minutes && selectedOrder.status === 'PROCESSING') {
-      const updateCountdown = () => {
-        const createdTime = new Date(selectedOrder.created_at).getTime();
-        const estimatedTime = createdTime + (selectedOrder.estimated_minutes || 0) * 60000;
-        const now = new Date().getTime();
-        const remaining = estimatedTime - now;
-
-        if (remaining <= 0) {
-          setTimeRemaining('Siap diambil');
-        } else {
-          const minutes = Math.floor(remaining / 60000);
-          const seconds = Math.floor((remaining % 60000) / 1000);
-          setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')} menit`);
-        }
-      };
-
-      updateCountdown();
-      const interval = setInterval(updateCountdown, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [selectedOrder]);
 
   const fetchOrderHistory = async () => {
     try {
@@ -145,12 +113,6 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
       setError(null);
       const response = await api.get(`/orders/${id}`);
       const orderData = response.data.data || response.data;
-      
-      // Generate transaction ID if not exists
-      if (!orderData.transaction_id) {
-        orderData.transaction_id = `TXN${Math.floor(Math.random() * 1000000000)}`;
-      }
-      
       setSelectedOrder(orderData);
       setViewMode('detail');
     } catch (err: any) {
@@ -208,15 +170,30 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'PENDING':
-        return 'bg-yellow-100 text-yellow-700';
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
       case 'PROCESSING':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'COMPLETED':
-        return 'bg-green-100 text-green-700';
+        return 'bg-green-100 text-green-700 border-green-200';
       case 'CANCELLED':
-        return 'bg-red-100 text-red-700';
+        return 'bg-red-100 text-red-700 border-red-200';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return <FaClock className="w-4 h-4" />;
+      case 'PROCESSING':
+        return <FaSpinner className="w-4 h-4 animate-spin" />;
+      case 'COMPLETED':
+        return <FaCheckCircle className="w-4 h-4" />;
+      case 'CANCELLED':
+        return <FaExclamationTriangle className="w-4 h-4" />;
+      default:
+        return <FaBox className="w-4 h-4" />;
     }
   };
 
@@ -236,88 +213,55 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
     window.open(whatsappUrl, '_blank');
   };
 
-  const handleDownloadStruk = (order: Order) => {
+  const handlePrint = (order: Order) => {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Struk Pesanan #${order.order_number}</title>
+            <title>Order #${order.order_number}</title>
             <style>
-              body { font-family: 'Courier New', monospace; padding: 20px; max-width: 300px; margin: 0 auto; }
-              .header { text-align: center; margin-bottom: 20px; }
-              .header h1 { font-size: 18px; margin: 0; }
-              .header p { font-size: 12px; color: #666; margin: 5px 0; }
-              .divider { border-top: 1px dashed #000; margin: 15px 0; }
-              .item { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
-              .item-detail { font-size: 10px; color: #666; margin-left: 10px; }
-              .total { display: flex; justify-content: space-between; font-weight: bold; margin-top: 10px; }
-              .footer { text-align: center; font-size: 10px; color: #666; margin-top: 20px; }
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              .header { text-align: center; margin-bottom: 30px; }
+              .order-info { margin-bottom: 20px; }
+              table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+              th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+              th { background-color: #f5f5f5; }
+              .total { font-size: 18px; font-weight: bold; text-align: right; }
             </style>
           </head>
           <body>
             <div class="header">
-              <h1>Kenangan Kopi</h1>
-              <p>Jl. Sudirman No. 123, Jakarta Pusat</p>
-              <p>Telp: 021-1234567</p>
+              <h1>Order Receipt</h1>
+              <p>Order #${order.order_number}</p>
             </div>
-            
-            <div class="divider"></div>
-            
-            <p><strong>Order #${order.order_number}</strong></p>
-            <p>${formatDate(order.created_at)}</p>
-            
-            <div class="divider"></div>
-            
-            <p><strong>${order.delivery_type === 'delivery' ? 'Delivery' : 'Pickup'}</strong></p>
-            ${order.delivery_type === 'pickup' ? `
-              <p>Pickup di: Ruko Bandara Mas</p>
-              <p>Pickup di Counter</p>
-            ` : ''}
-            
-            <div class="divider"></div>
-            
-            <p><strong>Pesanan (Total ${order.items.length} items)</strong></p>
-            
-            ${order.items.map(item => `
-              <div>
-                <div class="item">
-                  <span>${item.qty} x ${item.name}</span>
-                  <span>${formatCurrency(item.price)}</span>
-                </div>
-                ${item.variants ? `<div class="item-detail">${item.variants.join(', ')}</div>` : ''}
-              </div>
-            `).join('')}
-            
-            <div class="divider"></div>
-            
-            <div class="item">
-              <span>Subtotal</span>
-              <span>${formatCurrency(order.total_price - order.shipping_cost)}</span>
+            <div class="order-info">
+              <p><strong>Date:</strong> ${formatDate(order.created_at)}</p>
+              <p><strong>Status:</strong> ${getStatusText(order.status)}</p>
+              <p><strong>Payment Method:</strong> ${order.payment_method}</p>
             </div>
-            <div class="item">
-              <span>Tax</span>
-              <span>${formatCurrency(order.total_price * 0.11)}</span>
-            </div>
-            <div class="item">
-              <span>Total</span>
-              <span><strong>${formatCurrency(order.total_price)}</strong></span>
-            </div>
-            
-            <div class="divider"></div>
-            
-            <div class="item">
-              <span>Payment Method</span>
-              <span>${order.payment_method === 'cash' ? 'Cash' : 'QRIS'}</span>
-            </div>
-            <div class="item">
-              <span>Transaksi ID</span>
-              <span>${order.transaction_id || 'N/A'}</span>
-            </div>
-            
-            <div class="footer">
-              <p>All Price are inclusive Tax</p>
-              <p>Terima kasih telah berbelanja!</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${order.items.map(item => `
+                  <tr>
+                    <td>${item.name}</td>
+                    <td>${item.qty}</td>
+                    <td>${formatCurrency(item.price)}</td>
+                    <td>${formatCurrency(item.price * item.qty)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div class="total">
+              Total: ${formatCurrency(order.total_price)}
             </div>
           </body>
         </html>
@@ -340,28 +284,28 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
       {/* Modal Content */}
       <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-fadeIn">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-6">
+        <div className="sticky top-0 bg-gradient-to-r from-red-700 to-red-800 text-white p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {viewMode === 'detail' ? (
                 <button
                   onClick={handleBackToHistory}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
                 >
-                  <FaArrowLeft className="w-5 h-5 text-gray-600" />
+                  <FaArrowLeft className="w-5 h-5" />
                 </button>
               ) : (
-                <FaHistory className="w-6 h-6 text-red-700" />
+                <FaHistory className="w-6 h-6" />
               )}
-              <h2 className="text-2xl font-bold text-gray-800">
-                {viewMode === 'detail' ? 'Detail Pesanan' : 'Riwayat Pesanan'}
+              <h2 className="text-2xl font-bold">
+                {viewMode === 'detail' ? 'Order Details' : 'Order History'}
               </h2>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
             >
-              <FaTimes className="w-5 h-5 text-gray-500" />
+              <FaTimes className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -382,7 +326,7 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
                 onClick={fetchOrderHistory}
                 className="mt-4 px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800"
               >
-                Coba Lagi
+                Try Again
               </button>
             </div>
           ) : viewMode === 'history' ? (
@@ -393,16 +337,17 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
                   <FaShoppingBag className="w-12 h-12 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  Belum Ada Pesanan
+                  No Order History
                 </h3>
                 <p className="text-gray-500 mb-6">
-                  Anda belum melakukan pemesanan. Yuk pesan kopi favoritmu!
+                  You haven't made any purchases yet.
+                  Start ordering your favorite coffee!
                 </p>
                 <button
                   onClick={onClose}
                   className="px-6 py-3 bg-red-700 text-white rounded-xl font-medium hover:bg-red-800 transition-colors"
                 >
-                  Mulai Belanja
+                  Start Shopping
                 </button>
               </div>
             ) : (
@@ -421,8 +366,11 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
                           #{order.order_number}
                         </p>
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                        {getStatusText(order.status)}
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}>
+                        <span className="flex items-center gap-1">
+                          {getStatusIcon(order.status)}
+                          {getStatusText(order.status)}
+                        </span>
                       </span>
                     </div>
 
@@ -438,9 +386,7 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
                           ) : (
                             <FaStore className="w-3 h-3" />
                           )}
-                          <span className="capitalize">
-                            {order.delivery_type === 'delivery' ? 'Delivery' : 'Pickup'}
-                          </span>
+                          <span className="capitalize">{order.delivery_type}</span>
                         </div>
                       </div>
                       <p className="font-semibold text-red-700">
@@ -449,56 +395,171 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div className="text-sm text-gray-500">
-                        {order.items.length} item{order.items.length > 1 ? 's' : ''}
+                      <div className="flex -space-x-2">
+                        {order.items.slice(0, 3).map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="w-8 h-8 bg-red-100 rounded-full border-2 border-white flex items-center justify-center"
+                            title={item.name}
+                          >
+                            <FaBox className="w-4 h-4 text-red-700" />
+                          </div>
+                        ))}
+                        {order.items.length > 3 && (
+                          <div className="w-8 h-8 bg-gray-100 rounded-full border-2 border-white flex items-center justify-center text-xs font-medium text-gray-600">
+                            +{order.items.length - 3}
+                          </div>
+                        )}
                       </div>
-                      <button className="text-red-700 text-sm font-medium group-hover:underline">
-                        Lihat Detail
-                      </button>
+                      <FaChevronRight className="w-4 h-4 text-gray-400 group-hover:text-red-700 transition-colors" />
                     </div>
                   </div>
                 ))}
               </div>
             )
           ) : (
-            // DETAIL VIEW - Inspired by the image
+            // DETAIL VIEW
             selectedOrder && (
               <div className="space-y-6">
-                {/* Pickup Header */}
-                <div className="text-center">
-                  <span className={`inline-block px-4 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.status)}`}>
-                    {selectedOrder.status === 'COMPLETED' ? '✓ Selesai' : getStatusText(selectedOrder.status)}
-                  </span>
+                {/* Order Info */}
+                <div className="bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-xl border border-red-200">
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Order Number</p>
+                      <p className="text-xl font-bold text-gray-800">
+                        #{selectedOrder.order_number}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-600 mb-1">Status</p>
+                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(selectedOrder.status)}`}>
+                        {getStatusIcon(selectedOrder.status)}
+                        {getStatusText(selectedOrder.status)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Store Info */}
-                <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-800">Kenangan VIP</h3>
-                  <p className="text-2xl font-bold text-red-700 mt-1">
-                    {formatCurrency(selectedOrder.total_price)}
-                  </p>
-                </div>
-
-                {/* Customer Info */}
+                {/* Date & Time */}
                 <div className="bg-gray-50 p-4 rounded-xl">
-                  <h4 className="font-semibold text-gray-700 mb-3">Detail Pesanan</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <FaUser className="w-4 h-4 text-gray-400 mt-1" />
+                  <div className="flex items-center gap-3">
+                    <FaCalendarAlt className="w-5 h-5 text-red-600" />
+                    <div>
+                      <p className="text-sm text-gray-600">Order Date & Time</p>
+                      <p className="font-medium text-gray-800">
+                        {formatDate(selectedOrder.created_at)}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {getTimeAgo(selectedOrder.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Estimated Time */}
+                {selectedOrder.estimated_minutes && (
+                  <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                    <div className="flex items-center gap-3">
+                      <FaClock className="w-5 h-5 text-blue-600" />
                       <div>
-                        <p className="text-sm text-gray-600">Nama Pelanggan</p>
-                        <p className="font-medium">{selectedOrder.user?.name || 'Fikri Aziz Mudzaki'}</p>
+                        <p className="text-sm text-gray-600">Estimated Ready</p>
+                        <p className="text-lg font-semibold text-gray-800">
+                          {selectedOrder.estimated_minutes} minutes
+                        </p>
                       </div>
                     </div>
-                    
-                    {selectedOrder.delivery_type === 'pickup' && (
-                      <div className="flex items-start gap-2 mt-3">
-                        <FaStore className="w-4 h-4 text-gray-400 mt-1" />
-                        <div>
-                          <p className="text-sm text-gray-600">Pickup di</p>
-                          <p className="font-medium">Ruko Bandara Mas</p>
-                          <p className="text-sm text-gray-500">Pickup di Counter</p>
-                        </div>
+                  </div>
+                )}
+
+                {/* Delivery/Pickup Info */}
+                <div className="bg-gray-50 p-4 rounded-xl">
+                  <div className="flex items-center gap-3 mb-3">
+                    {selectedOrder.delivery_type === 'delivery' ? (
+                      <FaMotorcycle className="w-5 h-5 text-red-600" />
+                    ) : (
+                      <FaStore className="w-5 h-5 text-red-600" />
+                    )}
+                    <h3 className="font-semibold text-gray-800">
+                      {selectedOrder.delivery_type === 'delivery'
+                        ? 'Delivery Information'
+                        : 'Pickup Information'}
+                    </h3>
+                  </div>
+
+                  {selectedOrder.delivery_type === 'delivery' && selectedOrder.shipping_address ? (
+                    <div className="ml-8 space-y-2">
+                      <p className="text-sm text-gray-600 flex items-start gap-2">
+                        <FaMapMarkerAlt className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          {selectedOrder.shipping_address.full_address ||
+                           `${selectedOrder.shipping_address.address}, ${selectedOrder.shipping_address.city}`}
+                        </span>
+                      </p>
+                      {selectedOrder.shipping_address.recipientName && (
+                        <p className="text-sm text-gray-600 flex items-center gap-2">
+                          <FaUser className="w-4 h-4 text-gray-400" />
+                          {selectedOrder.shipping_address.recipientName}
+                        </p>
+                      )}
+                      {selectedOrder.shipping_address.phoneNumber && (
+                        <p className="text-sm text-gray-600 flex items-center gap-2">
+                          <FaPhone className="w-4 h-4 text-gray-400" />
+                          {selectedOrder.shipping_address.phoneNumber}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="ml-8">
+                      <p className="text-sm text-gray-600">
+                        Pickup at our store: Jl. Sudirman No. 123, Jakarta Pusat
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Please bring your order number for pickup
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Payment Info */}
+                <div className="bg-gray-50 p-4 rounded-xl">
+                  <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                    <FaReceipt className="w-4 h-4 text-red-600" />
+                    Payment Details
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Payment Method</span>
+                      <span className="font-medium text-gray-800 flex items-center gap-1">
+                        {selectedOrder.payment_method === 'cash' ? (
+                          <FaMoneyBillWave className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <FaCreditCard className="w-4 h-4 text-blue-600" />
+                        )}
+                        {selectedOrder.payment_method === 'cash' ? 'Cash on Delivery' : 'Debit/Credit Card'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Subtotal</span>
+                      <span className="text-gray-800">
+                        {formatCurrency(selectedOrder.total_price - selectedOrder.shipping_cost)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Shipping Cost</span>
+                      <span className="text-gray-800">
+                        {selectedOrder.shipping_cost === 0 ? 'Free' : formatCurrency(selectedOrder.shipping_cost)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm pt-2 border-t border-gray-200">
+                      <span className="font-semibold text-gray-800">Total</span>
+                      <span className="font-bold text-lg text-red-700">
+                        {formatCurrency(selectedOrder.total_price)}
+                      </span>
+                    </div>
+                    {selectedOrder.paid_at && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Paid at</span>
+                        <span className="text-gray-800">{formatDate(selectedOrder.paid_at)}</span>
                       </div>
                     )}
                   </div>
@@ -506,101 +567,44 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
 
                 {/* Order Items */}
                 <div className="bg-gray-50 p-4 rounded-xl">
-                  <h4 className="font-semibold text-gray-700 mb-3">
-                    Pesanan (Total {selectedOrder.items.length} items)
-                  </h4>
-                  
-                  <div className="space-y-4">
+                  <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                    <FaBox className="w-4 h-4 text-red-600" />
+                    Order Items
+                  </h3>
+                  <div className="space-y-3">
                     {selectedOrder.items.map((item) => (
-                      <div key={item.id} className="border-b border-gray-200 pb-3 last:border-0">
-                        <div className="flex justify-between items-start mb-1">
-                          <span className="text-sm font-medium text-gray-800">
-                            {item.qty} x {item.name}
-                          </span>
-                          <span className="text-sm font-medium text-gray-800">
-                            {formatCurrency(item.price)}
-                          </span>
-                        </div>
-                        {item.variants && item.variants.length > 0 && (
-                          <p className="text-xs text-gray-500 ml-4">
-                            {item.variants.join(' • ')}
+                      <div key={item.id} className="flex justify-between items-center">
+                        <div>
+                          <p className="font-medium text-gray-800">{item.name}</p>
+                          <p className="text-sm text-gray-500">
+                            {item.qty} x {formatCurrency(item.price)}
                           </p>
-                        )}
-                        {item.notes && (
-                          <p className="text-xs text-gray-500 ml-4">Note: {item.notes}</p>
-                        )}
+                        </div>
+                        <span className="font-medium text-gray-800">
+                          {formatCurrency(item.price * item.qty)}
+                        </span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Payment Details */}
-                <div className="bg-gray-50 p-4 rounded-xl">
-                  <h4 className="font-semibold text-gray-700 mb-3">Detail Pembayaran</h4>
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Transaksi ID</span>
-                      <span className="font-mono text-xs">{selectedOrder.transaction_id || 'N/A'}</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-gray-600">Total</span>
-                      <div className="text-right">
-                        <span className="font-bold text-lg text-red-700">
-                          {formatCurrency(selectedOrder.total_price)}
-                        </span>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {selectedOrder.payment_method === 'cash' ? 'Cash' : 'QRIS'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Estimated Time for PROCESSING orders */}
-                {selectedOrder.status === 'PROCESSING' && selectedOrder.estimated_minutes && (
-                  <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <FaClock className="w-5 h-5 text-blue-600" />
-                        <span className="text-sm text-gray-600">Estimasi Siap</span>
-                      </div>
-                      <span className="font-semibold text-blue-700">{timeRemaining}</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Tax Info */}
-                <p className="text-xs text-center text-gray-400">
-                  All Price are inclusive Tax
-                </p>
-
-                {/* Action Buttons - Matching the image */}
-                <div className="flex flex-col gap-3 pt-4">
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
                   <button
-                    onClick={() => handleDownloadStruk(selectedOrder)}
-                    className="w-full bg-red-700 text-white py-3 rounded-xl font-medium hover:bg-red-800 transition-colors flex items-center justify-center gap-2"
+                    onClick={() => handleShareWhatsApp(selectedOrder)}
+                    className="flex-1 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                   >
-                    <FaDownload className="w-4 h-4" />
-                    Download Struk
+                    <FaWhatsapp className="w-4 h-4" />
+                    Share
                   </button>
-                  
                   <button
-                    onClick={onClose}
-                    className="w-full border border-gray-300 py-3 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                    onClick={() => handlePrint(selectedOrder)}
+                    className="flex-1 border border-gray-300 py-3 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
                   >
-                    Kembali Ke Beranda
+                    <FaPrint className="w-4 h-4" />
+                    Print
                   </button>
                 </div>
-
-                {/* View All History Link */}
-                <button
-                  onClick={handleBackToHistory}
-                  className="w-full text-center text-sm text-red-700 hover:text-red-800 font-medium"
-                >
-                  Lihat Semua Pesanan
-                </button>
               </div>
             )
           )}
