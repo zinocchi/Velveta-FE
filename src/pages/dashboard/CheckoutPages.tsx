@@ -29,7 +29,7 @@ import {
   FaCheck,
 } from "react-icons/fa";
 import { SiMastercard, SiVisa } from "react-icons/si";
-import OrderStatusModal from "../dashboard/OrderStatusModal";
+import ShowHistoryModal from "../../components/modal/ShowHistoryModal";
 
 interface Address {
   id: string;
@@ -57,7 +57,7 @@ const CheckoutPage = () => {
   const { state, dispatch } = useCart();
   const navigate = useNavigate();
 
-  const [showOrderModal, setShowOrderModal] = useState(false);
+const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [orderSuccessData, setOrderSuccessData] = useState<any>(null);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
   const [lastOrderNumber, setLastOrderNumber] = useState<string | null>(null);
@@ -120,7 +120,7 @@ const CheckoutPage = () => {
   } | null>(null);
 
   const [paymentMethod, setPaymentMethod] = useState("cash");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{
     show: boolean;
@@ -377,7 +377,7 @@ const CheckoutPage = () => {
 
       setOrderSuccessData(formattedData);
       setLastOrderNumber(orderData.order_number);
-      setShowOrderModal(true);
+      setShowHistoryModal(true);
     } catch (error) {
       console.error("Failed to fetch order details:", error);
     }
@@ -395,7 +395,7 @@ const CheckoutPage = () => {
     }
 
     try {
-      setLoading(true);
+      setLoading(false);
 
       const selectedAddress = addresses.find(
         (addr) => addr.id === selectedAddressId,
@@ -506,7 +506,7 @@ const CheckoutPage = () => {
 
   // Handler untuk close modal
   const handleCloseModal = () => {
-    setShowOrderModal(false);
+    setShowHistoryModal(false);
     // Optional: redirect ke halaman orders setelah modal ditutup
     // navigate('/orders/my');
   };
@@ -540,6 +540,17 @@ const CheckoutPage = () => {
       }`;
     }
   };
+
+  // if (loading) {
+  //   return (
+  //     <main className="pt-28 pb-16 max-w-7xl mx-auto px-4">
+  //       <div className="text-center py-12">
+  //         <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-700"></div>
+  //         <p className="mt-4 text-gray-600">Loading checkout...</p>
+  //       </div>
+  //     </main>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
@@ -577,7 +588,7 @@ const CheckoutPage = () => {
               <FaTrash className="w-8 h-8 text-red-700" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
-              Hapus Alamat
+              Delete Address
             </h3>
             <p className="text-gray-600 text-center mb-6">
               Are you sure you want to delete?{" "}
@@ -853,7 +864,7 @@ const CheckoutPage = () => {
                             label: e.target.value,
                           })
                         }
-                        placeholder="Contoh: Rumah, Kantor"
+                        placeholder="Example: Home, Office"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700 focus:border-transparent transition-all"
                       />
                     </div>
@@ -1034,7 +1045,7 @@ const CheckoutPage = () => {
                         type="submit"
                         className="flex-1 bg-red-700 text-white py-2 rounded-lg font-medium hover:bg-red-800 transition-colors"
                       >
-                        {editingAddress ? "Perbarui Alamat" : "Simpan Alamat"}
+                        {editingAddress ? "Update Address" : "Save Address"}
                       </button>
                       <button
                         type="button"

@@ -4,7 +4,7 @@ import "../styles/Navbar.css";
 import VelvetaLogo from "../assets/icon/velveta.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
-import CartModal from "../pages/dashboard/CartModal";
+import CartModal from "../components/modal/CartModal";
 import { useCart } from "../context/CartContext";
 
 const Navbar = () => {

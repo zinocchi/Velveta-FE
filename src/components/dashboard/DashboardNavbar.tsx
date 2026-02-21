@@ -1,38 +1,20 @@
+// src/components/navbar/DashboardNavbar.tsx
 import React, { useState, useRef, useEffect } from "react";
 import VelvetaLogo from "../../assets/icon/velveta.png";
 import { useAuth } from "../../auth/useAuth";
 import { useNavigate } from "react-router-dom";
-import CartModal from "../../pages/dashboard/CartModal";
+import CartModal from "../modal/CartModal";
 import { useCart } from "../../context/CartContext";
-import OrderStatusModal from "../../pages/dashboard/OrderStatusModal";
-
-// interface User {
-//   name: string;
-//   username: string;
-//   photo?: string;
-//   email?: string;
-//   fullname?: string;
-//   avatar?: string;
-// }
+import OrderHistoryModal from "../modal/OrderHistoryModal";
 
 interface DashboardNavbarProps {
-  // user: User;
-  cartCount?: number;
-  notificationCount?: number;
-  onNotificationClick?: () => void;
-  onCartClick?: () => void;
   onEditProfile?: () => void;
   onViewOrders?: () => void;
   onViewFavorites?: () => void;
   onLogout?: () => void;
-  logoUrl?: string;
 }
 
 const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
-  cartCount = 0,
-  notificationCount = 0,
-  onNotificationClick,
-  onCartClick,
   onEditProfile,
   onViewOrders,
   onViewFavorites,
@@ -40,33 +22,15 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [openMenu, setOpenMenu] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [showOrderHistory, setShowOrderHistory] = useState(false);
+  
   const dropdownRef = useRef<HTMLDivElement>(null);
   const confirmRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const { isLoggedIn, logout } = useAuth();
-  const { user } = useAuth();
+  
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const { totalItems } = useCart();
-  const [showOrderStatus, setShowOrderStatus] = useState(false);
-  const [orderSuccessData, setOrderSuccessData] = useState<any>(null);
-  const lastOrderId = orderSuccessData?.order_id;
-
-  useEffect(() => {
-    const handleScrollClose = () => {
-      setDropdownOpen(false);
-      setOpenMenu(false);
-      setIsMobileMenuOpen(false);
-    };
-
-    window.addEventListener("scroll", handleScrollClose, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScrollClose);
-    };
-  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -85,49 +49,74 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
     };
   }, []);
 
+  // Handle scroll close
+  useEffect(() => {
+    const handleScrollClose = () => {
+      setDropdownOpen(false);
+    };
+
+    window.addEventListener("scroll", handleScrollClose, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScrollClose);
+    };
+  }, []);
+
+  // Handle body scroll when modal is open
+  useEffect(() => {
+    if (showLogoutConfirm || showOrderHistory || isCartOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [showLogoutConfirm, showOrderHistory, isCartOpen]);
+
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  useEffect(() => {
-    if (showLogoutConfirm) {
-      document.body.classList.add("modal-open");
-    } else {
-      document.body.classList.remove("modal-open");
-    }
-
-    // Cleanup on unmount
-    return () => {
-      document.body.classList.remove("modal-open");
-    };
-  }, [showLogoutConfirm]);
-
   const handleLogout = () => {
     setShowLogoutConfirm(true);
-    setOpenMenu(false);
-    setIsMobileMenuOpen(false);
+    setDropdownOpen(false);
   };
 
   const confirmLogout = () => {
     logout();
-
-    document.body.classList.remove("modal-open");
-
     localStorage.removeItem("token");
-    setShowLogoutConfirm(true);
+    setShowLogoutConfirm(false);
     navigate("/");
     window.location.reload();
   };
 
   const cancelLogout = () => {
     setShowLogoutConfirm(false);
-    document.body.classList.remove("modal-open");
   };
-  // const getInitial = () => {
-  //   return user?.username?.charAt(0).toUpperCase() ||
-  //          user?.name?.charAt(0).toUpperCase() ||
-  //          "U";
-  // };
+
+  const handleOrderHistoryClick = () => {
+    setShowOrderHistory(true);
+    setDropdownOpen(false);
+  };
+
+  const handleEditProfileClick = () => {
+    onEditProfile?.();
+    setDropdownOpen(false);
+    navigate("/dashboard/profile");
+  };
+
+  const handleViewOrdersClick = () => {
+    onViewOrders?.();
+    setDropdownOpen(false);
+    navigate("/dashboard/orders");
+  };
+
+  const handleViewFavoritesClick = () => {
+    onViewFavorites?.();
+    setDropdownOpen(false);
+    navigate("/dashboard/favorites");
+  };
 
   return (
     <>
@@ -135,22 +124,21 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-6">
-              {/* Empty space for alignment - can be used for logo or other elements */}
-            </div>
-
-            <div className="absolute left-20 top-1/2 transform -translate-y-1/2">
+              {/* Logo */}
               <img
                 src={VelvetaLogo}
                 alt="Velveta Logo"
-                className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover transition-transform duration-300 hover:rotate-12"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover transition-transform duration-300 hover:rotate-12 cursor-pointer"
+                onClick={() => navigate("/dashboard")}
               />
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Notification Button */}
+              {/* Order History Button */}
               <button
-                onClick={() => setShowOrderStatus(true)}
+                onClick={handleOrderHistoryClick}
                 className="relative p-2 text-gray-600 hover:text-red-700 transition-colors duration-300"
+                title="Order History"
               >
                 <svg
                   className="w-6 h-6"
@@ -162,32 +150,16 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth="2"
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                {/* Badge notifikasi jika ada order baru */}
-                {orderSuccessData && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
-                    1
-                  </span>
-                )}
               </button>
 
-              <OrderStatusModal
-                isOpen={showOrderStatus}
-                orderId={lastOrderId}
-                onClose={() => setShowOrderStatus(false)}
-              />
-              
               {/* Cart Button */}
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsCartOpen(true);
-                }}
+                onClick={() => setIsCartOpen(true)}
                 className="relative p-2 text-gray-700 hover:text-red-700 transition-colors duration-300"
                 aria-label="Cart"
-                id="cart-icon"
               >
                 <svg
                   className="w-6 h-6"
@@ -209,12 +181,6 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                 )}
               </button>
 
-              {/* Modal Cart */}
-              <CartModal
-                isOpen={isCartOpen}
-                onClose={() => setIsCartOpen(false)}
-              />
-
               {/* Profile Dropdown */}
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -225,17 +191,17 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                     src={
                       user?.avatar ||
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        user?.fullname || user?.fullname || "User",
+                        user?.fullname || "User",
                       )}&background=random&color=fff&bold=true`
                     }
-                    className="h-10 w-10 rounded-full object-cover border-2 border-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-                    alt={user?.fullname || user?.fullname || "User"}
+                    className="h-10 w-10 rounded-full object-cover border-2 border-white shadow-lg hover:shadow-xl transition-all duration-300"
+                    alt={user?.fullname || "User"}
                   />
                 </button>
 
                 {/* Dropdown Menu */}
                 {dropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50 transition-all duration-200 animate-fadeIn">
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50 animate-fadeIn">
                     {/* User info section */}
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="font-medium text-gray-900 text-sm truncate">
@@ -249,35 +215,42 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                     {/* Menu items */}
                     <div className="py-1">
                       <button
-                        onClick={() => {
-                          onEditProfile?.();
-                          setDropdownOpen(false);
-                        }}
-                        className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
+                        onClick={handleEditProfileClick}
+                        className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
                       >
-                        <i className="fas fa-user-edit w-5 mr-3 "></i>
+                        <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
                         Edit Profile
                       </button>
 
                       <button
-                        onClick={() => {
-                          onViewOrders?.();
-                          setDropdownOpen(false);
-                        }}
-                        className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
+                        onClick={handleOrderHistoryClick}
+                        className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
                       >
-                        <i className="fas fa-history w-5 mr-3"></i>
+                        <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                         Order History
                       </button>
 
                       <button
-                        onClick={() => {
-                          onViewFavorites?.();
-                          setDropdownOpen(false);
-                        }}
-                        className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
+                        onClick={handleViewOrdersClick}
+                        className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
                       >
-                        <i className="fas fa-heart w-5 mr-3"></i>
+                        <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        My Orders
+                      </button>
+
+                      <button
+                        onClick={handleViewFavoritesClick}
+                        className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
+                      >
+                        <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
                         Favorites
                       </button>
                     </div>
@@ -288,7 +261,9 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                         onClick={handleLogout}
                         className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
                       >
-                        <i className="fas fa-sign-out-alt w-5 mr-3"></i>
+                        <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
                         Logout
                       </button>
                     </div>
@@ -300,16 +275,24 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
         </div>
       </header>
 
+      {/* Modals */}
+      <OrderHistoryModal
+        isOpen={showOrderHistory}
+        onClose={() => setShowOrderHistory(false)}
+      />
+
+      <CartModal
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+      />
+
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
         <>
-          {/* Overlay */}
           <div
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[60] "
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[60]"
             onClick={cancelLogout}
           />
-
-          {/* Modal Konfirmasi */}
           <div
             ref={confirmRef}
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 bg-white rounded-xl shadow-2xl z-[70] p-6 animate-scaleIn"
@@ -361,7 +344,3 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
 };
 
 export default DashboardNavbar;
-
-function setScrolled(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}
