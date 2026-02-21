@@ -59,15 +59,33 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
   const modalContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+
     if (isOpen) {
-      fetchOrderHistory();
+      // Hitung scrollbar width untuk mencegah layout shift
+      const scrollbarWidth =
+        window.innerWidth - document.documentElement.clientWidth;
+
+      // Prevent body scroll
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+
+      // Fetch orders
+      fetchOrderHistory();
+
+      // Add event listeners
+      document.addEventListener("keydown", handleEscape);
     }
 
     return () => {
-      document.body.style.overflow = "auto";
+      // Restore body scroll
+      document.body.style.overflow = "unset";
+      document.body.style.paddingRight = "0px";
+
+      // Remove event listeners
+      document.removeEventListener("keydown", handleEscape);
     };
   }, [isOpen]);
 
@@ -98,6 +116,11 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
   const handleCloseDetailModal = () => {
     setShowDetailModal(false);
     setSelectedOrderId(null);
+  };
+
+  const handleBrowseMenu = () => {
+    onClose();
+    window.location.href = "/menu";
   };
 
   const formatCurrency = (value: number) => {
@@ -177,17 +200,20 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div
-          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-          onClick={onClose}
-        />
-
+      {/* Backdrop with blur effect */}
+      <div 
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9999]"
+        onClick={onClose}
+      />
+      
+      {/* Modal Container */}
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
         <div
           ref={modalContentRef}
-          className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-fadeIn"
+          className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-fadeIn pointer-events-auto"
           onClick={handleModalClick}
         >
+          {/* Header - Sticky */}
           <div className="sticky top-0 bg-gradient-to-r from-red-700 to-red-800 text-white p-6 z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -203,6 +229,7 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
             </div>
           </div>
 
+          {/* Content - Scrollable */}
           <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-12">
@@ -222,24 +249,22 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
                 </button>
               </div>
             ) : orders.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="flex flex-col items-center justify-center py-12 px-4">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <FaShoppingBag className="w-12 h-12 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   No Orders Yet
                 </h3>
-                <p className="text-gray-500 mb-6">
-                  You haven't placed any orders yet. Start ordering your favorite
-                  coffee now!
+                <p className="text-gray-500 text-center mb-6">
+                  You haven't placed any orders yet. Start ordering your favorite coffee now!
                 </p>
                 <button
-                  onClick={() => {
-                    onClose();
-                  }}
-                  className="px-6 py-3 bg-red-700 text-white rounded-xl font-medium hover:bg-red-800 transition-colors"
+                  onClick={handleBrowseMenu}
+                  className="px-6 py-3 bg-red-700 text-white rounded-xl font-medium hover:bg-red-800 transition-colors flex items-center gap-2"
                 >
-                  Start Shopping
+                  <span>Browse Menu</span>
+                  <span>→</span>
                 </button>
               </div>
             ) : (
@@ -324,23 +349,24 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
             )}
           </div>
         </div>
-
-        <style>{`
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-              transform: scale(0.95);
-            }
-            to {
-              opacity: 1;
-              transform: scale(1);
-            }
-          }
-          .animate-fadeIn {
-            animation: fadeIn 0.3s ease-out;
-          }
-        `}</style>
       </div>
+
+      {/* Animation styles */}
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+      `}</style>
 
       {/* Order Detail Modal */}
       <OrderDetailModal

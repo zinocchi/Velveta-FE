@@ -212,7 +212,7 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
 
                     {/* Menu items */}
                     <div className="py-1">
-                      <button
+                      {/* <button
                         onClick={handleEditProfileClick}
                         className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150">
                         <svg
@@ -228,7 +228,7 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                           />
                         </svg>
                         Edit Profile
-                      </button>
+                      </button> */}
 
                       <button
                         onClick={handleOrderHistoryClick}
@@ -266,7 +266,7 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                         My Orders
                       </button>
 
-                      <button
+                      {/* <button
                         onClick={handleViewFavoritesClick}
                         className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150">
                         <svg
@@ -282,7 +282,7 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                           />
                         </svg>
                         Favorites
-                      </button>
+                      </button> */}
                     </div>
 
                     {/* Logout section */}
