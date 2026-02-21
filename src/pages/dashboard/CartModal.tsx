@@ -109,7 +109,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded-lg"
                       />
-                    )}
+                    )}  
                     <div>
                       <h3 className="font-medium text-gray-800">{item.name}</h3>
                       <p className="text-gray-600">
