@@ -5,11 +5,13 @@ import axios from "axios";
 import { useCart } from "../../context/CartContext";
 import { getCategoryFallbackImage } from "./constants";
 import { flyToCart } from "../../utils/flyToCart";
+import { FaMinus, FaPlus } from "react-icons/fa";
 
 export default function CategoryPage() {
   const { category } = useParams<{ category: string }>();
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
+  const { state, dispatch } = useCart();
 
   const CATEGORY_INFO: Record<string, { title: string; description: string }> =
     {
@@ -67,7 +69,40 @@ export default function CategoryPage() {
     description: "Delicious menu items available in this category.",
   };
 
-  const { dispatch } = useCart();
+  // Helper function untuk mendapatkan quantity item di cart
+  const getItemQuantity = (itemId: number) => {
+    const cartItem = state.items.find((item) => item.id === itemId);
+    return cartItem?.qty || 0;
+  };
+
+  // Handler untuk menambah quantity
+  const handleIncrease = (item: Menu, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const currentQty = getItemQuantity(item.id);
+    
+    if (currentQty === 0) {
+      // Jika belum ada di cart, tambahkan dengan animasi flyToCart
+      flyToCart(
+        (e.currentTarget as HTMLElement).closest(".cart-source") as HTMLElement,
+      );
+    }
+    
+    dispatch({
+      type: "ADD_TO_CART",
+      payload: {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        image_url: item.image_url,
+      },
+    });
+  };
+
+  // Handler untuk mengurangi quantity
+  const handleDecrease = (itemId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    dispatch({ type: "DECREMENT", payload: itemId });
+  };
 
   if (loading) {
     return (
@@ -113,62 +148,92 @@ export default function CategoryPage() {
 
         {/* Menu Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-          {menus.map((item) => (
-            <div
-              key={item.id}
-              className="cart-source bg-white rounded-lg sm:rounded-xl shadow-sm overflow-hidden p-3 sm:p-4 md:p-5 h-full flex flex-col hover:shadow-md transition-shadow duration-300"
-            >
-              {/* Image */}
-              <div className="overflow-hidden rounded-md sm:rounded-lg mb-3 sm:mb-4">
-                <img
-                  src={item.image_url ?? getCategoryFallbackImage(category)}
-                  alt={item.name}
-                  className="w-full h-32 sm:h-36 md:h-40 object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = getCategoryFallbackImage(category);
-                  }}
-                />
-              </div>
+          {menus.map((item) => {
+            const quantity = getItemQuantity(item.id);
+            
+            return (
+              <div
+                key={item.id}
+                className="cart-source bg-white rounded-lg sm:rounded-xl shadow-sm overflow-hidden p-3 sm:p-4 md:p-5 h-full flex flex-col hover:shadow-md transition-shadow duration-300"
+              >
+                {/* Image */}
+                <div className="overflow-hidden rounded-md sm:rounded-lg mb-3 sm:mb-4">
+                  <img
+                    src={item.image_url ?? getCategoryFallbackImage(category)}
+                    alt={item.name}
+                    className="w-full h-32 sm:h-36 md:h-40 object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = getCategoryFallbackImage(category);
+                    }}
+                  />
+                </div>
 
-              {/* Title */}
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">
-                {item.name}
-              </h3>
+                {/* Title */}
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">
+                  {item.name}
+                </h3>
 
-              {/* Description */}
-              <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2">
-                {item.description}
-              </p>
-
-              {/* Price and Button */}
-              <div className="mt-auto flex items-center justify-between">
-                <p className="text-base sm:text-lg font-bold text-gray-900">
-                  Rp {item.price.toLocaleString("id-ID")}
+                {/* Description */}
+                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2">
+                  {item.description}
                 </p>
-                <button
-                  className="bg-red-700 hover:bg-red-800 text-white text-xs sm:text-sm font-medium py-1.5 sm:py-2 px-3 sm:px-4 rounded-md sm:rounded-lg transition-colors duration-300 active:scale-95"
-                  onClick={(e) => {
-                    flyToCart(
-                      e.currentTarget.closest(".cart-source") as HTMLElement,
-                    );
-                    dispatch({
-                      type: "ADD_TO_CART",
-                      payload: {
-                        id: item.id,
-                        name: item.name,
-                        price: item.price,
-                        image_url: item.image_url,
-                      },
-                    });
-                  }}
-                >
-                  <span className="hidden sm:inline">Add</span>
-                  <span className="sm:hidden">Add</span>
-                </button>
+
+                {/* Price */}
+                <div className="mt-auto">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-base sm:text-lg font-bold text-gray-900">
+                      Rp {item.price.toLocaleString("id-ID")}
+                    </p>
+                    
+                    {/* Tombol Add - Hanya muncul jika quantity 0 */}
+                    {quantity === 0 && (
+                      <button
+                        className="bg-red-700 hover:bg-red-800 text-white text-xs sm:text-sm font-medium py-1.5 sm:py-2 px-3 sm:px-4 rounded-md sm:rounded-lg transition-colors duration-300 active:scale-95"
+                        onClick={(e) => handleIncrease(item, e)}
+                      >
+                        Add
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Quantity Control - Muncul di bawah price jika quantity > 0 */}
+                  {quantity > 0 && (
+                    <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+                      <span className="text-xs sm:text-sm text-gray-600">
+                        Quantity:
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => handleDecrease(item.id, e)}
+                          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-700 rounded-full transition-colors"
+                        >
+                          <FaMinus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                        </button>
+                        <span className="w-8 text-center text-sm sm:text-base font-semibold text-red-700">
+                          {quantity}
+                        </span>
+                        <button
+                          onClick={(e) => handleIncrease(item, e)}
+                          disabled={quantity >= 10}
+                          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-700 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-50"
+                        >
+                          <FaPlus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pesan jika sudah mencapai maksimum */}
+                  {quantity >= 10 && (
+                    <p className="text-xs text-red-600 mt-2 text-right">
+                      Max quantity reached
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </main>

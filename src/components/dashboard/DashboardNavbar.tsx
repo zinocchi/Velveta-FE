@@ -24,10 +24,10 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showOrderHistory, setShowOrderHistory] = useState(false);
-  
+
   const dropdownRef = useRef<HTMLDivElement>(null);
   const confirmRef = useRef<HTMLDivElement>(null);
-  
+
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const { totalItems } = useCart();
@@ -109,7 +109,7 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
   const handleViewOrdersClick = () => {
     onViewOrders?.();
     setDropdownOpen(false);
-    navigate("/dashboard/orders");
+    navigate("/dashboard/checkout");
   };
 
   const handleViewFavoritesClick = () => {
@@ -138,14 +138,12 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
               <button
                 onClick={handleOrderHistoryClick}
                 className="relative p-2 text-gray-600 hover:text-red-700 transition-colors duration-300"
-                title="Order History"
-              >
+                title="Order History">
                 <svg
                   className="w-6 h-6"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                  viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -157,16 +155,17 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
 
               {/* Cart Button */}
               <button
-                onClick={() => setIsCartOpen(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCartOpen(true);
+                }}
                 className="relative p-2 text-gray-700 hover:text-red-700 transition-colors duration-300"
-                aria-label="Cart"
-              >
+                aria-label="Cart">
                 <svg
                   className="w-6 h-6"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                  viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -185,8 +184,7 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={toggleDropdown}
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300"
-                >
+                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300">
                   <img
                     src={
                       user?.avatar ||
@@ -216,40 +214,72 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                     <div className="py-1">
                       <button
                         onClick={handleEditProfileClick}
-                        className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
-                      >
-                        <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150">
+                        <svg
+                          className="w-4 h-4 mr-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
                         </svg>
                         Edit Profile
                       </button>
 
                       <button
                         onClick={handleOrderHistoryClick}
-                        className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
-                      >
-                        <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150">
+                        <svg
+                          className="w-4 h-4 mr-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
                         </svg>
                         Order History
                       </button>
 
                       <button
                         onClick={handleViewOrdersClick}
-                        className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
-                      >
-                        <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150">
+                        <svg
+                          className="w-4 h-4 mr-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                          />
                         </svg>
                         My Orders
                       </button>
 
                       <button
                         onClick={handleViewFavoritesClick}
-                        className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150"
-                      >
-                        <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        className="flex items-center w-full px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150">
+                        <svg
+                          className="w-4 h-4 mr-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                          />
                         </svg>
                         Favorites
                       </button>
@@ -259,10 +289,18 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                     <div className="border-t border-gray-100 pt-1">
                       <button
                         onClick={handleLogout}
-                        className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
-                      >
-                        <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150">
+                        <svg
+                          className="w-4 h-4 mr-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                          />
                         </svg>
                         Logout
                       </button>
@@ -281,10 +319,7 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
         onClose={() => setShowOrderHistory(false)}
       />
 
-      <CartModal
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-      />
+      <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
@@ -295,16 +330,14 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
           />
           <div
             ref={confirmRef}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 bg-white rounded-xl shadow-2xl z-[70] p-6 animate-scaleIn"
-          >
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 bg-white rounded-xl shadow-2xl z-[70] p-6 animate-scaleIn">
             <div className="text-center mb-6">
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
                   className="w-6 h-6 text-red-600"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                  viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -325,14 +358,12 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
             <div className="flex space-x-3">
               <button
                 onClick={cancelLogout}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
-              >
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium">
                 Cancel
               </button>
               <button
                 onClick={confirmLogout}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium"
-              >
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium">
                 Yes, Logout
               </button>
             </div>

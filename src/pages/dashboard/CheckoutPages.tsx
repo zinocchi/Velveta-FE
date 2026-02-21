@@ -29,7 +29,7 @@ import {
   FaCheck,
 } from "react-icons/fa";
 import { SiMastercard, SiVisa } from "react-icons/si";
-import ShowHistoryModal from "../../components/modal/ShowHistoryModal";
+import OrderDetailModal from "../../components/modal/OrderDetailModal";
 
 interface Address {
   id: string;
@@ -57,10 +57,8 @@ const CheckoutPage = () => {
   const { state, dispatch } = useCart();
   const navigate = useNavigate();
 
-const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [orderSuccessData, setOrderSuccessData] = useState<any>(null);
+  const [showOrderDetail, setShowOrderDetail] = useState(false);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
-  const [lastOrderNumber, setLastOrderNumber] = useState<string | null>(null);
 
   const [notification, setNotification] = useState<{
     show: boolean;
@@ -120,7 +118,8 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
   } | null>(null);
 
   const [paymentMethod, setPaymentMethod] = useState("cash");
-  const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true); // Untuk loading halaman
+  const [processing, setProcessing] = useState(false); // Untuk proses order
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{
     show: boolean;
@@ -147,45 +146,60 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   // Load saved addresses from localStorage on mount
   useEffect(() => {
-    const savedAddresses = localStorage.getItem("userAddresses");
-    if (savedAddresses) {
-      const parsed = JSON.parse(savedAddresses);
-      setAddresses(parsed);
-      const defaultAddress = parsed.find((addr: Address) => addr.isDefault);
-      if (defaultAddress) {
-        setSelectedAddressId(defaultAddress.id);
+    const loadAddresses = async () => {
+      try {
+        setPageLoading(true);
+        // Simulasi loading (bisa dihapus jika tidak perlu)
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const savedAddresses = localStorage.getItem("userAddresses");
+        if (savedAddresses) {
+          const parsed = JSON.parse(savedAddresses);
+          setAddresses(parsed);
+          const defaultAddress = parsed.find((addr: Address) => addr.isDefault);
+          if (defaultAddress) {
+            setSelectedAddressId(defaultAddress.id);
+          }
+        } else {
+          // Mock data for demo
+          const mockAddresses: Address[] = [
+            {
+              id: "1",
+              label: "Rumah",
+              recipientName: "John Doe",
+              phoneNumber: "081234567890",
+              address: "Jl. Contoh Alamat No. 123",
+              detail: "RT 01 RW 02",
+              city: "Jakarta Selatan",
+              postalCode: "12345",
+              isDefault: true,
+              type: "home",
+            },
+            {
+              id: "2",
+              label: "Kantor",
+              recipientName: "John Doe",
+              phoneNumber: "081234567891",
+              address: "Jl. Sudirman No. 456",
+              detail: "Gedung ABC Lantai 5",
+              city: "Jakarta Pusat",
+              postalCode: "67890",
+              isDefault: false,
+              type: "office",
+            },
+          ];
+          setAddresses(mockAddresses);
+          setSelectedAddressId("1");
+        }
+      } catch (error) {
+        console.error("Failed to load addresses:", error);
+        showNotification("Failed to load addresses", "error");
+      } finally {
+        setPageLoading(false);
       }
-    } else {
-      // Mock data for demo
-      const mockAddresses: Address[] = [
-        {
-          id: "1",
-          label: "Rumah",
-          recipientName: "John Doe",
-          phoneNumber: "081234567890",
-          address: "Jl. Contoh Alamat No. 123",
-          detail: "RT 01 RW 02",
-          city: "Jakarta Selatan",
-          postalCode: "12345",
-          isDefault: true,
-          type: "home",
-        },
-        {
-          id: "2",
-          label: "Kantor",
-          recipientName: "John Doe",
-          phoneNumber: "081234567891",
-          address: "Jl. Sudirman No. 456",
-          detail: "Gedung ABC Lantai 5",
-          city: "Jakarta Pusat",
-          postalCode: "67890",
-          isDefault: false,
-          type: "office",
-        },
-      ];
-      setAddresses(mockAddresses);
-      setSelectedAddressId("1");
-    }
+    };
+
+    loadAddresses();
   }, []);
 
   // Save addresses to localStorage when updated
@@ -352,50 +366,40 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
     setShowAddressForm(true);
   };
 
-  const fetchOrderDetails = async (orderId: string) => {
-    try {
-      const response = await api.get(`/orders/${orderId}`);
-      const orderData = response.data.data || response.data;
+  // Fungsi untuk membuka modal detail order
+  const handleOpenOrderDetail = (orderId: string) => {
+    setLastOrderId(orderId);
+    setShowOrderDetail(true);
+  };
 
-      // Format data untuk modal
-      const formattedData = {
-        order_id: orderData.id,
-        order_number: orderData.order_number || `ORD-${orderData.id}`,
-        status: orderData.status,
-        total: orderData.total_price,
-        payment_method: orderData.payment_method,
-        delivery_type: orderData.delivery_type,
-        estimated_minutes: orderData.estimated_minutes,
-        shipping_address: orderData.shipping_address,
-        items: orderData.items?.map((item: any) => ({
-          name: item.menu?.name || "Menu Item",
-          qty: item.qty,
-          price: item.price,
-        })),
-        created_at: orderData.created_at,
-      };
-
-      setOrderSuccessData(formattedData);
-      setLastOrderNumber(orderData.order_number);
-      setShowHistoryModal(true);
-    } catch (error) {
-      console.error("Failed to fetch order details:", error);
-    }
+  // Handler untuk close modal
+  const handleCloseOrderDetail = () => {
+    setShowOrderDetail(false);
+    setLastOrderId(null);
+    // Redirect ke dashboard atau halaman lain setelah modal ditutup
+    navigate("/dashboard");
   };
 
   const handleCreateOrder = async () => {
-    if (state.items.length === 0) return;
+    // Validasi awal
+    if (state.items.length === 0) {
+      showNotification("Your cart is empty", "error");
+      return;
+    }
+    
     if (!termsAccepted) {
       showNotification("Please accept the terms and conditions", "error");
       return;
     }
+    
     if (deliveryType === "delivery" && !selectedAddressId) {
       showNotification("Please select a shipping address", "error");
       return;
     }
 
     try {
-      setLoading(false);
+      // Set processing true
+      setProcessing(true);
 
       const selectedAddress = addresses.find(
         (addr) => addr.id === selectedAddressId,
@@ -408,6 +412,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
       const itemsPayload = state.items.map((item) => ({
         id: item.id,
         qty: item.qty,
+        price: item.price,
       }));
 
       // Format shipping address
@@ -462,15 +467,21 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
 
       console.log("Sending order data:", JSON.stringify(orderPayload, null, 2));
 
+      // Kirim request ke backend
       const response = await api.post("/orders", orderPayload);
 
       console.log("Order response:", response.data);
 
-      // Handle response
-      if (response.data.success || response.data.order_id) {
-        const orderId = response.data.order_id || response.data.data?.order_id;
-
-        setLastOrderId(orderId);
+      // Handle response sukses
+      if (
+        response.data.success ||
+        response.data.order_id ||
+        response.data.data?.id
+      ) {
+        const orderId =
+          response.data.order_id ||
+          response.data.data?.id ||
+          response.data.data?.order_id;
 
         // Tampilkan notifikasi sukses
         showNotification(
@@ -481,14 +492,15 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
         // Clear cart
         dispatch({ type: "CLEAR_CART" });
 
-        // Fetch order details setelah 1 detik
+        // Buka modal detail order setelah 1 detik
         setTimeout(() => {
-          fetchOrderDetails(orderId);
-        }, 1500);
+          handleOpenOrderDetail(orderId);
+        }, 1000);
       } else {
         throw new Error(response.data.message || "Failed to create order");
       }
     } catch (err: any) {
+      // Handle error
       console.error("Checkout error:", err);
 
       const errorMessage =
@@ -500,15 +512,9 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
 
       showNotification(errorMessage, "error");
     } finally {
-      setLoading(false);
+      // Set processing false setelah selesai (baik sukses maupun error)
+      setProcessing(false);
     }
-  };
-
-  // Handler untuk close modal
-  const handleCloseModal = () => {
-    setShowHistoryModal(false);
-    // Optional: redirect ke halaman orders setelah modal ditutup
-    // navigate('/orders/my');
   };
 
   const paymentMethods = [
@@ -541,26 +547,26 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
     }
   };
 
-  // if (loading) {
-  //   return (
-  //     <main className="pt-28 pb-16 max-w-7xl mx-auto px-4">
-  //       <div className="text-center py-12">
-  //         <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-700"></div>
-  //         <p className="mt-4 text-gray-600">Loading checkout...</p>
-  //       </div>
-  //     </main>
-  //   );
-  // }
+  // Loading state untuk halaman
+  if (pageLoading) {
+    return (
+      <main className="pt-28 pb-16 max-w-7xl mx-auto px-4">
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-700"></div>
+          <p className="mt-4 text-gray-600">Loading checkout...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Custom Notification */}
       {notification.show && (
         <div
           className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-slideDown ${
             notification.type === "success" ? "bg-green-600" : "bg-red-600"
-          } text-white`}
-        >
+          } text-white`}>
           {notification.type === "success" ? (
             <FaCheckCircle className="w-5 h-5" />
           ) : (
@@ -606,35 +612,25 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                     addressLabel: "",
                   })
                 }
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-              >
-                Batal
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+                Cancel
               </button>
               <button
                 onClick={handleDeleteAddress}
-                className="flex-1 px-4 py-3 bg-red-700 rounded-xl text-white font-medium hover:bg-red-800 transition-colors"
-              >
-                Hapus
+                className="flex-1 px-4 py-3 bg-red-700 rounded-xl text-white font-medium hover:bg-red-800 transition-colors">
+                Delete
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Order Status Modal */}
-      {/* <OrderStatusModal
-        isOpen={showOrderModal}
-        onClose={handleCloseModal}
-        orderData={
-          orderSuccessData || {
-            order_id: "",
-            status: "PENDING",
-            total: 0,
-            payment_method: "",
-            delivery_type: "",
-          }
-        }
-      /> */}
+      {/* Order Detail Modal */}
+      <OrderDetailModal
+        isOpen={showOrderDetail}
+        orderId={lastOrderId}
+        onClose={handleCloseOrderDetail}
+      />
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -654,8 +650,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                     deliveryType === "delivery"
                       ? "border-red-700 bg-red-50"
                       : "border-gray-200 hover:border-red-300"
-                  }`}
-                >
+                  }`}>
                   <FaTruck
                     className={`w-6 h-6 mx-auto mb-2 ${
                       deliveryType === "delivery"
@@ -668,8 +663,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                       deliveryType === "delivery"
                         ? "text-red-700"
                         : "text-gray-600"
-                    }`}
-                  >
+                    }`}>
                     Delivery
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
@@ -683,8 +677,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                     deliveryType === "pickup"
                       ? "border-red-700 bg-red-50"
                       : "border-gray-200 hover:border-red-300"
-                  }`}
-                >
+                  }`}>
                   <FaStore
                     className={`w-6 h-6 mx-auto mb-2 ${
                       deliveryType === "pickup"
@@ -697,8 +690,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                       deliveryType === "pickup"
                         ? "text-red-700"
                         : "text-gray-600"
-                    }`}
-                  >
+                    }`}>
                     Pickup
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
@@ -724,8 +716,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                       resetAddressForm();
                       setShowAddressForm(true);
                     }}
-                    className="flex items-center gap-1 text-sm text-red-700 hover:text-red-800 font-medium transition-colors"
-                  >
+                    className="flex items-center gap-1 text-sm text-red-700 hover:text-red-800 font-medium transition-colors">
                     <FaPlus className="w-3 h-3" />
                     Add address
                   </button>
@@ -741,8 +732,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                             ? "border-red-700 bg-red-50"
                             : "border-gray-200 hover:border-red-300"
                         }`}
-                        onClick={() => setSelectedAddressId(address.id)}
-                      >
+                        onClick={() => setSelectedAddressId(address.id)}>
                         <div className="flex items-start gap-3">
                           <div
                             className={`w-8 h-8 rounded-full flex items-center justify-center ${
@@ -751,8 +741,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                                 : address.type === "office"
                                   ? "bg-orange-100"
                                   : "bg-purple-100"
-                            }`}
-                          >
+                            }`}>
                             {address.type === "home" ? (
                               <FaHome className="w-4 h-4 text-red-700" />
                             ) : address.type === "office" ? (
@@ -796,8 +785,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                               e.stopPropagation();
                               handleEditAddress(address);
                             }}
-                            className="p-1.5 text-gray-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                          >
+                            className="p-1.5 text-gray-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors">
                             <FaEdit className="w-4 h-4" />
                           </button>
                           <button
@@ -809,8 +797,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                                 addressLabel: address.label,
                               });
                             }}
-                            className="p-1.5 text-gray-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                          >
+                            className="p-1.5 text-gray-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors">
                             <FaTrash className="w-4 h-4" />
                           </button>
                         </div>
@@ -821,8 +808,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                               e.stopPropagation();
                               handleSetDefault(address.id);
                             }}
-                            className="mt-2 text-xs text-red-700 hover:text-red-800 font-medium transition-colors"
-                          >
+                            className="mt-2 text-xs text-red-700 hover:text-red-800 font-medium transition-colors">
                             Set default
                           </button>
                         )}
@@ -841,8 +827,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                             resetAddressForm();
                             setShowAddressForm(true);
                           }}
-                          className="mt-2 text-red-700 hover:text-red-800 font-medium"
-                        >
+                          className="mt-2 text-red-700 hover:text-red-800 font-medium">
                           Add first address
                         </button>
                       </div>
@@ -920,14 +905,14 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                             address: e.target.value,
                           })
                         }
-                        placeholder="Nama jalan, gedung, no. rumah"
+                        placeholder="Street name, building, house number"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700"
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Address details (Opsional)
+                        Address details (Optional)
                       </label>
                       <input
                         type="text"
@@ -938,7 +923,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                             detail: e.target.value,
                           })
                         }
-                        placeholder="RT/RW, blok, no. unit"
+                        placeholder="RT/RW, block, unit number"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700"
                       />
                     </div>
@@ -956,8 +941,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                               city: e.target.value,
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700"
-                        >
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700">
                           <option>Jakarta Selatan</option>
                           <option>Jakarta Pusat</option>
                           <option>Jakarta Utara</option>
@@ -967,7 +951,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Pos code
+                          Postal code
                         </label>
                         <input
                           type="text"
@@ -992,8 +976,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                         {(["home", "office", "other"] as const).map((type) => (
                           <label
                             key={type}
-                            className="flex items-center gap-2 cursor-pointer"
-                          >
+                            className="flex items-center gap-2 cursor-pointer">
                             <input
                               type="radio"
                               name="addressType"
@@ -1009,10 +992,10 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                             />
                             <span className="capitalize text-sm text-gray-700">
                               {type === "home"
-                                ? "Rumah"
+                                ? "Home"
                                 : type === "office"
-                                  ? "Kantor"
-                                  : "Lainnya"}
+                                  ? "Office"
+                                  : "Other"}
                             </span>
                           </label>
                         ))}
@@ -1034,8 +1017,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                       />
                       <label
                         htmlFor="setDefault"
-                        className="text-sm text-gray-700"
-                      >
+                        className="text-sm text-gray-700">
                         Set default address
                       </label>
                     </div>
@@ -1043,8 +1025,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                     <div className="flex gap-3 pt-2">
                       <button
                         type="submit"
-                        className="flex-1 bg-red-700 text-white py-2 rounded-lg font-medium hover:bg-red-800 transition-colors"
-                      >
+                        className="flex-1 bg-red-700 text-white py-2 rounded-lg font-medium hover:bg-red-800 transition-colors">
                         {editingAddress ? "Update Address" : "Save Address"}
                       </button>
                       <button
@@ -1054,8 +1035,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                           setEditingAddress(null);
                           resetAddressForm();
                         }}
-                        className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
+                        className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                         Cancel
                       </button>
                     </div>
@@ -1082,8 +1062,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                           selectedDeliveryOption === option.id
                             ? "border-red-700 bg-red-50"
                             : "border-gray-200 hover:border-red-300"
-                        }`}
-                      >
+                        }`}>
                         <input
                           type="radio"
                           name="delivery"
@@ -1098,8 +1077,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                               selectedDeliveryOption === option.id
                                 ? "bg-red-100"
                                 : "bg-gray-100"
-                            }`}
-                          >
+                            }`}>
                             <Icon
                               className={`w-6 h-6 ${
                                 selectedDeliveryOption === option.id
@@ -1195,8 +1173,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                 {state.items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50/50 rounded-lg transition-colors px-2"
-                  >
+                    className="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50/50 rounded-lg transition-colors px-2">
                     {/* Product Image Placeholder */}
                     <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-red-50 rounded-lg flex items-center justify-center shadow-sm">
                       {item.image_url && (
@@ -1220,8 +1197,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                       <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
                         <button
                           onClick={() => handleDecreaseQty(item.id)}
-                          className="w-8 h-8 flex items-center justify-center bg-gray-50 hover:bg-red-50 text-gray-600 hover:text-red-700 disabled:opacity-50 disabled:hover:bg-gray-50 disabled:hover:text-gray-600 transition-colors"
-                        >
+                          className="w-8 h-8 flex items-center justify-center bg-gray-50 hover:bg-red-50 text-gray-600 hover:text-red-700 disabled:opacity-50 disabled:hover:bg-gray-50 disabled:hover:text-gray-600 transition-colors">
                           <FaMinus className="w-3 h-3" />
                         </button>
                         <span className="w-10 text-center font-medium text-gray-700">
@@ -1230,8 +1206,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                         <button
                           onClick={() => handleIncreaseQty(item.id)}
                           disabled={item.qty >= 10}
-                          className="w-8 h-8 flex items-center justify-center bg-gray-50 hover:bg-red-50 text-gray-600 hover:text-red-700 disabled:opacity-50 disabled:hover:bg-gray-50 disabled:hover:text-gray-600 transition-colors"
-                        >
+                          className="w-8 h-8 flex items-center justify-center bg-gray-50 hover:bg-red-50 text-gray-600 hover:text-red-700 disabled:opacity-50 disabled:hover:bg-gray-50 disabled:hover:text-gray-600 transition-colors">
                           <FaPlusIcon className="w-3 h-3" />
                         </button>
                       </div>
@@ -1249,8 +1224,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
               {/* Add More Items Button */}
               <button
                 onClick={() => navigate("/menu")}
-                className="w-full mt-4 py-3 border-2 border-red-700 text-red-700 rounded-xl font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2 group"
-              >
+                className="w-full mt-4 py-3 border-2 border-red-700 text-red-700 rounded-xl font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2 group">
                 <FaPlusIcon className="w-4 h-4 group-hover:rotate-90 transition-transform" />
                 Add order
               </button>
@@ -1275,8 +1249,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                         paymentMethod === method.id
                           ? "border-red-700 bg-red-50"
                           : "border-gray-200 hover:border-red-300"
-                      }`}
-                    >
+                      }`}>
                       <input
                         type="radio"
                         name="payment"
@@ -1291,8 +1264,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                             paymentMethod === method.id
                               ? "bg-red-100"
                               : "bg-gray-100"
-                          }`}
-                        >
+                          }`}>
                           <Icon
                             className={`w-6 h-6 ${
                               paymentMethod === method.id
@@ -1351,7 +1323,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                     ) : (
                       <FaMotorcycle className="w-3 h-3" />
                     )}
-                    {deliveryType === "pickup" ? "Pickup" : "Ongkir"}
+                    {deliveryType === "pickup" ? "Pickup" : "Shipping"}
                   </span>
                   {shippingCost === 0 ? (
                     <span className="text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full text-xs">
@@ -1369,7 +1341,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                   <div className="bg-red-50 p-3 rounded-lg border border-red-100">
                     <p className="text-xs text-red-700 font-medium mb-1 flex items-center gap-1">
                       <FaClock className="w-3 h-3" />
-                      Estimated to
+                      Estimated delivery
                     </p>
                     <p className="text-sm text-red-700 font-semibold">
                       {deliveryEstimate.timeRange}
@@ -1391,7 +1363,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                     <p className="text-xs text-orange-700 mb-2 flex items-center gap-1">
                       <FaMotorcycle className="w-3 h-3" />
                       Add Rp {(500000 - total).toLocaleString()} for Free
-                      shipping cost
+                      shipping
                     </p>
                     <div className="w-full bg-orange-200 rounded-full h-1.5 overflow-hidden">
                       <div
@@ -1422,7 +1394,7 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
                         Rp {grandTotal.toLocaleString()}
                       </span>
                       <p className="text-xs text-gray-500 mt-1">
-                        Including PPN
+                        Including tax
                       </p>
                     </div>
                   </div>
@@ -1454,13 +1426,14 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
               {/* Checkout Button */}
               <button
                 onClick={handleCreateOrder}
-                disabled={loading || !termsAccepted || state.items.length === 0}
+                disabled={
+                  processing || !termsAccepted || state.items.length === 0
+                }
                 className="w-full bg-red-700 text-white py-3 rounded-xl font-semibold mt-4 
                          hover:bg-red-800 transition-colors disabled:opacity-50 
                          disabled:cursor-not-allowed disabled:hover:bg-red-700
-                         relative overflow-hidden group"
-              >
-                {loading ? (
+                         relative overflow-hidden group">
+                {processing ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     <span>Processing...</span>
@@ -1536,4 +1509,4 @@ const [showHistoryModal, setShowHistoryModal] = useState(false);
   );
 };
 
-export default CheckoutPage;
+export default CheckoutPage;  

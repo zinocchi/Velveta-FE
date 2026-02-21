@@ -176,7 +176,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
               onClick={handleCheckout}
               className="flex-1 py-3 bg-red-700 text-white rounded-xl hover:bg-amber-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={state.items.length === 0}
-            >
+            > 
               Checkout
             </button>
           </div>
