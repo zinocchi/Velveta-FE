@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // Tambahkan useLocation
 import menuService from "../../services/MenuServices";
 import type { Menu } from "../../types/index";
 import "../../styles/Menu.css";
@@ -73,11 +73,15 @@ const CATEGORY_INFO = {
 };
 
 const Menu = () => {
+  const location = useLocation();
   const [menuData, setMenuData] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
   const [groupedCategories, setGroupedCategories] = useState<
     Record<string, Menu[]>
   >({});
+
+  // Deteksi apakah ini diakses dari dashboard
+  const isFromDashboard = location.pathname.includes("/dashboard");
 
   useEffect(() => {
     fetchMenuData();
@@ -111,13 +115,13 @@ const Menu = () => {
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, [groupedCategories]);
 
   const fetchMenuData = async () => {
     try {
       setLoading(true);
       const data = await menuService.getAllMenu();
-      console.log("Fetched menu data:", data); // Debug log
+      console.log("Fetched menu data:", data);
 
       setMenuData(data);
 
@@ -130,7 +134,7 @@ const Menu = () => {
         return acc;
       }, {});
 
-      console.log("Grouped categories:", Object.keys(grouped)); // Debug log
+      console.log("Grouped categories:", Object.keys(grouped));
       setGroupedCategories(grouped);
     } catch (error) {
       console.error("Error fetching menu data:", error);
@@ -177,7 +181,7 @@ const Menu = () => {
         .join(" "),
       description: `${groupedCategories[category]?.length || 0} items available`,
       image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085",
-      section: "food" as const, // default to food
+      section: "food" as const,
     };
   };
 
@@ -188,14 +192,13 @@ const Menu = () => {
     return (
       <Link
         key={category}
-        to={`/category/${category}`} // buat route baru di React
+        to={`/category/${category}`}
         state={{
           category,
           menu,
           displayName: info.displayName,
         }}
-        className="menu-page-item group"
-      >
+        className="menu-page-item group">
         <div className="bg-white rounded-xl shadow-sm overflow-hidden p-4 h-full flex flex-col hover:shadow-md transition-shadow duration-300">
           <div className="relative overflow-hidden rounded-lg mb-4">
             <img
@@ -203,10 +206,6 @@ const Menu = () => {
               alt={info.displayName}
               className="menu-img w-full h-40 sm:h-48 object-cover rounded-lg"
             />
-            {/* <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="absolute top-2 right-2 bg-red-700 text-white text-xs font-bold px-2 py-1 rounded-full">
-              {menu.length} items
-            </div> */}
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-1">
             {info.displayName}
@@ -217,10 +216,19 @@ const Menu = () => {
     );
   };
 
+  // Tentukan padding-top untuk konten utama
+  const getMainPaddingTop = () => {
+    if (isFromDashboard) {
+      return "pt-4"; // Padding kecil untuk dashboard
+    }
+    return "pt-24"; // Padding lebih besar untuk halaman utama (karena ada navbar)
+  };
+
   return (
-    <main className="pt-12 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main
+      className={`${getMainPaddingTop()} pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`}>
       <div className="flex flex-col md:flex-row">
-        <div className="flex-1 pt-12">
+        <div className="flex-1">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 font-montserrat">
             Our Menu
           </h1>
@@ -228,11 +236,6 @@ const Menu = () => {
             Discover our premium selection of coffees and delicious food
             pairings
           </p>
-
-          {/* Total categories debug */}
-          {/* <div className="mb-4 text-sm text-gray-500">
-            Total categories found: {Object.keys(groupedCategories).length}
-          </div> */}
 
           {/* Drinks Section */}
           {drinkCategories.length > 0 && (
@@ -278,8 +281,7 @@ const Menu = () => {
               <p className="text-gray-600">No menu categories available.</p>
               <button
                 onClick={fetchMenuData}
-                className="mt-4 px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800"
-              >
+                className="mt-4 px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800">
                 Retry
               </button>
             </div>

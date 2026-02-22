@@ -79,14 +79,14 @@ export default function CategoryPage() {
   const handleIncrease = (item: Menu, e: React.MouseEvent) => {
     e.stopPropagation();
     const currentQty = getItemQuantity(item.id);
-    
+
     if (currentQty === 0) {
       // Jika belum ada di cart, tambahkan dengan animasi flyToCart
       flyToCart(
         (e.currentTarget as HTMLElement).closest(".cart-source") as HTMLElement,
       );
     }
-    
+
     dispatch({
       type: "ADD_TO_CART",
       payload: {
@@ -106,15 +106,14 @@ export default function CategoryPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen pt-16 md:pt-20 flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-700"></div>
           <p className="mt-4 text-gray-600">Loading menu...</p>
         </div>
-      </main>
+      </div>
     );
   }
-
   if (menus.length === 0) {
     return (
       <main className="pt-20 md:pt-28 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -150,12 +149,11 @@ export default function CategoryPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
           {menus.map((item) => {
             const quantity = getItemQuantity(item.id);
-            
+
             return (
               <div
                 key={item.id}
-                className="cart-source bg-white rounded-lg sm:rounded-xl shadow-sm overflow-hidden p-3 sm:p-4 md:p-5 h-full flex flex-col hover:shadow-md transition-shadow duration-300"
-              >
+                className="cart-source bg-white rounded-lg sm:rounded-xl shadow-sm overflow-hidden p-3 sm:p-4 md:p-5 h-full flex flex-col hover:shadow-md transition-shadow duration-300">
                 {/* Image */}
                 <div className="overflow-hidden rounded-md sm:rounded-lg mb-3 sm:mb-4">
                   <img
@@ -185,13 +183,12 @@ export default function CategoryPage() {
                     <p className="text-base sm:text-lg font-bold text-gray-900">
                       Rp {item.price.toLocaleString("id-ID")}
                     </p>
-                    
+
                     {/* Tombol Add - Hanya muncul jika quantity 0 */}
                     {quantity === 0 && (
                       <button
                         className="bg-red-700 hover:bg-red-800 text-white text-xs sm:text-sm font-medium py-1.5 sm:py-2 px-3 sm:px-4 rounded-md sm:rounded-lg transition-colors duration-300 active:scale-95"
-                        onClick={(e) => handleIncrease(item, e)}
-                      >
+                        onClick={(e) => handleIncrease(item, e)}>
                         Add
                       </button>
                     )}
@@ -206,8 +203,7 @@ export default function CategoryPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={(e) => handleDecrease(item.id, e)}
-                          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-700 rounded-full transition-colors"
-                        >
+                          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-700 rounded-full transition-colors">
                           <FaMinus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                         </button>
                         <span className="w-8 text-center text-sm sm:text-base font-semibold text-red-700">
@@ -216,8 +212,7 @@ export default function CategoryPage() {
                         <button
                           onClick={(e) => handleIncrease(item, e)}
                           disabled={quantity >= 10}
-                          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-700 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-50"
-                        >
+                          className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-700 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-50">
                           <FaPlus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                         </button>
                       </div>
