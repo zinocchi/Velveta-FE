@@ -8,6 +8,7 @@ import {
 } from "react";
 import axios from "axios";
 
+// Context for managing user authentication state across the app
 export interface User {
   id: number;
   username: string;
@@ -36,8 +37,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       });
   }, []);
 
-
-return (
+  return (
     <UserContext.Provider value={{ user, setUser }}>
       {Children.only(children)}
     </UserContext.Provider>
@@ -45,9 +45,9 @@ return (
 };
 
 export const useUser = () => {
-    const ctx = useContext(UserContext);
-    if (!ctx) {
-        throw new Error("useUser must be used within a UserProvider");
-    }
-    return ctx;
+  const ctx = useContext(UserContext);
+  if (!ctx) {
+    throw new Error("useUser must be used within a UserProvider");
+  }
+  return ctx;
 };

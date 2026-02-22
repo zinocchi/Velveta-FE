@@ -78,7 +78,6 @@ const DashboardContent: React.FC = () => {
       const response = await api.get("/orders/my");
       const ordersData = response.data.data || response.data;
 
-      // Calculate stats
       const completedOrders = ordersData.filter(
         (o: Order) => o.status === "COMPLETED",
       );
@@ -87,7 +86,6 @@ const DashboardContent: React.FC = () => {
         0,
       );
 
-      // Find favorite drink
       const drinkCount: Record<string, { count: number; name: string }> = {};
       ordersData.forEach((order: Order) => {
         order.items.forEach((item: OrderItem) => {
@@ -108,7 +106,6 @@ const DashboardContent: React.FC = () => {
         }
       });
 
-      // Get recent orders (last 5)
       const recentOrders = [...ordersData]
         .sort(
           (a, b) =>

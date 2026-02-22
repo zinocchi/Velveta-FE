@@ -6,8 +6,7 @@ import React, {
   type ReactNode,
 } from "react";
 
-/* ================= TYPES ================= */
-
+// Context for managing shopping cart state across the app
 export interface CartItem {
   id: number;
   name: string;
@@ -27,13 +26,11 @@ type CartAction =
   | { type: "REMOVE"; payload: number }
   | { type: "CLEAR_CART" };
 
-/* ================= REDUCER ================= */
-
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case "ADD_TO_CART": {
       const existing = state.items.find(
-        (item) => item.id === action.payload.id
+        (item) => item.id === action.payload.id,
       );
 
       if (existing) {
@@ -41,7 +38,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
           items: state.items.map((item) =>
             item.id === action.payload.id
               ? { ...item, qty: item.qty + 1 }
-              : item
+              : item,
           ),
         };
       }
@@ -54,9 +51,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case "INCREMENT":
       return {
         items: state.items.map((item) =>
-          item.id === action.payload
-            ? { ...item, qty: item.qty + 1 }
-            : item
+          item.id === action.payload ? { ...item, qty: item.qty + 1 } : item,
         ),
       };
 
@@ -64,9 +59,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       return {
         items: state.items
           .map((item) =>
-            item.id === action.payload
-              ? { ...item, qty: item.qty - 1 }
-              : item
+            item.id === action.payload ? { ...item, qty: item.qty - 1 } : item,
           )
           .filter((item) => item.qty > 0),
       };
@@ -84,8 +77,6 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
   }
 };
 
-/* ================= CONTEXT ================= */
-
 const CartContext = createContext<{
   state: CartState;
   dispatch: React.Dispatch<CartAction>;
@@ -93,19 +84,14 @@ const CartContext = createContext<{
   totalPrice: number;
 } | null>(null);
 
-/* ================= INIT FROM STORAGE ================= */
-
 const initCart = (): CartState => {
   const saved = localStorage.getItem("cart");
   return saved ? JSON.parse(saved) : { items: [] };
 };
 
-/* ================= PROVIDER ================= */
-
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(cartReducer, undefined, initCart);
 
-  // 🔥 persist cart
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(state));
   }, [state]);
@@ -114,7 +100,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const totalPrice = state.items.reduce(
     (sum, item) => sum + item.price * item.qty,
-    0
+    0,
   );
 
   return (
@@ -123,8 +109,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     </CartContext.Provider>
   );
 };
-
-/* ================= HOOK ================= */
 
 export const useCart = () => {
   const context = useContext(CartContext);

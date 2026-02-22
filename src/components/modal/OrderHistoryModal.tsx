@@ -55,7 +55,7 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  
+
   const modalContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -64,27 +64,21 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
     };
 
     if (isOpen) {
-      // Hitung scrollbar width untuk mencegah layout shift
       const scrollbarWidth =
         window.innerWidth - document.documentElement.clientWidth;
 
-      // Prevent body scroll
       document.body.style.overflow = "hidden";
       document.body.style.paddingRight = `${scrollbarWidth}px`;
 
-      // Fetch orders
       fetchOrderHistory();
 
-      // Add event listeners
       document.addEventListener("keydown", handleEscape);
     }
 
     return () => {
-      // Restore body scroll
       document.body.style.overflow = "unset";
       document.body.style.paddingRight = "0px";
 
-      // Remove event listeners
       document.removeEventListener("keydown", handleEscape);
     };
   }, [isOpen]);
@@ -141,8 +135,10 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
     const diffSeconds = Math.floor(diffTime / 1000);
 
     if (diffSeconds < 60) return "Just now";
-    if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes > 1 ? "s" : ""} ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    if (diffMinutes < 60)
+      return `${diffMinutes} minute${diffMinutes > 1 ? "s" : ""} ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
     if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
     return date.toLocaleDateString("en-US", {
       day: "numeric",
@@ -201,18 +197,17 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
   return (
     <>
       {/* Backdrop with blur effect */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9999]"
         onClick={onClose}
       />
-      
+
       {/* Modal Container */}
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
         <div
           ref={modalContentRef}
           className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-fadeIn pointer-events-auto"
-          onClick={handleModalClick}
-        >
+          onClick={handleModalClick}>
           {/* Header - Sticky */}
           <div className="sticky top-0 bg-gradient-to-r from-red-700 to-red-800 text-white p-6 z-10">
             <div className="flex items-center justify-between">
@@ -222,8 +217,7 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              >
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors">
                 <FaTimes className="w-5 h-5" />
               </button>
             </div>
@@ -243,8 +237,7 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
                 <p className="text-gray-500 text-sm">{error}</p>
                 <button
                   onClick={fetchOrderHistory}
-                  className="mt-4 px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800"
-                >
+                  className="mt-4 px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800">
                   Try Again
                 </button>
               </div>
@@ -257,12 +250,12 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
                   No Orders Yet
                 </h3>
                 <p className="text-gray-500 text-center mb-6">
-                  You haven't placed any orders yet. Start ordering your favorite coffee now!
+                  You haven't placed any orders yet. Start ordering your
+                  favorite coffee now!
                 </p>
                 <button
                   onClick={handleBrowseMenu}
-                  className="px-6 py-3 bg-red-700 text-white rounded-xl font-medium hover:bg-red-800 transition-colors flex items-center gap-2"
-                >
+                  className="px-6 py-3 bg-red-700 text-white rounded-xl font-medium hover:bg-red-800 transition-colors flex items-center gap-2">
                   <span>Browse Menu</span>
                   <span>→</span>
                 </button>
@@ -273,8 +266,7 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
                   <div
                     key={order.id}
                     onClick={() => handleViewOrder(order.id)}
-                    className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer group"
-                  >
+                    className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer group">
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <p className="text-sm text-gray-500">Order Number</p>
@@ -283,8 +275,7 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
                         </p>
                       </div>
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}
-                      >
+                        className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}>
                         <span className="flex items-center gap-1">
                           {getStatusIcon(order.status)}
                           {getStatusText(order.status)}
@@ -322,8 +313,7 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
                           <div
                             key={idx}
                             className="w-8 h-8 bg-red-100 rounded-full border-2 border-white flex items-center justify-center overflow-hidden"
-                            title={item.menu?.name}
-                          >
+                            title={item.menu?.name}>
                             {item.menu?.image_url ? (
                               <img
                                 src={item.menu.image_url}

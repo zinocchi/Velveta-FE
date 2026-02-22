@@ -24,12 +24,9 @@ import AuthCallback from "../pages/auth/AuthCallback";
 
 // dashboard
 import DashboardPage from "../pages/dashboard/Dashboard";
-import Orders from "../pages/dashboard/Orders";
 import Favorites from "../pages/dashboard/Favorites";
 import Profile from "../pages/dashboard/Profile";
 import CheckoutPages from "../pages/dashboard/CheckoutPages";
-
-// Hapus import OrderDetailPage karena sekarang pakai modal
 
 const AppRoutes = () => {
   return (
@@ -54,12 +51,11 @@ const AppRoutes = () => {
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardPage />} />
             <Route path="menu" element={<Menu />} />
-            <Route path="orders" element={<Orders />} />
             <Route path="favorites" element={<Favorites />} />
             <Route path="profile" element={<Profile />} />
             <Route path="checkout" element={<CheckoutPages />} />
           </Route>
-          
+
           {/* Hapus route /order/:orderId */}
         </Route>
 

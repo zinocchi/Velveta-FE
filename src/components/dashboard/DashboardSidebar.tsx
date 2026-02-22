@@ -27,7 +27,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     if (onBackToHome) {
       onBackToHome();
     } else {
-      navigate("/"); // default ke home
+      navigate("/"); 
     }
   };
 

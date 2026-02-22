@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { useAuth } from "../../auth/useAuth";
 
+// Page to handle authentication callback from external providers (Google)
 const AuthCallback = () => {
   const navigate = useNavigate();
   const { setUser, setIsLoggedIn } = useAuth();

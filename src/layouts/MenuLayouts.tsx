@@ -2,6 +2,7 @@ import Navbar from "../components/Navbar";
 import MenuSidebar from "../components/menu/MenuSidebar";
 import { Outlet } from "react-router-dom";
 
+// Layout for menu-related pages, providing a sidebar for navigation between menu sections
 const MenuLayout = () => {
   return (
     <>

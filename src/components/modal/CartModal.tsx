@@ -1,7 +1,6 @@
 // CartModal.tsx
 import React, { useEffect, useRef } from "react";
 import { useCart } from "../../context/CartContext";
-import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 
 interface CartModalProps {
@@ -28,25 +27,20 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
     };
 
     if (isOpen) {
-      // Hitung scrollbar width untuk mencegah layout shift
       const scrollbarWidth =
         window.innerWidth - document.documentElement.clientWidth;
 
-      // Prevent body scroll
       document.body.style.overflow = "hidden";
       document.body.style.paddingRight = `${scrollbarWidth}px`;
 
-      // Add event listeners
       document.addEventListener("click", handleClickOutside);
       document.addEventListener("keydown", handleEscape);
     }
 
     return () => {
-      // Restore body scroll
       document.body.style.overflow = "unset";
       document.body.style.paddingRight = "0px";
 
-      // Remove event listeners
       document.removeEventListener("click", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
     };
@@ -191,7 +185,6 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
             )}
           </div>
 
-          {/* Footer - Sticky bottom - Hanya tampil jika cart tidak kosong */}
           {state.items.length > 0 && (
             <div className="border-t p-6 bg-white sticky bottom-0 rounded-b-2xl">
               <div className="flex justify-between items-center mb-6">

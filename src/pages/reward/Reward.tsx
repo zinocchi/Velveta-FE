@@ -20,7 +20,6 @@ const Rewards = () => {
     setAlertType(type);
     setShowAlert(true);
 
-    // Auto hide setelah 4 detik
     setTimeout(() => {
       setShowAlert(false);
     }, 5000);
@@ -41,7 +40,6 @@ const Rewards = () => {
   };
 
   useEffect(() => {
-    // Progress bar animation
     const progressBars = document.querySelectorAll(".progress-bar");
     progressBars.forEach((bar) => {
       const element = bar as HTMLElement;
@@ -52,7 +50,6 @@ const Rewards = () => {
       }, 300);
     });
 
-    // Fade in animation
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -72,7 +69,6 @@ const Rewards = () => {
       observer.observe(el);
     });
 
-    // Add floating animation styles
     const style = document.createElement("style");
     style.textContent = `
       .fade-in {
@@ -135,8 +131,7 @@ const Rewards = () => {
                     ? "bg-green-50/95 border-green-200"
                     : "bg-red-50/95 border-red-200"
               }
-            `}
-          >
+            `}>
             <div className="flex items-start">
               <div className="flex-shrink-0">
                 {alertType === "info" ? (
@@ -145,8 +140,7 @@ const Rewards = () => {
                       className="h-5 w-5 text-red-600"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -161,8 +155,7 @@ const Rewards = () => {
                       className="h-5 w-5 text-green-600"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -177,8 +170,7 @@ const Rewards = () => {
                       className="h-5 w-5 text-red-600"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -200,8 +192,7 @@ const Rewards = () => {
                           ? "text-green-800"
                           : "text-red-800"
                     }
-                  `}
-                >
+                  `}>
                   {alertType === "info"
                     ? "Already Signed In"
                     : alertType === "success"
@@ -212,14 +203,12 @@ const Rewards = () => {
               </div>
               <button
                 onClick={() => setShowAlert(false)}
-                className="ml-2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
+                className="ml-2 text-gray-400 hover:text-gray-600 transition-colors">
                 <svg
                   className="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -264,14 +253,12 @@ const Rewards = () => {
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <button
               onClick={handleJoinClick}
-              className="px-8 py-3 bg-white text-red-700 rounded-full font-bold hover:bg-gray-100 transition-colors duration-300"
-            >
+              className="px-8 py-3 bg-white text-red-700 rounded-full font-bold hover:bg-gray-100 transition-colors duration-300">
               Join Now
             </button>
             <a
               href="#how-it-works"
-              className="px-8 py-3 border-2 border-white text-white rounded-full font-bold hover:bg-white hover:text-red-700 transition-colors duration-300"
-            >
+              className="px-8 py-3 border-2 border-white text-white rounded-full font-bold hover:bg-white hover:text-red-700 transition-colors duration-300">
               How It Works
             </a>
           </div>
@@ -301,8 +288,7 @@ const Rewards = () => {
               <div className="w-full bg-gray-200 rounded-full h-4">
                 <div
                   className="progress-bar bg-amber-500 h-4 rounded-full"
-                  style={{ width: "50%" }}
-                ></div>
+                  style={{ width: "50%" }}></div>
               </div>
             </div>
 
@@ -398,8 +384,7 @@ const Rewards = () => {
                       className="h-10 w-10 text-gray-600"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -417,8 +402,7 @@ const Rewards = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 text-red-700 mr-2 mt-0.5"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                      fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -434,8 +418,7 @@ const Rewards = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 text-red-700 mr-2 mt-0.5"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                      fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -451,8 +434,7 @@ const Rewards = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 text-red-700 mr-2 mt-0.5"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                      fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -471,8 +453,7 @@ const Rewards = () => {
                   <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                     <div
                       className="bg-gray-400 h-2 rounded-full"
-                      style={{ width: "50%" }}
-                    ></div>
+                      style={{ width: "50%" }}></div>
                   </div>
                 </div>
               </div>
@@ -488,8 +469,7 @@ const Rewards = () => {
                       className="h-10 w-10 text-amber-600"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -507,8 +487,7 @@ const Rewards = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 text-red-700 mr-2 mt-0.5"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                      fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -524,8 +503,7 @@ const Rewards = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 text-red-700 mr-2 mt-0.5"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                      fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -541,8 +519,7 @@ const Rewards = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 text-red-700 mr-2 mt-0.5"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                      fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -558,8 +535,7 @@ const Rewards = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 text-red-700 mr-2 mt-0.5"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                      fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -578,8 +554,7 @@ const Rewards = () => {
                   <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                     <div
                       className="bg-amber-400 h-2 rounded-full"
-                      style={{ width: "30%" }}
-                    ></div>
+                      style={{ width: "30%" }}></div>
                   </div>
                 </div>
               </div>
@@ -595,8 +570,7 @@ const Rewards = () => {
                       className="h-10 w-10 text-white"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -614,8 +588,7 @@ const Rewards = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 text-red-700 mr-2 mt-0.5"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                      fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -631,8 +604,7 @@ const Rewards = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 text-red-700 mr-2 mt-0.5"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                      fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -648,8 +620,7 @@ const Rewards = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 text-red-700 mr-2 mt-0.5"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                      fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -665,8 +636,7 @@ const Rewards = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 text-red-700 mr-2 mt-0.5"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                      fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -682,8 +652,7 @@ const Rewards = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 text-red-700 mr-2 mt-0.5"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
+                      fill="currentColor">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -702,8 +671,7 @@ const Rewards = () => {
                   <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                     <div
                       className="bg-gray-600 h-2 rounded-full"
-                      style={{ width: "100%" }}
-                    ></div>
+                      style={{ width: "100%" }}></div>
                   </div>
                 </div>
               </div>
@@ -768,12 +736,10 @@ const Rewards = () => {
             ].map((faq, index) => (
               <div
                 key={index}
-                className="bg-white p-6 rounded-xl shadow-sm fade-in"
-              >
+                className="bg-white p-6 rounded-xl shadow-sm fade-in">
                 <button
                   onClick={() => toggleFAQ(index)}
-                  className="faq-toggle w-full flex justify-between items-center"
-                >
+                  className="faq-toggle w-full flex justify-between items-center">
                   <h3 className="text-lg font-bold text-left text-gray-900">
                     {faq.question}
                   </h3>
@@ -784,8 +750,7 @@ const Rewards = () => {
                     }`}
                     fill="none"
                     viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
+                    stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -797,8 +762,7 @@ const Rewards = () => {
                 <div
                   className={`faq-content mt-3 text-gray-600 ${
                     openFaq === index ? "block" : "hidden"
-                  }`}
-                >
+                  }`}>
                   <p>{faq.answer}</p>
                 </div>
               </div>
@@ -811,4 +775,3 @@ const Rewards = () => {
 };
 
 export default Rewards;
-

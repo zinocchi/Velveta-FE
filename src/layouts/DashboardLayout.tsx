@@ -3,6 +3,8 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import DashboardNavbar from "../components/dashboard/DashboardNavbar";
 import DashboardSidebar from "../components/dashboard/DashboardSidebar";
 
+
+// Main layout for the user dashboard, including a navbar and sidebar for navigation between dashboard sections
 const DashboardLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,7 +37,6 @@ const DashboardLayout: React.FC = () => {
     favoriteDrinksCount: 8,
   };
 
-  // Event handlers
   const handleTabChange = (tabId: string) => {
     navigate(`/dashboard/${tabId}`);
   };

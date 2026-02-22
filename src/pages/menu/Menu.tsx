@@ -5,7 +5,6 @@ import type { Menu } from "../../types/index";
 import "../../styles/Menu.css";
 
 const CATEGORY_INFO = {
-  // Drinks
   hot_coffee: {
     displayName: "Hot Coffee",
     description: "Rich, aromatic coffee served hot",
@@ -41,7 +40,6 @@ const CATEGORY_INFO = {
       "https://globalassets.starbucks.com/digitalassets/products/bev/HotChocolate.jpg",
     section: "drinks" as const,
   },
-  // Food
   bakery: {
     displayName: "Bakery",
     description: "Freshly baked pastries and breads",
@@ -80,7 +78,6 @@ const Menu = () => {
     Record<string, Menu[]>
   >({});
 
-  // Deteksi apakah ini diakses dari dashboard
   const isFromDashboard = location.pathname.includes("/dashboard");
 
   useEffect(() => {
@@ -88,7 +85,6 @@ const Menu = () => {
   }, []);
 
   useEffect(() => {
-    // Animation for menu items
     const menuItems = document.querySelectorAll(".menu-page-item");
     const observer = new IntersectionObserver(
       (entries) => {
@@ -111,7 +107,6 @@ const Menu = () => {
       observer.observe(item);
     });
 
-    // Cleanup
     return () => {
       observer.disconnect();
     };
@@ -168,12 +163,10 @@ const Menu = () => {
     );
   }
 
-  // Helper function to get category info
   const getCategoryInfo = (category: string) => {
     const info = CATEGORY_INFO[category as keyof typeof CATEGORY_INFO];
     if (info) return info;
 
-    // Fallback for unknown categories
     return {
       displayName: category
         .split("_")
@@ -216,12 +209,11 @@ const Menu = () => {
     );
   };
 
-  // Tentukan padding-top untuk konten utama
   const getMainPaddingTop = () => {
     if (isFromDashboard) {
-      return "pt-4"; // Padding kecil untuk dashboard
+      return "pt-4";
     }
-    return "pt-24"; // Padding lebih besar untuk halaman utama (karena ada navbar)
+    return "pt-24";
   };
 
   return (

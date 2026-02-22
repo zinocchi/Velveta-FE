@@ -1,6 +1,7 @@
 import api from "../api/axios";
 import { type Menu, type ApiResponse, type MenuFilters } from "../types/index";
 
+// Service to handle all menu-related API calls
 const menuService = {
   /**
    * Get all menus with optional filters
@@ -11,7 +12,7 @@ const menuService = {
 
       if (filters?.category && filters.category !== "all") {
         params.append("category", filters.category);
-      }  
+      }
 
       if (filters?.search) {
         params.append("search", filters.search);
@@ -59,8 +60,7 @@ const menuService = {
    */
   async getCategories(): Promise<string[]> {
     try {
-      const response =
-        await api.get<ApiResponse<string[]>>("/menu/categories");
+      const response = await api.get<ApiResponse<string[]>>("/menu/categories");
       return response.data.data;
     } catch (error) {
       console.error("Error fetching categories:", error);

@@ -10,7 +10,7 @@ const About = () => {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     document.querySelectorAll(".fade-in").forEach((el) => {
@@ -18,7 +18,7 @@ const About = () => {
         "opacity-0",
         "translate-y-6",
         "transition-all",
-        "duration-700"
+        "duration-700",
       );
       observer.observe(el);
     });
@@ -28,28 +28,24 @@ const About = () => {
 
   return (
     <>
-      {/* HERO - Hapus mt-20 dan tambahkan pt-20 untuk kompensasi navbar */}
-      {/* HERO dengan gambar fullscreen tepat di bawah navbar */}
-{/* HERO dengan gambar fullscreen tepat di bawah navbar */}
-<section
-  className="relative h-[calc(96vh-5rem)] bg-cover bg-center"
-  style={{
-    backgroundImage:
-      "url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085')",
-  }}
->
-  {/* Overlay untuk konten */}
-  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-    <div className="text-center px-4">
-      <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 ">
-        Our Story
-      </h1>
-      <p className="text-lg md:text-2xl text-white max-w-2xl mx-auto ">
-        Discover the passion behind every cup of Velveta Coffee
-      </p>
-    </div>
-  </div>
-</section>
+      <section
+        className="relative h-[calc(96vh-5rem)] bg-cover bg-center"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085')",
+        }}>
+        {/* Overlay untuk konten */}
+        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+          <div className="text-center px-4">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 ">
+              Our Story
+            </h1>
+            <p className="text-lg md:text-2xl text-white max-w-2xl mx-auto ">
+              Discover the passion behind every cup of Velveta Coffee
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* ABOUT */}
       <section className="py-16 bg-white">
@@ -98,8 +94,7 @@ const About = () => {
             ].map((item, i) => (
               <div
                 key={i}
-                className="bg-white p-8 rounded-xl shadow fade-in text-center"
-              >
+                className="bg-white p-8 rounded-xl shadow fade-in text-center">
                 <h3 className="text-xl font-bold mb-2">{item.title}</h3>
                 <p className="text-gray-600">{item.desc}</p>
               </div>
@@ -129,8 +124,7 @@ const About = () => {
           ].map((p, i) => (
             <div
               key={i}
-              className="flex flex-col md:flex-row gap-6 bg-gray-50 p-6 rounded-xl fade-in"
-            >
+              className="flex flex-col md:flex-row gap-6 bg-gray-50 p-6 rounded-xl fade-in">
               <img
                 src={p.img}
                 className="w-full md:w-1/3 h-60 object-cover rounded-lg"
@@ -145,7 +139,7 @@ const About = () => {
         </div>
       </section>
     </>
-  );  
+  );
 };
 
 export default About;

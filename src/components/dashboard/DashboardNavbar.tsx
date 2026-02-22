@@ -1,4 +1,3 @@
-// src/components/navbar/DashboardNavbar.tsx
 import React, { useState, useRef, useEffect } from "react";
 import VelvetaLogo from "../../assets/icon/velveta.png";
 import { useAuth } from "../../auth/useAuth";
@@ -32,7 +31,6 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
   const navigate = useNavigate();
   const { totalItems } = useCart();
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -49,7 +47,6 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
     };
   }, []);
 
-  // Handle scroll close
   useEffect(() => {
     const handleScrollClose = () => {
       setDropdownOpen(false);
@@ -61,7 +58,6 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
     };
   }, []);
 
-  // Handle body scroll when modal is open
   useEffect(() => {
     if (showLogoutConfirm || showOrderHistory || isCartOpen) {
       document.body.style.overflow = "hidden";
@@ -200,7 +196,6 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                 {/* Dropdown Menu */}
                 {dropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50 animate-fadeIn">
-                    {/* User info section */}
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="font-medium text-gray-900 text-sm truncate">
                         {user?.fullname}

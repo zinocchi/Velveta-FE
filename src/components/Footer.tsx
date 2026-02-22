@@ -1,4 +1,11 @@
-// components/Footer.tsx - Update untuk mobile
+import {
+  FaFacebook,
+  FaInstagram,
+  FaTwitter,
+  FaYoutube,
+  FaTiktok,
+} from "react-icons/fa";
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
@@ -27,8 +34,7 @@ const Footer = () => {
                   className="w-4 h-4 md:w-5 md:h-5 mr-2 mt-1 flex-shrink-0"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                  viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -49,8 +55,7 @@ const Footer = () => {
                   className="w-4 h-4 md:w-5 md:h-5 mr-2 flex-shrink-0"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                  viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -65,8 +70,7 @@ const Footer = () => {
                   className="w-4 h-4 md:w-5 md:h-5 mr-2 flex-shrink-0"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                  viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -85,15 +89,68 @@ const Footer = () => {
               Follow Us
             </h3>
             <div className="flex space-x-3 md:space-x-4">
-              {/* Social icons tetap sama */}
+              {/* Facebook */}
               <a
-                href="#"
-                className="text-gray-400 hover:text-white transition-colors duration-300"
-              >
-                {/* Facebook icon */}
+                href="https://facebook.com/velvetacoffee"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white transition-colors duration-300 hover:scale-110 transform"
+                aria-label="Facebook">
+                <FaFacebook className="w-5 h-5 md:w-6 md:h-6" />
               </a>
-              {/* Instagram icon */}
-              {/* YouTube icon */}
+
+              {/* Instagram */}
+              <a
+                href="https://instagram.com/velvetacoffee"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white transition-colors duration-300 hover:scale-110 transform"
+                aria-label="Instagram">
+                <FaInstagram className="w-5 h-5 md:w-6 md:h-6" />
+              </a>
+
+              {/* Twitter/X */}
+              <a
+                href="https://twitter.com/velvetacoffee"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white transition-colors duration-300 hover:scale-110 transform"
+                aria-label="Twitter">
+                <FaTwitter className="w-5 h-5 md:w-6 md:h-6" />
+              </a>
+
+              {/* YouTube */}
+              <a
+                href="https://youtube.com/velvetacoffee"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white transition-colors duration-300 hover:scale-110 transform"
+                aria-label="YouTube">
+                <FaYoutube className="w-5 h-5 md:w-6 md:h-6" />
+              </a>
+
+              {/* TikTok */}
+              <a
+                href="https://tiktok.com/@velvetacoffee"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white transition-colors duration-300 hover:scale-110 transform"
+                aria-label="TikTok">
+                <FaTiktok className="w-5 h-5 md:w-6 md:h-6" />
+              </a>
+            </div>
+
+            {/* Operating Hours - Optional */}
+            <div className="mt-4 md:mt-6">
+              <h4 className="text-sm font-semibold text-gray-300 mb-2">
+                Open Daily
+              </h4>
+              <p className="text-xs md:text-sm text-gray-400">
+                Mon - Fri: 7:00 AM - 10:00 PM
+              </p>
+              <p className="text-xs md:text-sm text-gray-400">
+                Sat - Sun: 8:00 AM - 11:00 PM
+              </p>
             </div>
           </div>
         </div>

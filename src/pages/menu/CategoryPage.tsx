@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import type { Menu } from "../../types";
+import type { Menu } from "../../types/index";
 import axios from "axios";
 import { useCart } from "../../context/CartContext";
-import { getCategoryFallbackImage } from "./constants";
+import { getCategoryFallbackImage } from "../../types/constant";
 import { flyToCart } from "../../utils/flyToCart";
 import { FaMinus, FaPlus } from "react-icons/fa";
 
@@ -75,13 +75,11 @@ export default function CategoryPage() {
     return cartItem?.qty || 0;
   };
 
-  // Handler untuk menambah quantity
   const handleIncrease = (item: Menu, e: React.MouseEvent) => {
     e.stopPropagation();
     const currentQty = getItemQuantity(item.id);
 
     if (currentQty === 0) {
-      // Jika belum ada di cart, tambahkan dengan animasi flyToCart
       flyToCart(
         (e.currentTarget as HTMLElement).closest(".cart-source") as HTMLElement,
       );
@@ -98,7 +96,6 @@ export default function CategoryPage() {
     });
   };
 
-  // Handler untuk mengurangi quantity
   const handleDecrease = (itemId: number, e: React.MouseEvent) => {
     e.stopPropagation();
     dispatch({ type: "DECREMENT", payload: itemId });

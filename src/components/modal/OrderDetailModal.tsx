@@ -78,14 +78,15 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
-  const [estimatedCompletion, setEstimatedCompletion] = useState<string | null>(null);
+  const [estimatedCompletion, setEstimatedCompletion] = useState<string | null>(
+    null,
+  );
   const [showReceipt, setShowReceipt] = useState(false);
 
   const modalContentRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pendingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Cleanup all timers on unmount
   useEffect(() => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -106,9 +107,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
     };
   }, [isOpen, orderId]);
 
-  // Timer effect untuk countdown dan status management
   useEffect(() => {
-    // Clear existing timers
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -136,14 +135,12 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
       }),
     );
 
-    // Auto-transition from PENDING to PROCESSING after 5 seconds (simulasi)
     if (order.status === "PENDING") {
       pendingTimerRef.current = setTimeout(() => {
         setOrder((prev) => (prev ? { ...prev, status: "PROCESSING" } : null));
       }, 5000);
     }
 
-    // Countdown timer hanya untuk PROCESSING
     if (order.status === "PROCESSING") {
       const updateTime = () => {
         const now = new Date().getTime();
@@ -188,7 +185,6 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
       const response = await api.get(`/orders/${id}`);
       const orderData = response.data.data || response.data;
 
-      // Set default estimated_minutes jika tidak ada (untuk demo)
       if (!orderData.estimated_minutes) {
         orderData.estimated_minutes = 15;
       }
@@ -529,8 +525,8 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               ) : (
                 <FaBox className="w-6 h-6 text-gray-500" />
               )}
-              
-            <div className="flex-1">
+
+              <div className="flex-1">
                 <p className="font-medium text-sm">{item.menu.name}</p>
                 <p className="text-xs text-gray-500">
                   {item.qty} x{" "}
@@ -635,7 +631,6 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           ref={modalContentRef}
           className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-fadeIn pointer-events-auto"
           onClick={handleModalClick}>
-          
           {/* Header - Sticky */}
           <div className="sticky top-0 bg-gradient-to-r from-red-700 to-red-800 text-white p-6 z-10">
             <div className="flex items-center justify-between">
@@ -819,10 +814,12 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                         Waiting for Payment
                       </h3>
                       <p className="text-sm text-yellow-700">
-                        Your order is pending. We'll start processing once payment is confirmed.
+                        Your order is pending. We'll start processing once
+                        payment is confirmed.
                       </p>
                       <p className="text-xs text-yellow-600 mt-3">
-                        Estimated preparation time: {order.estimated_minutes} minutes
+                        Estimated preparation time: {order.estimated_minutes}{" "}
+                        minutes
                       </p>
                     </div>
                   </div>
@@ -914,7 +911,9 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Subtotal</span>
                       <span className="text-gray-800">
-                        {formatCurrency(order.total_price - order.shipping_cost)}
+                        {formatCurrency(
+                          order.total_price - order.shipping_cost,
+                        )}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">

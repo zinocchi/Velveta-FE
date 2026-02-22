@@ -24,7 +24,6 @@ const Home = () => {
     setAlertType(type);
     setShowAlert(true);
 
-    // Auto hide setelah 4 detik
     setTimeout(() => {
       setShowAlert(false);
     }, 4000);
@@ -34,7 +33,6 @@ const Home = () => {
     if (isLoggedIn) {
       showCustomAlert("You are already logged in! Redirecting to dashboard...");
 
-      // Tunggu sebentar sebelum redirect agar alert terlihat
       setTimeout(() => {
         navigate("/dashboard");
       }, 1500);
@@ -57,7 +55,6 @@ const Home = () => {
     };
 
     const timer = setTimeout(() => {
-      // Initialize ScrollReveal hanya di desktop
       if (window.innerWidth >= 1024) {
         const scrollReveal = ScrollReveal({
           origin: "bottom",
@@ -99,7 +96,6 @@ const Home = () => {
         });
       }
 
-      // Intersection Observer untuk semua device
       const sections = document.querySelectorAll("section");
       const options = {
         threshold: 0.05,
@@ -111,7 +107,6 @@ const Home = () => {
           if (entry.isIntersecting) {
             const target = entry.target as HTMLElement;
 
-            // Hanya terapkan animasi jika belum visible
             if (target.style.opacity !== "1") {
               target.style.transition =
                 "all 0.8s cubic-bezier(0.22, 1, 0.36, 1)";
@@ -119,7 +114,6 @@ const Home = () => {
               target.style.transform = "translateY(0) scale(1)";
               target.style.filter = "blur(0)";
 
-              // Efek glow sementara hanya di desktop
               if (window.innerWidth >= 768) {
                 target.style.boxShadow = "0 0 30px rgba(155, 17, 30, 0.2)";
                 setTimeout(() => {
@@ -134,7 +128,6 @@ const Home = () => {
       }, options);
 
       sections.forEach((section, index) => {
-        // Skip hero section dari observer
         if (index === 0) return;
 
         const element = section as HTMLElement;
@@ -150,7 +143,6 @@ const Home = () => {
         sectionObserver.observe(section);
       });
 
-      // Logo animation hanya di desktop
       if (window.innerWidth >= 768) {
         const logo = document.querySelector(".logo-img");
         if (logo) {
@@ -176,7 +168,6 @@ const Home = () => {
         }
       }
 
-      // Button effects
       const buttons = document.querySelectorAll(
         'button, .btn, a[role="button"]',
       );
@@ -206,7 +197,6 @@ const Home = () => {
           buttonElement.style.boxShadow = "none";
         });
 
-        // Touch effect untuk mobile
         buttonElement.addEventListener("touchstart", () => {
           buttonElement.style.transform = "scale(0.95)";
         });
@@ -216,7 +206,6 @@ const Home = () => {
         });
       });
 
-      // Add floating animation styles
       const style = document.createElement("style");
       style.textContent = `
         @keyframes float {

@@ -32,7 +32,6 @@ const Login: React.FC = () => {
     setAlertType(type);
     setShowAlert(true);
 
-    // Auto hide
     const timer = setTimeout(() => {
       setShowAlert(false);
     }, 5000);
@@ -40,13 +39,11 @@ const Login: React.FC = () => {
     return () => clearTimeout(timer);
   };
 
-  // Login.tsx - Tambah debugging
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     console.log("DEBUG: onSubmit called");
 
-    // Reset alert dulu
     setShowAlert(false);
 
     if (!formData.login.trim() || !formData.password.trim()) {
@@ -58,14 +55,12 @@ const Login: React.FC = () => {
     try {
       console.log("DEBUG: Calling login function...");
 
-      // Panggil login function
       const result = await login(formData.login, formData.password);
 
       console.log("DEBUG: Login successful, result:", result);
 
       showCustomAlert("Login berhasil! Mengalihkan...", "success");
 
-      // Tunggu 1.5 detik lalu redirect
       setTimeout(() => {
         navigate("/");
       }, 1500);
@@ -76,10 +71,8 @@ const Login: React.FC = () => {
         stack: err.stack,
       });
 
-      // Tampilkan error alert
       showCustomAlert(err.message || "Login gagal. Silakan coba lagi.");
 
-      // Clear password field
       setFormData((prev) => ({ ...prev, password: "" }));
     }
   };
@@ -106,8 +99,7 @@ const Login: React.FC = () => {
               alertType === "error"
                 ? "bg-red-50 border-red-500"
                 : "bg-green-50 border-green-500"
-            }`}
-          >
+            }`}>
             <div className="flex items-start">
               <div className="flex-shrink-0">
                 {alertType === "error" ? (
@@ -115,8 +107,7 @@ const Login: React.FC = () => {
                     className="h-6 w-6 text-red-500"
                     fill="none"
                     viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
+                    stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -129,8 +120,7 @@ const Login: React.FC = () => {
                     className="h-6 w-6 text-green-500"
                     fill="none"
                     viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
+                    stroke="currentColor">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -144,8 +134,7 @@ const Login: React.FC = () => {
                 <p
                   className={`text-sm font-medium ${
                     alertType === "error" ? "text-red-700" : "text-green-700"
-                  }`}
-                >
+                  }`}>
                   {alertMessage}
                 </p>
               </div>
@@ -155,15 +144,13 @@ const Login: React.FC = () => {
                   alertType === "error"
                     ? "bg-red-50 text-red-500 hover:bg-red-100 focus:ring-red-300"
                     : "bg-green-50 text-green-500 hover:bg-green-100 focus:ring-green-300"
-                }`}
-              >
+                }`}>
                 <span className="sr-only">Close</span>
                 <svg
                   className="h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -221,8 +208,7 @@ const Login: React.FC = () => {
               <div>
                 <label
                   htmlFor="login"
-                  className="block text-sm font-medium mb-2 text-gray-700"
-                >
+                  className="block text-sm font-medium mb-2 text-gray-700">
                   * Username or Email
                 </label>
                 <input
@@ -241,8 +227,7 @@ const Login: React.FC = () => {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium mb-2 text-gray-700"
-                >
+                  className="block text-sm font-medium mb-2 text-gray-700">
                   * Password
                 </label>
                 <div className="relative">
@@ -261,8 +246,7 @@ const Login: React.FC = () => {
                     type="button"
                     onClick={togglePasswordVisibility}
                     disabled={loading}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-500 hover:text-red-600 transition duration-200 disabled:cursor-not-allowed"
-                  >
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-500 hover:text-red-600 transition duration-200 disabled:cursor-not-allowed">
                     {showPassword ? (
                       <EyeSlashIcon className="w-5 h-5 text-gray-700" />
                     ) : (
@@ -290,29 +274,25 @@ const Login: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-8 py-3 bg-red-600 text-white font-medium rounded-full shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300 text-base disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                  className="px-8 py-3 bg-red-600 text-white font-medium rounded-full shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300 text-base disabled:opacity-50 disabled:cursor-not-allowed">
                   {loading ? (
                     <span className="flex items-center justify-center">
                       <svg
                         className="animate-spin h-5 w-5 mr-2 text-white"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
-                        viewBox="0 0 24 24"
-                      >
+                        viewBox="0 0 24 24">
                         <circle
                           className="opacity-25"
                           cx="12"
                           cy="12"
                           r="10"
                           stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
+                          strokeWidth="4"></circle>
                         <path
                           className="opacity-75"
                           fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
                       Signing in...
                     </span>
@@ -333,13 +313,11 @@ const Login: React.FC = () => {
             {/* Tombol Login Google */}
             <button
               onClick={handleGoogleLogin}
-              className="flex items-center justify-center gap-2 w-full bg-red-600 text-white rounded-md py-3 mt-4"
-            >
+              className="flex items-center justify-center gap-2 w-full bg-red-600 text-white rounded-md py-3 mt-4">
               <svg
                 className="w-5 h-5"
                 xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 48 48"
-              >
+                viewBox="0 0 48 48">
                 <path
                   fill="#EA4335"
                   d="M24 9.5c3.5 0 6.3 1.5 8.2 2.8l6-6C34.9 2.7 29.8 0 24 0 14.7 0 6.7 5.4 2.8 13.2l7 5.5C11.7 13.2 17.3 9.5 24 9.5z"
@@ -366,8 +344,7 @@ const Login: React.FC = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   navigate("/register");
-                }}
-              >
+                }}>
                 Register now
               </a>
             </p>

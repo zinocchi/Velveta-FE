@@ -9,6 +9,7 @@ type User = {
   avatar?: string;
 };
 
+//fetch user data from localStorage and set to state, also provide login and logout functions
 export const useAuth = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -27,12 +28,10 @@ export const useAuth = () => {
     }
   }, []);
 
-  // EXPORT setIsLoggedIn juga
   const updateIsLoggedIn = useCallback((status: boolean) => {
     setIsLoggedIn(status);
   }, []);
 
-  /** LOGIN FUNCTION */
   const login = useCallback(
     async (loginInput: string, password: string) => {
       setLoading(true);
@@ -48,7 +47,7 @@ export const useAuth = () => {
         localStorage.setItem("user", JSON.stringify(res.data.user));
 
         setUser(res.data.user);
-        setIsLoggedIn(true); // Jangan lupa ini
+        setIsLoggedIn(true); 
 
         return {
           success: true,
@@ -74,7 +73,6 @@ export const useAuth = () => {
     []
   );
 
-  /** LOGOUT FUNCTION */
   const logout = useCallback(async () => {
     try {
       await api.post("/logout");
@@ -84,7 +82,7 @@ export const useAuth = () => {
     localStorage.removeItem("user");
 
     setUser(null);
-    setIsLoggedIn(false); // Jangan lupa ini
+    setIsLoggedIn(false); 
 
     navigate("/login");
   }, [navigate]);
@@ -93,7 +91,7 @@ export const useAuth = () => {
     user,
     setUser,
     isLoggedIn,
-    setIsLoggedIn: updateIsLoggedIn, // Export setIsLoggedIn
+    setIsLoggedIn: updateIsLoggedIn,
     login,
     logout,
     loading,

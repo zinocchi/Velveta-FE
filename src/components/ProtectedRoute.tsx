@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useEffect, useState, type JSX } from "react";
 
+// Components to protect routes that can only be accessed by logged-in users
 const ProtectedRoute = ({ children }: { children?: JSX.Element }) => {
   const [isChecking, setIsChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);

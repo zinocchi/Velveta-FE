@@ -37,7 +37,6 @@ const Navbar = () => {
     };
   }, [showLogoutConfirm]);
 
-  // Close mobile menu on scroll
   useEffect(() => {
     const closeOnScroll = () => {
       setOpenMenu(false);
@@ -47,10 +46,8 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", closeOnScroll);
   }, []);
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Close user menu
       if (
         wrapperRef.current &&
         !wrapperRef.current.contains(event.target as Node)
@@ -58,7 +55,6 @@ const Navbar = () => {
         setOpenMenu(false);
       }
 
-      // Close mobile menu
       if (
         mobileMenuRef.current &&
         !mobileMenuRef.current.contains(event.target as Node) &&
@@ -74,7 +70,6 @@ const Navbar = () => {
     };
   }, []);
 
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -83,7 +78,6 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
@@ -116,8 +110,7 @@ const Navbar = () => {
       <header
         className={`fixed top-0 w-full bg-white z-50 transition-all duration-300 ${
           scrolled ? "shadow-md border-b border-gray-200" : ""
-        }`}
-      >
+        }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 md:h-20">
             {/* Logo and Navigation */}
@@ -142,27 +135,23 @@ const Navbar = () => {
                 {isNotHomePage && (
                   <Link
                     to="/"
-                    className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
-                  >
+                    className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300">
                     Home
                   </Link>
                 )}
                 <Link
                   to="/menu"
-                  className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
-                >
+                  className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300">
                   Menu
                 </Link>
                 <Link
                   to="/about"
-                  className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
-                >
+                  className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300">
                   About Us
                 </Link>
                 <Link
                   to="/reward"
-                  className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
-                >
+                  className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300">
                   Reward
                 </Link>
               </nav>
@@ -174,15 +163,13 @@ const Navbar = () => {
                 href="https://www.google.com/maps"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center text-gray-700 hover:text-red-700 transition-colors duration-300 text-sm font-medium whitespace-nowrap"
-              >
+                className="flex items-center text-gray-700 hover:text-red-700 transition-colors duration-300 text-sm font-medium whitespace-nowrap">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5 mr-1 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -209,14 +196,12 @@ const Navbar = () => {
                     }}
                     className="relative p-2 text-gray-700 hover:text-red-700 transition-colors duration-300"
                     aria-label="Cart"
-                    id="cart-icon"
-                  >
+                    id="cart-icon">
                     <svg
                       className="w-6 h-6"
                       fill="none"
                       stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
+                      viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -244,8 +229,7 @@ const Navbar = () => {
                     <button
                       onClick={() => setOpenMenu(!openMenu)}
                       className="flex items-center focus:outline-none"
-                      aria-label="User menu"
-                    >
+                      aria-label="User menu">
                       <img
                         src={
                           user?.avatar ||
@@ -271,14 +255,12 @@ const Navbar = () => {
                         <Link
                           to="/dashboard"
                           className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-100 text-sm text-gray-700 transition-colors duration-150"
-                          onClick={() => setOpenMenu(false)}
-                        >
+                          onClick={() => setOpenMenu(false)}>
                           <svg
                             className="w-4 h-4 mr-3"
                             fill="none"
                             stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                            viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -291,14 +273,12 @@ const Navbar = () => {
                         <Link
                           to="/profile"
                           className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-100 text-sm text-gray-700 transition-colors duration-150"
-                          onClick={() => setOpenMenu(false)}
-                        >
+                          onClick={() => setOpenMenu(false)}>
                           <svg
                             className="w-4 h-4 mr-3"
                             fill="none"
                             stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                            viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -310,14 +290,12 @@ const Navbar = () => {
                         </Link>
                         <button
                           onClick={handleLogout}
-                          className="flex items-center w-full text-left px-4 py-3 hover:bg-red-50 text-sm text-red-600 font-medium transition-colors duration-150"
-                        >
+                          className="flex items-center w-full text-left px-4 py-3 hover:bg-red-50 text-sm text-red-600 font-medium transition-colors duration-150">
                           <svg
                             className="w-4 h-4 mr-3"
                             fill="none"
                             stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                            viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -334,14 +312,12 @@ const Navbar = () => {
                   <div className="flex items-center space-x-2 md:space-x-3">
                     <Link
                       to="/login"
-                      className="px-3 py-1.5 md:px-4 md:py-2 border border-gray-800 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors duration-300 whitespace-nowrap"
-                    >
+                      className="px-3 py-1.5 md:px-4 md:py-2 border border-gray-800 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors duration-300 whitespace-nowrap">
                       Sign in
                     </Link>
                     <Link
                       to="/register"
-                      className="px-3 py-1.5 md:px-4 md:py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-700 transition-colors duration-300 whitespace-nowrap"
-                    >
+                      className="px-3 py-1.5 md:px-4 md:py-2 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-700 transition-colors duration-300 whitespace-nowrap">
                       Join now
                     </Link>
                   </div>
@@ -358,14 +334,12 @@ const Navbar = () => {
                     setIsCartOpen(true);
                   }}
                   className="relative p-2 text-gray-700 hover:text-red-700 transition-colors duration-300"
-                  aria-label="Cart"
-                >
+                  aria-label="Cart">
                   <svg
                     className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -387,8 +361,7 @@ const Navbar = () => {
                   <button
                     onClick={() => setOpenMenu(!openMenu)}
                     className="flex items-center focus:outline-none"
-                    aria-label="User menu"
-                  >
+                    aria-label="User menu">
                     <img
                       src={
                         user?.avatar ||
@@ -405,8 +378,7 @@ const Navbar = () => {
                 <div className="flex items-center space-x-2">
                   <Link
                     to="/login"
-                    className="px-3 py-1.5 border border-gray-800 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors duration-300"
-                  >
+                    className="px-3 py-1.5 border border-gray-800 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors duration-300">
                     Sign in
                   </Link>
                 </div>
@@ -417,15 +389,13 @@ const Navbar = () => {
                 onClick={toggleMobileMenu}
                 className="text-gray-700 hover:text-red-700 focus:outline-none p-2"
                 data-mobile-toggle="true"
-                aria-label="Toggle menu"
-              >
+                aria-label="Toggle menu">
                 {isMobileMenuOpen ? (
                   <svg
                     className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -438,8 +408,7 @@ const Navbar = () => {
                     className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -460,15 +429,13 @@ const Navbar = () => {
               <Link
                 to="/"
                 className="flex flex-col items-center justify-center text-gray-700 hover:text-red-700 transition-colors duration-300 p-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
+                onClick={() => setIsMobileMenuOpen(false)}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -482,15 +449,13 @@ const Navbar = () => {
               <Link
                 to="/menu"
                 className="flex flex-col items-center justify-center text-gray-700 hover:text-red-700 transition-colors duration-300 p-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
+                onClick={() => setIsMobileMenuOpen(false)}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -504,15 +469,13 @@ const Navbar = () => {
               <Link
                 to="/about"
                 className="flex flex-col items-center justify-center text-gray-700 hover:text-red-700 transition-colors duration-300 p-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
+                onClick={() => setIsMobileMenuOpen(false)}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -526,15 +489,13 @@ const Navbar = () => {
               <Link
                 to="/reward"
                 className="flex flex-col items-center justify-center text-gray-700 hover:text-red-700 transition-colors duration-300 p-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
+                onClick={() => setIsMobileMenuOpen(false)}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -549,15 +510,13 @@ const Navbar = () => {
                 href="https://www.google.com/maps"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center justify-center text-gray-700 hover:text-red-700 transition-colors duration-300 p-2"
-              >
+                className="flex flex-col items-center justify-center text-gray-700 hover:text-red-700 transition-colors duration-300 p-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -590,8 +549,11 @@ const Navbar = () => {
             <div
               ref={mobileMenuRef}
               className="fixed inset-y-0 right-0 w-4/5 max-w-sm bg-white shadow-2xl z-50 transform transition-transform duration-300 lg:hidden"
-              style={{ transform: isMobileMenuOpen ? 'translateX(0)' : 'translateX(100%)' }}
-            >
+              style={{
+                transform: isMobileMenuOpen
+                  ? "translateX(0)"
+                  : "translateX(100%)",
+              }}>
               <div className="h-full flex flex-col">
                 {/* Menu Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -619,14 +581,12 @@ const Navbar = () => {
                   </div>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 text-gray-500 hover:text-red-700"
-                  >
+                    className="p-2 text-gray-500 hover:text-red-700">
                     <svg
                       className="w-6 h-6"
                       fill="none"
                       stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
+                      viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -649,15 +609,13 @@ const Navbar = () => {
                         <Link
                           to="/"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700"
-                        >
+                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5"
                             fill="none"
                             viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
+                            stroke="currentColor">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -671,15 +629,13 @@ const Navbar = () => {
                       <Link
                         to="/menu"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700"
-                      >
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-5 w-5"
                           fill="none"
                           viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
+                          stroke="currentColor">
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -692,15 +648,13 @@ const Navbar = () => {
                       <Link
                         to="/about"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700"
-                      >
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-5 w-5"
                           fill="none"
                           viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
+                          stroke="currentColor">
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -713,15 +667,13 @@ const Navbar = () => {
                       <Link
                         to="/reward"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700"
-                      >
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-5 w-5"
                           fill="none"
                           viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
+                          stroke="currentColor">
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -742,14 +694,12 @@ const Navbar = () => {
                         <Link
                           to="/dashboard"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700"
-                        >
+                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
                           <svg
                             className="h-5 w-5"
                             fill="none"
                             stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                            viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -762,14 +712,12 @@ const Navbar = () => {
                         <Link
                           to="/profile"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700"
-                        >
+                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
                           <svg
                             className="h-5 w-5"
                             fill="none"
                             stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                            viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -781,14 +729,12 @@ const Navbar = () => {
                         </Link>
                         <button
                           onClick={handleLogout}
-                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 text-red-600 w-full text-left"
-                        >
+                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 text-red-600 w-full text-left">
                           <svg
                             className="h-5 w-5"
                             fill="none"
                             stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                            viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -805,15 +751,13 @@ const Navbar = () => {
                           <Link
                             to="/login"
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="flex-1 px-4 py-3 border border-gray-800 rounded-lg text-center font-medium hover:bg-gray-100"
-                          >
+                            className="flex-1 px-4 py-3 border border-gray-800 rounded-lg text-center font-medium hover:bg-gray-100">
                             Sign in
                           </Link>
                           <Link
                             to="/register"
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="flex-1 px-4 py-3 bg-gray-900 text-white rounded-lg text-center font-medium hover:bg-gray-700"
-                          >
+                            className="flex-1 px-4 py-3 bg-gray-900 text-white rounded-lg text-center font-medium hover:bg-gray-700">
                             Join now
                           </Link>
                         </div>
@@ -844,16 +788,14 @@ const Navbar = () => {
           />
           <div
             ref={confirmRef}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xs sm:max-w-sm md:w-80 bg-white rounded-xl shadow-2xl z-[70] p-4 sm:p-6 animate-scaleIn"
-          >
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xs sm:max-w-sm md:w-80 bg-white rounded-xl shadow-2xl z-[70] p-4 sm:p-6 animate-scaleIn">
             <div className="text-center mb-4 sm:mb-6">
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <svg
                   className="w-5 h-5 sm:w-6 sm:h-6 text-red-600"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                  viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -874,14 +816,12 @@ const Navbar = () => {
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={cancelLogout}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium text-sm sm:text-base"
-              >
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium text-sm sm:text-base">
                 Cancel
               </button>
               <button
                 onClick={confirmLogout}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium text-sm sm:text-base"
-              >
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium text-sm sm:text-base">
                 Yes, Logout
               </button>
             </div>
@@ -889,13 +829,9 @@ const Navbar = () => {
         </>
       )}
 
-      {/* Spacer untuk bottom navigation di mobile */}
       <div className="h-16 lg:hidden"></div>
 
-      <CartModal
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-      />
+      <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );
 };

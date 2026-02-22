@@ -42,7 +42,6 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validasi terms
     if (!form.terms) {
       setErrors({ terms: ["You must agree to the terms"] });
       return;

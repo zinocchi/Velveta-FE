@@ -1,4 +1,3 @@
-// src/pages/CheckoutPage.tsx
 import { useCart } from "../../context/CartContext";
 import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
@@ -118,8 +117,8 @@ const CheckoutPage = () => {
   } | null>(null);
 
   const [paymentMethod, setPaymentMethod] = useState("cash");
-  const [pageLoading, setPageLoading] = useState(true); // Untuk loading halaman
-  const [processing, setProcessing] = useState(false); // Untuk proses order
+  const [pageLoading, setPageLoading] = useState(true); 
+  const [processing, setProcessing] = useState(false); 
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{
     show: boolean;
@@ -131,25 +130,21 @@ const CheckoutPage = () => {
     addressLabel: "",
   });
 
-  // Fungsi untuk menampilkan notifikasi
   const showNotification = (
     message: string,
     type: "success" | "error" = "success",
   ) => {
     setNotification({ show: true, message, type });
 
-    // Auto hide setelah 3 detik
     setTimeout(() => {
       setNotification((prev) => ({ ...prev, show: false }));
     }, 3000);
   };
 
-  // Load saved addresses from localStorage on mount
   useEffect(() => {
     const loadAddresses = async () => {
       try {
         setPageLoading(true);
-        // Simulasi loading (bisa dihapus jika tidak perlu)
         await new Promise(resolve => setTimeout(resolve, 500));
         
         const savedAddresses = localStorage.getItem("userAddresses");
@@ -161,7 +156,6 @@ const CheckoutPage = () => {
             setSelectedAddressId(defaultAddress.id);
           }
         } else {
-          // Mock data for demo
           const mockAddresses: Address[] = [
             {
               id: "1",
@@ -202,14 +196,12 @@ const CheckoutPage = () => {
     loadAddresses();
   }, []);
 
-  // Save addresses to localStorage when updated
   useEffect(() => {
     if (addresses.length > 0) {
       localStorage.setItem("userAddresses", JSON.stringify(addresses));
     }
   }, [addresses]);
 
-  // Calculate delivery estimate in minutes
   useEffect(() => {
     if (deliveryType === "delivery" && selectedDeliveryOption) {
       const option = deliveryOptions.find(
@@ -253,7 +245,6 @@ const CheckoutPage = () => {
 
   const grandTotal = total + shippingCost;
 
-  // Quantity handlers
   const handleIncreaseQty = (itemId: number) => {
     const item = state.items.find((i) => i.id === itemId);
     if (!item || item.qty >= 10) return;
@@ -272,7 +263,6 @@ const CheckoutPage = () => {
     }
   };
 
-  // Handle address form submission
   const handleAddressSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -306,7 +296,6 @@ const CheckoutPage = () => {
     resetAddressForm();
   };
 
-  // Handle address deletion
   const handleDeleteAddress = () => {
     const updatedAddresses = addresses.filter(
       (addr) => addr.id !== showDeleteConfirm.addressId,
@@ -324,7 +313,6 @@ const CheckoutPage = () => {
     setShowDeleteConfirm({ show: false, addressId: "", addressLabel: "" });
   };
 
-  // Handle set as default
   const handleSetDefault = (addressId: string) => {
     const updatedAddresses = addresses.map((addr) => ({
       ...addr,
@@ -334,7 +322,6 @@ const CheckoutPage = () => {
     setSelectedAddressId(addressId);
   };
 
-  // Reset address form
   const resetAddressForm = () => {
     setAddressForm({
       label: "",
@@ -349,7 +336,6 @@ const CheckoutPage = () => {
     });
   };
 
-  // Edit address
   const handleEditAddress = (address: Address) => {
     setEditingAddress(address);
     setAddressForm({
@@ -366,22 +352,18 @@ const CheckoutPage = () => {
     setShowAddressForm(true);
   };
 
-  // Fungsi untuk membuka modal detail order
   const handleOpenOrderDetail = (orderId: string) => {
     setLastOrderId(orderId);
     setShowOrderDetail(true);
   };
 
-  // Handler untuk close modal
   const handleCloseOrderDetail = () => {
     setShowOrderDetail(false);
     setLastOrderId(null);
-    // Redirect ke dashboard atau halaman lain setelah modal ditutup
     navigate("/dashboard");
   };
 
   const handleCreateOrder = async () => {
-    // Validasi awal
     if (state.items.length === 0) {
       showNotification("Your cart is empty", "error");
       return;
@@ -489,10 +471,8 @@ const CheckoutPage = () => {
           "success",
         );
 
-        // Clear cart
         dispatch({ type: "CLEAR_CART" });
 
-        // Buka modal detail order setelah 1 detik
         setTimeout(() => {
           handleOpenOrderDetail(orderId);
         }, 1000);
@@ -500,7 +480,6 @@ const CheckoutPage = () => {
         throw new Error(response.data.message || "Failed to create order");
       }
     } catch (err: any) {
-      // Handle error
       console.error("Checkout error:", err);
 
       const errorMessage =
@@ -512,7 +491,6 @@ const CheckoutPage = () => {
 
       showNotification(errorMessage, "error");
     } finally {
-      // Set processing false setelah selesai (baik sukses maupun error)
       setProcessing(false);
     }
   };
@@ -547,7 +525,6 @@ const CheckoutPage = () => {
     }
   };
 
-  // Loading state untuk halaman
   if (pageLoading) {
     return (
       <main className="pt-28 pb-16 max-w-7xl mx-auto px-4">
@@ -561,7 +538,6 @@ const CheckoutPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Custom Notification */}
       {notification.show && (
         <div
           className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-slideDown ${
