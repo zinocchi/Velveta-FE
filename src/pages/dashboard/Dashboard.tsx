@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../auth/useAuth";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
+import orderHistory from "../../components/modal/OrderHistoryModal";
 import {
   FaShoppingBag,
   FaStar,
@@ -322,15 +323,15 @@ const DashboardContent: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Recent Orders</h2>
-          {stats.totalOrders > 0 && (
+          {/* {stats.totalOrders > 0 && (
             <button
-              onClick={() => navigate("/dashboard/orders")}
+              onClick={() => navigate("/orderHistory")}
               className="text-red-700 hover:text-red-800 text-sm font-medium flex items-center gap-1 transition-colors"
             >
               View All
               <FaChevronRight className="w-3 h-3" />
             </button>
-          )}
+          )} */}
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">

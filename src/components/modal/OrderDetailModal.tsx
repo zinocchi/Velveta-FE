@@ -1,4 +1,3 @@
-// src/components/modal/OrderDetailModal.tsx
 import React, { useState, useEffect, useRef } from "react";
 import {
   FaTimes,

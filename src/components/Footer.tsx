@@ -140,8 +140,7 @@ const Footer = () => {
               </a>
             </div>
 
-            {/* Operating Hours - Optional */}
-            <div className="mt-4 md:mt-6">
+            {/* <div className="mt-4 md:mt-6">
               <h4 className="text-sm font-semibold text-gray-300 mb-2">
                 Open Daily
               </h4>
@@ -151,7 +150,7 @@ const Footer = () => {
               <p className="text-xs md:text-sm text-gray-400">
                 Sat - Sun: 8:00 AM - 11:00 PM
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
 

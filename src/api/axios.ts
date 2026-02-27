@@ -1,6 +1,5 @@
 import axios, { AxiosError } from "axios";
 
-//get api token from backend
 const api = axios.create({
   baseURL: "http://localhost:8000/api",
   headers: {
