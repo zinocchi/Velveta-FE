@@ -3,6 +3,13 @@ import MainLayout from "../layouts/MainLayout";
 import MenuLayout from "../layouts/MenuLayouts";
 import DashboardLayout from "../layouts/DashboardLayout";
 
+//admin
+import AdminLayout from "../admin/layout/AdminLayout";
+import AdminLogin from "../admin/pages/auth/Login";
+import AdminRegister from "../admin/pages/auth/Register";
+import AdminDashboard from "../admin/pages/dashboard/Dashboard";
+import AdminProtectedRoute from "../admin/components/ProtectedRoute";
+
 // pages
 import Home from "../pages/home/Home";
 import About from "../pages/about/About";
@@ -31,10 +38,10 @@ const AppRoutes = () => {
   return (
     <>
       <ScrollToTop />
+
       <Routes>
-        {/* Layout */}
+        {/* ===== USER LAYOUT ===== */}
         <Route element={<MainLayout />}>
-          {/* Public */}
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/reward" element={<Reward />} />
@@ -45,7 +52,7 @@ const AppRoutes = () => {
           <Route path="/menu" element={<Menu />} />
         </Route>
 
-        {/* Protected Routes */}
+        {/* ===== USER PROTECTED ===== */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardPage />} />
@@ -54,14 +61,25 @@ const AppRoutes = () => {
             <Route path="profile" element={<Profile />} />
             <Route path="checkout" element={<CheckoutPages />} />
           </Route>
-
-          {/* Hapus route /order/:orderId */}
         </Route>
 
-        {/* Auth */}
+        {/* ===== AUTH ===== */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+
+        {/* ===== ADMIN ===== */}
+
+        {/* Admin Login */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/register" element={<AdminRegister />} />
+
+        {/* Admin Protected */}
+        <Route element={<AdminProtectedRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+          </Route>
+        </Route>
       </Routes>
     </>
   );

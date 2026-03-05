@@ -1,24 +1,17 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/useAuth";
-import "../../api/axios";
-import VelvetaLogo from "../../assets/icon/velveta.png";
+import VelvetaLogo from "../../../assets/icon/velveta.png";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
-const Login: React.FC = () => {
+const AdminLogin = () => {
   const navigate = useNavigate();
-  const { login, loading, error } = useAuth();
-
-  const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8000/auth/google/redirect";
-  };
-
   const [showPassword, setShowPassword] = useState(false);
-  const [keepSignedIn, setKeepSignedIn] = useState(false);
   const [formData, setFormData] = useState({
-    login: "",
+    email: "",
     password: "",
+    workPin: "",
   });
+  const [loading, setLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState<"error" | "success">("error");
@@ -38,41 +31,55 @@ const Login: React.FC = () => {
     return () => clearTimeout(timer);
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    console.log("DEBUG: onSubmit called");
 
     setShowAlert(false);
 
-    if (!formData.login.trim() || !formData.password.trim()) {
-      console.log("DEBUG: Fields empty");
-      showCustomAlert("Username/email and password must be filled in");
+    if (
+      !formData.email.trim() ||
+      !formData.password.trim() ||
+      !formData.workPin.trim()
+    ) {
+      showCustomAlert("Email, password, and work PIN must be filled in.");
       return;
     }
 
+    setLoading(true);
+
     try {
-      console.log("DEBUG: Calling login function...");
-
-      const result = await login(formData.login, formData.password);
-
-      console.log("DEBUG: Login successful, result:", result);
-
-      showCustomAlert("Login successful! Redirecting...", "success");
-
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
-    } catch (err: any) {
-      console.log("DEBUG: Error caught in onSubmit:", {
-        name: err.name,
-        message: err.message,
-        stack: err.stack,
+      const response = await fetch("http://localhost:8000/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          work_pin: formData.workPin,
+        }),
       });
 
-      showCustomAlert(err.message || "Login failed. Please try again.");
+      const data = await response.json();
 
-      setFormData((prev) => ({ ...prev, password: "" }));
+      if (response.ok) {
+        localStorage.setItem("admin_token", data.token);
+        showCustomAlert("Admin login successful! Redirecting...", "success");
+
+        setTimeout(() => {
+          navigate("/admin/dashboard");
+        }, 1500);
+      } else {
+        showCustomAlert(
+          data.message || "Login failed. Please check your credentials.",
+        );
+        setFormData((prev) => ({ ...prev, password: "", workPin: "" }));
+      }
+    } catch (error) {
+      showCustomAlert("An error occurred. Please try again.");
+      setFormData((prev) => ({ ...prev, password: "", workPin: "" }));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -183,43 +190,42 @@ const Login: React.FC = () => {
         <div className="logo">
           <img src={VelvetaLogo} alt="Logo" className="h-14" />
         </div>
+        <div className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-semibold">
+          Admin Access
+        </div>
       </header>
 
       <main className="pt-32 pb-16 px-5 flex justify-center">
         <div className="w-full max-w-md">
-          <h2 className="text-2xl font-bold text-center mb-10 font-['Montserrat'] text-gray-800">
-            Log in to Your Account
+          <h2 className="text-2xl font-bold text-center mb-2 font-['Montserrat'] text-gray-800">
+            Admin Login
           </h2>
+          <p className="text-center text-gray-500 mb-8">
+            Log in to the administrator dashboard
+          </p>
 
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
             <p className="text-sm text-gray-500 mb-8">
               * indicates required field
             </p>
 
-            {/* Tampilkan error dari useAuth jika ada */}
-            {error && !showAlert && (
-              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={onSubmit} className="space-y-6">
+            <form onSubmit={handleLogin} className="space-y-6">
               <div>
                 <label
-                  htmlFor="login"
+                  htmlFor="email"
                   className="block text-sm font-medium mb-2 text-gray-700">
-                  * Username or Email
+                  * Email
                 </label>
                 <input
-                  type="text"
-                  id="login"
-                  name="login"
+                  type="email"
+                  id="email"
+                  name="email"
                   required
                   disabled={loading}
-                  value={formData.login}
+                  value={formData.email}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="Enter your username or email"
+                  placeholder="Enter your admin email"
                 />
               </div>
 
@@ -255,18 +261,27 @@ const Login: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center pt-2">
-                <input
-                  type="checkbox"
-                  id="keep-signed-in"
-                  checked={keepSignedIn}
-                  disabled={loading}
-                  onChange={(e) => setKeepSignedIn(e.target.checked)}
-                  className="w-5 h-5 text-red-600 rounded focus:ring-red-300 border-gray-300 disabled:cursor-not-allowed"
-                />
-                <label htmlFor="keep-signed-in" className="ml-3 text-gray-700">
-                  Keep me signed in
+              <div>
+                <label
+                  htmlFor="workPin"
+                  className="block text-sm font-medium mb-2 text-gray-700">
+                  * Work PIN
                 </label>
+                <input
+                  type="password"
+                  id="workPin"
+                  name="workPin"
+                  required
+                  disabled={loading}
+                  value={formData.workPin}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  placeholder="Enter your work PIN"
+                  maxLength={6}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter the 6-digit work PIN provided by your administrator
+                </p>
               </div>
 
               <div className="pt-6 flex justify-end">
@@ -293,45 +308,14 @@ const Login: React.FC = () => {
                           fill="currentColor"
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Signing in...
+                      Verifying...
                     </span>
                   ) : (
-                    "Sign in"
+                    "Login to Admin Dashboard"
                   )}
                 </button>
               </div>
             </form>
-
-            {/* Divider dengan "or" */}
-            <div className="flex items-center my-8">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="mx-4 text-gray-500 text-sm">or</span>
-              <div className="flex-grow border-t border-gray-300"></div>
-            </div>
-
-            {/* Tombol Login Google */}
-            <button
-              onClick={handleGoogleLogin}
-              className="flex items-center justify-center gap-2 w-full bg-red-600 text-white rounded-md py-3 mt-4">
-              <svg
-                className="w-5 h-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 48 48">
-                <path
-                  fill="#EA4335"
-                  d="M24 9.5c3.5 0 6.3 1.5 8.2 2.8l6-6C34.9 2.7 29.8 0 24 0 14.7 0 6.7 5.4 2.8 13.2l7 5.5C11.7 13.2 17.3 9.5 24 9.5z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.5c-.5 2.9-2.1 5.3-4.4 7l6.8 5.3C43.7 37.3 46.1 31.3 46.1 24.5z"
-                />
-                <path
-                  fill="#4A90E2"
-                  d="M24 48c6.5 0 11.9-2.1 15.9-5.7l-6.8-5.3C30.6 38.2 27.5 39.5 24 39.5c-6.6 0-12.2-4.4-14.3-10.3l-7 5.5C6.8 42.7 14.7 48 24 48z"
-                />
-              </svg>
-              <span>Login with Google</span>
-            </button>
           </div>
 
           <div className="text-center mt-8">
@@ -342,11 +326,16 @@ const Login: React.FC = () => {
                 className="text-red-600 font-medium hover:text-red-800 transition duration-200"
                 onClick={(e) => {
                   e.preventDefault();
-                  navigate("/register");
+                  navigate("/admin/register");
                 }}>
                 Register now
               </a>
             </p>
+            <div className="text-center mt-8">
+              <p className="text-gray-500 text-xs">
+                This area is restricted to authorized administrators only.
+              </p>
+            </div>
           </div>
         </div>
       </main>
@@ -358,4 +347,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default AdminLogin;
