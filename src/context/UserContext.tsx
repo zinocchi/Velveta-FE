@@ -1,53 +1,91 @@
-import {
-  Children,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
-import axios from "axios";
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import api from '../api/axios';
 
-// Context for managing user authentication state across the app
-export interface User {
+interface User {
   id: number;
-  username: string;
+  fullname: string;
   email: string;
-  avatar?: string;
+  role?: string;
 }
 
-const UserContext = createContext<{
+interface UserContextType {
   user: User | null;
-  setUser: (user: User) => void;
-} | null>(null);
+  loading: boolean;
+  error: string | null;
+  refreshUser: () => Promise<void>;
+  logout: () => void;
+}
 
-export const UserProvider = ({ children }: { children: ReactNode }) => {
+const UserContext = createContext<UserContextType | undefined>(undefined);
+
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchUser = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Coba beberapa endpoint yang mungkin
+      let response;
+      try {
+        // Coba endpoint /me dulu (yang ada di route Anda)
+        response = await api.get('/me');
+      } catch (err) {
+        // Kalau gagal, coba /user
+        response = await api.get('/user');
+      }
+      
+      console.log('User data response:', response.data);
+      
+      // Sesuaikan dengan struktur response Anda
+      const userData = response.data.user || response.data;
+      setUser(userData);
+      
+    } catch (err: any) {
+      console.error('Error fetching user data:', err);
+      setError(err.response?.data?.message || 'Failed to fetch user');
+      
+      // Kalau 401 (unauthorized), user tidak login - itu normal
+      if (err.response?.status === 401) {
+        setUser(null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8000/api/user/", {
-        withCredentials: true,
-      })
-      .then((response) => {
-        setUser(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching user data:", error);
-      });
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchUser();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
+  const refreshUser = async () => {
+    await fetchUser();
+  };
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+  };
+
   return (
-    <UserContext.Provider value={{ user, setUser }}>
-      {Children.only(children)}
+    <UserContext.Provider value={{ user, loading, error, refreshUser, logout }}>
+      {children}
     </UserContext.Provider>
   );
 };
 
 export const useUser = () => {
-  const ctx = useContext(UserContext);
-  if (!ctx) {
-    throw new Error("useUser must be used within a UserProvider");
+  const context = useContext(UserContext);
+  if (context === undefined) {
+    throw new Error('useUser must be used within a UserProvider');
   }
-  return ctx;
-};
+  return context;
+};  

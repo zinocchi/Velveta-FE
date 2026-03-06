@@ -7,9 +7,9 @@ type User = {
   fullname?: string;
   email?: string;
   avatar?: string;
+  role?: string;  // ← TAMBAHKAN INI!
 };
 
-//fetch user data from localStorage and set to state, also provide login and logout functions
 export const useAuth = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -23,8 +23,14 @@ export const useAuth = () => {
     const usr = localStorage.getItem("user");
 
     if (token && usr) {
-      setIsLoggedIn(true);
-      setUser(JSON.parse(usr));
+      try {
+        const parsedUser = JSON.parse(usr);
+        console.log("Loaded user from storage:", parsedUser); // Debug
+        setIsLoggedIn(true);
+        setUser(parsedUser);
+      } catch (e) {
+        console.error("Failed to parse user from storage", e);
+      }
     }
   }, []);
 
@@ -43,15 +49,23 @@ export const useAuth = () => {
           password,
         });
 
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        console.log("Login response:", res.data); // Debug
 
-        setUser(res.data.user);
+        // Pastikan role dari response tersimpan
+        const userData = {
+          ...res.data.user,
+          role: res.data.user.role || 'user' // Default 'user' kalau tidak ada
+        };
+
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(userData));
+
+        setUser(userData);
         setIsLoggedIn(true); 
 
         return {
           success: true,
-          user: res.data.user,
+          user: userData,
           token: res.data.token,
         };
       } catch (err: any) {

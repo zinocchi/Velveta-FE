@@ -1,13 +1,17 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import MenuLayout from "../layouts/MenuLayouts";
 import DashboardLayout from "../layouts/DashboardLayout";
 
 //admin
+
 import AdminLayout from "../admin/layout/AdminLayout";
 import AdminLogin from "../admin/pages/auth/Login";
 import AdminRegister from "../admin/pages/auth/Register";
-import AdminDashboard from "../admin/pages/dashboard/Dashboard";
+import AdminDashboardPage from "../admin/pages/dashboard/DashboardPage";
+import MenuPage from "../admin/pages/menus/MenuPage";
+import OrdersPage from "../admin/pages/orders/OrderPage";
+// import ReportsPage from "../admin/pages/reports/ReportPage";
 import AdminProtectedRoute from "../admin/components/ProtectedRoute";
 
 // pages
@@ -70,14 +74,22 @@ const AppRoutes = () => {
 
         {/* ===== ADMIN ===== */}
 
-        {/* Admin Login */}
+        {/* Admin Auth - No Layout */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/register" element={<AdminRegister />} />
 
-        {/* Admin Protected */}
+        {/* Admin Protected Routes with Layout */}
         <Route element={<AdminProtectedRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
-            <Route path="dashboard" element={<AdminDashboard />} />
+            {/* Default redirect to dashboard */}
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            
+            {/* Admin Pages */}
+            <Route path="dashboard" element={<AdminDashboardPage />} />
+            <Route path="menus" element={<MenuPage />} />
+            <Route path="orders" element={<OrdersPage />} />
+            <Route path="orders/:id" element={<OrdersPage />} />
+            {/* <Route path="reports" element={<ReportsPage />} /> */}
           </Route>
         </Route>
       </Routes>

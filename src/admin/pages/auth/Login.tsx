@@ -61,13 +61,27 @@ const AdminLogin = () => {
       });
 
       const data = await response.json();
+      console.log("Admin login response:", data); // Debug
 
       if (response.ok) {
-        localStorage.setItem("admin_token", data.token);
+        // 🔥 YANG PENTING: Simpan token dan user data
+        localStorage.setItem("token", data.token);
+        
+        // Pastikan user data punya role admin
+        const userData = {
+          ...data.user,
+          role: 'admin' // Force role admin
+        };
+        localStorage.setItem("user", JSON.stringify(userData));
+        
+        // Trigger event storage untuk komponen lain
+        window.dispatchEvent(new Event('storage'));
+        
         showCustomAlert("Admin login successful! Redirecting...", "success");
 
         setTimeout(() => {
-          navigate("/admin/dashboard");
+          // Force reload dengan window.location
+          window.location.href = "/admin/dashboard";
         }, 1500);
       } else {
         showCustomAlert(
@@ -76,6 +90,7 @@ const AdminLogin = () => {
         setFormData((prev) => ({ ...prev, password: "", workPin: "" }));
       }
     } catch (error) {
+      console.error("Login error:", error);
       showCustomAlert("An error occurred. Please try again.");
       setFormData((prev) => ({ ...prev, password: "", workPin: "" }));
     } finally {
