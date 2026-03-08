@@ -17,6 +17,7 @@ export const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true); // Mulai dengan true
   const [error, setError] = useState("");
+  const isAdminPreview = user?.role === "admin";
 
   // Load user from localStorage
   useEffect(() => {
@@ -123,5 +124,6 @@ export const useAuth = () => {
     logout,
     loading,
     error,
+    isAdminPreview
   };
 };

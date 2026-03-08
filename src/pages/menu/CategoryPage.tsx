@@ -1,17 +1,32 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Tambah useNavigate
 import type { Menu } from "../../types/index";
 import axios from "axios";
 import { useCart } from "../../context/CartContext";
-import { getCategoryFallbackImage } from "../../types/constant";
+import { getCategoryFallbackImage } from "../../types/Constant";
 import { flyToCart } from "../../utils/flyToCart";
 import { FaMinus, FaPlus } from "react-icons/fa";
+import { useAuth } from "../../auth/useAuth"; // Tambah useAuth
+import CustomAlert from "../../components/ui/CustomAlert"; // Buat komponen alert
 
 export default function CategoryPage() {
   const { category } = useParams<{ category: string }>();
+  const navigate = useNavigate(); // Tambah navigate
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
   const { state, dispatch } = useCart();
+  const { isLoggedIn, isAdminPreview } = useAuth(); // Ambil auth state
+  
+  // State untuk alert
+  const [alert, setAlert] = useState<{
+    show: boolean;
+    message: string;
+    type: "error" | "warning" | "info" | "success";
+  }>({
+    show: false,
+    message: "",
+    type: "info",
+  });
 
   const CATEGORY_INFO: Record<string, { title: string; description: string }> =
     {
@@ -75,8 +90,79 @@ export default function CategoryPage() {
     return cartItem?.qty || 0;
   };
 
+  // Fungsi untuk menampilkan alert
+  const showAlert = (
+    message: string,
+    type: "error" | "warning" | "info" | "success" = "info"
+  ) => {
+    setAlert({ show: true, message, type });
+    
+    // Auto hide setelah 3 detik
+    setTimeout(() => {
+      setAlert((prev) => ({ ...prev, show: false }));
+    }, 3000);
+  };
+
+  const handleAddToCart = (item: Menu, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    // Cek apakah user sudah login
+    if (!isLoggedIn) {
+      showAlert("You must be logged in to add items to cart", "error");
+      
+      // Optional: redirect ke login setelah 1.5 detik
+      setTimeout(() => {
+        navigate("/login", { state: { from: `/category/${category}` } });
+      }, 1500);
+      return;
+    }
+
+    // Cek apakah admin preview mode
+    if (isAdminPreview) {
+      showAlert("Admin cannot add items to cart in preview mode", "warning");
+      return;
+    }
+
+    // Kalau sudah login dan bukan admin, lanjutkan
+    const currentQty = getItemQuantity(item.id);
+
+    if (currentQty === 0) {
+      flyToCart(
+        (e.currentTarget as HTMLElement).closest(".cart-source") as HTMLElement,
+      );
+    }
+
+    dispatch({
+      type: "ADD_TO_CART",
+      payload: {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        image_url: item.image_url,
+      },
+    });
+
+    showAlert(`${item.name} added to cart!`, "success");
+  };
+
   const handleIncrease = (item: Menu, e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // Cek apakah user sudah login
+    if (!isLoggedIn) {
+      showAlert("You must be logged in to add items to cart", "error");
+      setTimeout(() => {
+        navigate("/login", { state: { from: `/category/${category}` } });
+      }, 1500);
+      return;
+    }
+
+    // Cek apakah admin preview mode
+    if (isAdminPreview) {
+      showAlert("Admin cannot add items to cart in preview mode", "warning");
+      return;
+    }
+
     const currentQty = getItemQuantity(item.id);
 
     if (currentQty === 0) {
@@ -98,6 +184,22 @@ export default function CategoryPage() {
 
   const handleDecrease = (itemId: number, e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // Cek apakah user sudah login
+    if (!isLoggedIn) {
+      showAlert("You must be logged in to modify cart", "error");
+      setTimeout(() => {
+        navigate("/login", { state: { from: `/category/${category}` } });
+      }, 1500);
+      return;
+    }
+
+    // Cek apakah admin preview mode
+    if (isAdminPreview) {
+      showAlert("Admin cannot modify cart in preview mode", "warning");
+      return;
+    }
+
     dispatch({ type: "DECREMENT", payload: itemId });
   };
 
@@ -111,6 +213,7 @@ export default function CategoryPage() {
       </div>
     );
   }
+
   if (menus.length === 0) {
     return (
       <main className="pt-20 md:pt-28 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -130,7 +233,15 @@ export default function CategoryPage() {
   }
 
   return (
-    <main className="pt-20 md:pt-28 pb-16 md:pb-20">
+    <main className="pt-20 md:pt-28 pb-16 md:pb-20 relative">
+      {/* Custom Alert Component */}
+      <CustomAlert
+        show={alert.show}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert((prev) => ({ ...prev, show: false }))}
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Category Header */}
         <div className="mb-8 sm:mb-10 md:mb-12">
@@ -140,6 +251,15 @@ export default function CategoryPage() {
           <p className="text-gray-600 mt-2 sm:mt-3 text-sm sm:text-base md:text-lg">
             {info.description}
           </p>
+          
+          {/* Admin Preview Badge */}
+          {isAdminPreview && (
+            <div className="mt-4 inline-flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2">
+              <span className="text-yellow-700 text-sm">
+                👑 Admin Preview Mode - View only
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Menu Grid */}
@@ -150,7 +270,9 @@ export default function CategoryPage() {
             return (
               <div
                 key={item.id}
-                className="cart-source bg-white rounded-lg sm:rounded-xl shadow-sm overflow-hidden p-3 sm:p-4 md:p-5 h-full flex flex-col hover:shadow-md transition-shadow duration-300">
+                className={`cart-source bg-white rounded-lg sm:rounded-xl shadow-sm overflow-hidden p-3 sm:p-4 md:p-5 h-full flex flex-col hover:shadow-md transition-shadow duration-300 ${
+                  isAdminPreview ? "opacity-90" : ""
+                }`}>
                 {/* Image */}
                 <div className="overflow-hidden rounded-md sm:rounded-lg mb-3 sm:mb-4">
                   <img
@@ -181,18 +303,26 @@ export default function CategoryPage() {
                       Rp {item.price.toLocaleString("id-ID")}
                     </p>
 
-                    {/* Tombol Add - Hanya muncul jika quantity 0 */}
-                    {quantity === 0 && (
+                    {/* Tombol Add - Conditional berdasarkan auth state */}
+                    {!isLoggedIn ? (
+                      <button
+                        className="bg-gray-400 hover:bg-gray-500 text-white text-xs sm:text-sm font-medium py-1.5 sm:py-2 px-3 sm:px-4 rounded-md sm:rounded-lg transition-colors duration-300 cursor-pointer"
+                        onClick={(e) => handleAddToCart(item, e)}>
+                         Add
+                      </button>
+                    ) : isAdminPreview ? (
+                      <button></button>
+                    ) : quantity === 0 ? (
                       <button
                         className="bg-red-700 hover:bg-red-800 text-white text-xs sm:text-sm font-medium py-1.5 sm:py-2 px-3 sm:px-4 rounded-md sm:rounded-lg transition-colors duration-300 active:scale-95"
                         onClick={(e) => handleIncrease(item, e)}>
                         Add
                       </button>
-                    )}
+                    ) : null}
                   </div>
 
-                  {/* Quantity Control - Muncul di bawah price jika quantity > 0 */}
-                  {quantity > 0 && (
+                  {/* Quantity Control - Muncul di bawah price jika quantity > 0 dan bukan admin */}
+                  {quantity > 0 && !isAdminPreview && isLoggedIn && (
                     <div className="flex items-center justify-between border-t border-gray-100 pt-3">
                       <span className="text-xs sm:text-sm text-gray-600">
                         Quantity:
@@ -216,8 +346,20 @@ export default function CategoryPage() {
                     </div>
                   )}
 
+                  {/* Quantity untuk admin preview (display only) */}
+                  {quantity > 0 && isAdminPreview && (
+                    <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+                      <span className="text-xs sm:text-sm text-gray-600">
+                        In cart:
+                      </span>
+                      <span className="text-sm font-semibold text-gray-500">
+                        {quantity} items
+                      </span>
+                    </div>
+                  )}
+
                   {/* Pesan jika sudah mencapai maksimum */}
-                  {quantity >= 10 && (
+                  {quantity >= 10 && !isAdminPreview && (
                     <p className="text-xs text-red-600 mt-2 text-right">
                       Max quantity reached
                     </p>

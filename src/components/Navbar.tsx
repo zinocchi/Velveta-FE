@@ -11,7 +11,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const { isLoggedIn, user, logout } = useAuth();
+  const { isLoggedIn, user, logout, isAdminPreview } = useAuth();
   const [openMenu, setOpenMenu] = useState(false);
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -186,8 +186,9 @@ const Navbar = () => {
                 <span className="hidden xl:inline">Find a store</span>
                 <span className="xl:hidden">Store</span>
               </a>
+              
 
-              {isLoggedIn && (
+              {isLoggedIn && !isAdminPreview && (
                 <>
                   <button
                     onClick={(e) => {
