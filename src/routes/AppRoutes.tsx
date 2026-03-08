@@ -4,7 +4,6 @@ import MenuLayout from "../layouts/MenuLayouts";
 import DashboardLayout from "../layouts/DashboardLayout";
 
 //admin
-
 import AdminLayout from "../admin/layout/AdminLayout";
 import AdminLogin from "../admin/pages/auth/Login";
 import AdminRegister from "../admin/pages/auth/Register";
@@ -12,7 +11,7 @@ import AdminDashboardPage from "../admin/pages/dashboard/DashboardPage";
 import MenuPage from "../admin/pages/menus/MenuPage";
 import OrdersPage from "../admin/pages/orders/OrderPage";
 // import ReportsPage from "../admin/pages/reports/ReportPage";
-import AdminProtectedRoute from "../admin/components/ProtectedRoute";
+import AdminProtectedRoute from "../admin/components/AdminProtectedRoute";
 
 // pages
 import Home from "../pages/home/Home";
@@ -21,7 +20,7 @@ import Reward from "../pages/reward/Reward";
 
 // component
 import ScrollToTop from "../components/ScrollToTop";
-import ProtectedRoute from "../components/ProtectedRoute";
+import UserProtectedRoute from "../components/UserProtectedRoute";
 
 // menu
 import Menu from "../pages/menu/Menu";
@@ -57,7 +56,7 @@ const AppRoutes = () => {
         </Route>
 
         {/* ===== USER PROTECTED ===== */}
-        <Route element={<ProtectedRoute />}>
+        <Route element={<UserProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardPage />} />
             <Route path="menu" element={<Menu />} />

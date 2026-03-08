@@ -61,27 +61,23 @@ const AdminLogin = () => {
       });
 
       const data = await response.json();
-      console.log("Admin login response:", data); // Debug
+      console.log("Admin login response:", data); 
 
       if (response.ok) {
-        // 🔥 YANG PENTING: Simpan token dan user data
         localStorage.setItem("token", data.token);
         
-        // Pastikan user data punya role admin
         const userData = {
           ...data.user,
-          role: 'admin' // Force role admin
+          role: 'admin' 
         };
         localStorage.setItem("user", JSON.stringify(userData));
         
-        // Trigger event storage untuk komponen lain
         window.dispatchEvent(new Event('storage'));
         
         showCustomAlert("Admin login successful! Redirecting...", "success");
 
         setTimeout(() => {
-          // Force reload dengan window.location
-          window.location.href = "/admin/dashboard";
+           window.location.href = "/admin/dashboard";
         }, 1500);
       } else {
         showCustomAlert(
