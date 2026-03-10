@@ -1,10 +1,9 @@
-// admin/components/ProtectedRoute.tsx
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../auth/useAuth';
 
 const AdminProtectedRoute = () => {
-  console.log('🔒 AdminProtectedRoute checking...');
+  console.log(' AdminProtectedRoute checking...');
   const { user, loading, isLoggedIn } = useAuth();
   const token = localStorage.getItem('token');
   
@@ -29,7 +28,6 @@ const AdminProtectedRoute = () => {
     );
   }
   
-  // Kalau tidak ada token atau belum login, redirect ke admin login
   if (!token || !isLoggedIn || !user) {
     console.log('⛔ No token/user, redirecting to admin login');
     return <Navigate to="/admin/login" replace />;

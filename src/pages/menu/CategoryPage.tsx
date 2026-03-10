@@ -16,7 +16,7 @@ export default function CategoryPage() {
   const [loading, setLoading] = useState(true);
   const { state, dispatch } = useCart();
   const { isLoggedIn, isAdminPreview } = useAuth(); // Ambil auth state
-  
+
   // State untuk alert
   const [alert, setAlert] = useState<{
     show: boolean;
@@ -69,6 +69,7 @@ export default function CategoryPage() {
       })
       .then((res) => {
         setMenus(res.data.data);
+        console.log("Fetched menus for category:", res.data.data);
       })
       .catch((err) => {
         console.error(err);
@@ -93,10 +94,10 @@ export default function CategoryPage() {
   // Fungsi untuk menampilkan alert
   const showAlert = (
     message: string,
-    type: "error" | "warning" | "info" | "success" = "info"
+    type: "error" | "warning" | "info" | "success" = "info",
   ) => {
     setAlert({ show: true, message, type });
-    
+
     // Auto hide setelah 3 detik
     setTimeout(() => {
       setAlert((prev) => ({ ...prev, show: false }));
@@ -109,7 +110,7 @@ export default function CategoryPage() {
     // Cek apakah user sudah login
     if (!isLoggedIn) {
       showAlert("You must be logged in to add items to cart", "error");
-      
+
       // Optional: redirect ke login setelah 1.5 detik
       setTimeout(() => {
         navigate("/login", { state: { from: `/category/${category}` } });
@@ -251,12 +252,12 @@ export default function CategoryPage() {
           <p className="text-gray-600 mt-2 sm:mt-3 text-sm sm:text-base md:text-lg">
             {info.description}
           </p>
-          
+
           {/* Admin Preview Badge */}
           {isAdminPreview && (
             <div className="mt-4 inline-flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2">
               <span className="text-yellow-700 text-sm">
-                👑 Admin Preview Mode - View only
+                Admin Preview Mode - View only
               </span>
             </div>
           )}
@@ -308,7 +309,7 @@ export default function CategoryPage() {
                       <button
                         className="bg-gray-400 hover:bg-gray-500 text-white text-xs sm:text-sm font-medium py-1.5 sm:py-2 px-3 sm:px-4 rounded-md sm:rounded-lg transition-colors duration-300 cursor-pointer"
                         onClick={(e) => handleAddToCart(item, e)}>
-                         Add
+                        Add
                       </button>
                     ) : isAdminPreview ? (
                       <button></button>

@@ -1,5 +1,4 @@
-// auth/useAuth.ts
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
 
@@ -15,8 +14,12 @@ export const useAuth = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true); // Mulai dengan true
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  
+  // Gunakan ref untuk menyimpan role saat logout
+  const userRoleRef = useRef<string | undefined>(undefined);
+
   const isAdminPreview = user?.role === "admin";
 
   // Load user from localStorage
@@ -33,14 +36,18 @@ export const useAuth = () => {
           console.log('Parsed user:', parsedUser);
           setUser(parsedUser);
           setIsLoggedIn(true);
+          // Simpan role ke ref
+          userRoleRef.current = parsedUser.role;
         } else {
           setUser(null);
           setIsLoggedIn(false);
+          userRoleRef.current = undefined;
         }
       } catch (e) {
         console.error("Failed to parse user from storage", e);
         setUser(null);
         setIsLoggedIn(false);
+        userRoleRef.current = undefined;
       } finally {
         setLoading(false);
       }
@@ -48,7 +55,6 @@ export const useAuth = () => {
 
     loadUser();
 
-    // Listen for storage changes (login di tab lain)
     window.addEventListener('storage', loadUser);
     return () => window.removeEventListener('storage', loadUser);
   }, []);
@@ -76,6 +82,7 @@ export const useAuth = () => {
 
         setUser(userData);
         setIsLoggedIn(true);
+        userRoleRef.current = userData.role;
 
         return {
           success: true,
@@ -102,19 +109,25 @@ export const useAuth = () => {
       await api.post("/logout");
     } catch (_) {}
 
+    // Simpan role sebelum dihapus
+    const role = userRoleRef.current;
+    
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
     setUser(null);
     setIsLoggedIn(false);
+    userRoleRef.current = undefined;
     
-    // Redirect berdasarkan role sebelumnya
-    if (user?.role === 'admin') {
+    // Redirect berdasarkan role yang tersimpan di ref
+    if (role === 'admin') {
+      console.log('Logout admin, redirecting to /admin/login');
       navigate("/admin/login");
     } else {
+      console.log('Logout user, redirecting to /login');
       navigate("/login");
     }
-  }, [navigate, user]);
+  }, [navigate]); // Hapus user dari dependency array
 
   return {
     user,

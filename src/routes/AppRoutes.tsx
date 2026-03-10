@@ -5,8 +5,6 @@ import DashboardLayout from "../layouts/DashboardLayout";
 
 //admin
 import AdminLayout from "../admin/layout/AdminLayout";
-import AdminLogin from "../admin/pages/auth/Login";
-import AdminRegister from "../admin/pages/auth/Register";
 import AdminDashboardPage from "../admin/pages/dashboard/DashboardPage";
 import MenuPage from "../admin/pages/menus/MenuPage";
 import OrdersPage from "../admin/pages/orders/OrderPage";
@@ -71,17 +69,11 @@ const AppRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
 
-        {/* ===== ADMIN ===== */}
-
-        {/* Admin Auth - No Layout */}
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/register" element={<AdminRegister />} />
-
         {/* Admin Protected Routes with Layout */}
         <Route element={<AdminProtectedRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
-            {/* Default redirect to dashboard */}
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            {/* Default redirect to dashboard - pakai relative path biar konsisten */}
+            <Route index element={<Navigate to="dashboard" replace />} />
             
             {/* Admin Pages */}
             <Route path="dashboard" element={<AdminDashboardPage />} />
