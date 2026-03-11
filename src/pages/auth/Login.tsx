@@ -107,7 +107,7 @@ const Login: React.FC = () => {
       } else {
         console.log("DEBUG: Calling admin login...");
 
-        const response = await api.post("/admin/login", {
+        const response = await api.post("/login", {
           email: formData.login,
           password: formData.password,
           work_pin: formData.workPin,
