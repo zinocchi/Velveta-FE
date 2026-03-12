@@ -36,7 +36,47 @@ import {
 import { SiMastercard, SiVisa, SiPaypal } from "react-icons/si";
 import OrderDetailModal from "../../components/modal/OrderDetailModal";
 
-// Types
+// Types from API
+interface PaymentMethod {
+  id: number;
+  code: string;
+  name: string;
+  icon: string;
+  description: string;
+  settings: any;
+  display_order: number;
+  is_active: boolean;
+  providers?: EWalletProvider[];
+  banks?: Bank[];
+}
+
+interface EWalletProvider {
+  id: number;
+  code: string;
+  name: string;
+  icon: string;
+  settings: any;
+  display_order: number;
+  is_active: boolean;
+}
+
+interface Bank {
+  id: number;
+  code: string;
+  name: string;
+  icon: string;
+  accounts: BankAccount[];
+  settings: any;
+  display_order: number;
+  is_active: boolean;
+}
+
+interface BankAccount {
+  account_number: string;
+  account_name: string;
+  branch: string;
+}
+
 interface Address {
   id: string;
   label: string;
@@ -82,6 +122,10 @@ const CheckoutPage = () => {
   >("confirmation");
   const [showOrderDetail, setShowOrderDetail] = useState(false);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
+
+  // Payment methods from API
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(true);
 
   // Notification state
   const [notification, setNotification] = useState<{
@@ -194,6 +238,30 @@ const CheckoutPage = () => {
       setNotification((prev) => ({ ...prev, show: false }));
     }, 3000);
   };
+
+  // Fetch payment methods from API
+  useEffect(() => {
+    const fetchPaymentMethods = async () => {
+      try {
+        setLoadingPaymentMethods(true);
+        const response = await api.get("/payment/methods");
+        if (response.data.success) {
+          setPaymentMethods(response.data.data);
+          // Set default payment method
+          if (response.data.data.length > 0) {
+            setPaymentMethod(response.data.data[0].code);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch payment methods:", error);
+        showNotification("Failed to load payment methods", "error");
+      } finally {
+        setLoadingPaymentMethods(false);
+      }
+    };
+
+    fetchPaymentMethods();
+  }, []);
 
   useEffect(() => {
     const loadAddresses = async () => {
@@ -568,6 +636,28 @@ const CheckoutPage = () => {
         );
         const finalTotal = itemsTotal + shippingCost;
 
+        // Build payment details based on method
+        let paymentDetails = {};
+        
+        if (paymentMethod === "credit_card") {
+          paymentDetails = {
+            card_number: cardDetails.number,
+            card_holder: cardDetails.name,
+            expiry: cardDetails.expiry,
+            cvv: cardDetails.cvv,
+            save_card: cardDetails.saveCard,
+          };
+        } else if (paymentMethod === "e_wallet") {
+          paymentDetails = {
+            provider: selectedEWallet,
+            phone: phoneNumber,
+          };
+        } else if (paymentMethod === "bank_transfer") {
+          paymentDetails = {
+            bank: selectedBank,
+          };
+        }
+
         const orderPayload = {
           items: itemsPayload,
           delivery_type: deliveryType,
@@ -576,20 +666,7 @@ const CheckoutPage = () => {
           payment_method: paymentMethod,
           shipping_cost: shippingCost,
           total: finalTotal,
-          payment_details:
-            paymentMethod === "credit_card"
-              ? {
-                  card_last4: cardDetails.number.slice(-4),
-                  card_brand: detectCardBrand(cardDetails.number),
-                }
-              : paymentMethod === "e_wallet"
-                ? {
-                    e_wallet: selectedEWallet,
-                    phone_number: phoneNumber,
-                  }
-                : {
-                    bank: selectedBank,
-                  },
+          payment_details: paymentDetails,
         };
 
         console.log(
@@ -671,7 +748,17 @@ const CheckoutPage = () => {
     }
   };
 
-  if (pageLoading) {
+  // Get icon component based on icon string
+  const getIconComponent = (iconName: string) => {
+    const icons: { [key: string]: any } = {
+      FaCreditCard,
+      FaWallet,
+      FaMoneyBillWave,
+    };
+    return icons[iconName] || FaCreditCard;
+  };
+
+  if (pageLoading || loadingPaymentMethods) {
     return (
       <main className="pt-28 pb-16 max-w-7xl mx-auto px-4">
         <div className="text-center py-12">
@@ -1011,6 +1098,7 @@ const CheckoutPage = () => {
                     </div>
                   ) : (
                     <form onSubmit={handleAddressSubmit} className="space-y-4">
+                      {/* Address form fields - same as before */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Address label
@@ -1519,15 +1607,17 @@ const CheckoutPage = () => {
                     Secure payment via:
                   </p>
                   <div className="flex justify-center gap-3">
-                    <div className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                      <FaCreditCard className="w-5 h-5 text-gray-600" />
-                    </div>
-                    <div className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                      <SiMastercard className="w-5 h-5 text-gray-600" />
-                    </div>
-                    <div className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                      <SiVisa className="w-5 h-5 text-gray-600" />
-                    </div>
+                    {paymentMethods.map((method) => {
+                      const Icon = getIconComponent(method.icon);
+                      return (
+                        <div
+                          key={method.id}
+                          className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                          title={method.name}>
+                          <Icon className="w-5 h-5 text-gray-600" />
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -1542,83 +1632,41 @@ const CheckoutPage = () => {
                 Payment Details
               </h2>
 
-              {/* Payment Method Selection */}
+              {/* Payment Method Selection - From API */}
               <div className="mb-8">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">
                   Select Payment Method
                 </h3>
                 <div className="grid grid-cols-3 gap-3">
-                  <button
-                    onClick={() => setPaymentMethod("credit_card")}
-                    className={`p-3 border rounded-lg transition-all flex flex-col items-center gap-1 ${
-                      paymentMethod === "credit_card"
-                        ? "border-red-700 bg-red-50"
-                        : "border-gray-200 hover:border-red-300 hover:bg-gray-50"
-                    }`}>
-                    <FaCreditCard
-                      className={`w-5 h-5 ${
-                        paymentMethod === "credit_card"
-                          ? "text-red-700"
-                          : "text-gray-500"
-                      }`}
-                    />
-                    <span
-                      className={`text-xs font-medium ${
-                        paymentMethod === "credit_card"
-                          ? "text-red-700"
-                          : "text-gray-600"
-                      }`}>
-                      Credit Card
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => setPaymentMethod("e_wallet")}
-                    className={`p-3 border rounded-lg transition-all flex flex-col items-center gap-1 ${
-                      paymentMethod === "e_wallet"
-                        ? "border-red-700 bg-red-50"
-                        : "border-gray-200 hover:border-red-300 hover:bg-gray-50"
-                    }`}>
-                    <FaWallet
-                      className={`w-5 h-5 ${
-                        paymentMethod === "e_wallet"
-                          ? "text-red-700"
-                          : "text-gray-500"
-                      }`}
-                    />
-                    <span
-                      className={`text-xs font-medium ${
-                        paymentMethod === "e_wallet"
-                          ? "text-red-700"
-                          : "text-gray-600"
-                      }`}>
-                      E-Wallet
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => setPaymentMethod("bank_transfer")}
-                    className={`p-3 border rounded-lg transition-all flex flex-col items-center gap-1 ${
-                      paymentMethod === "bank_transfer"
-                        ? "border-red-700 bg-red-50"
-                        : "border-gray-200 hover:border-red-300 hover:bg-gray-50"
-                    }`}>
-                    <FaMoneyBillWave
-                      className={`w-5 h-5 ${
-                        paymentMethod === "bank_transfer"
-                          ? "text-red-700"
-                          : "text-gray-500"
-                      }`}
-                    />
-                    <span
-                      className={`text-xs font-medium ${
-                        paymentMethod === "bank_transfer"
-                          ? "text-red-700"
-                          : "text-gray-600"
-                      }`}>
-                      Bank Transfer
-                    </span>
-                  </button>
+                  {paymentMethods.map((method) => {
+                    const Icon = getIconComponent(method.icon);
+                    return (
+                      <button
+                        key={method.id}
+                        onClick={() => setPaymentMethod(method.code)}
+                        className={`p-3 border rounded-lg transition-all flex flex-col items-center gap-1 ${
+                          paymentMethod === method.code
+                            ? "border-red-700 bg-red-50"
+                            : "border-gray-200 hover:border-red-300 hover:bg-gray-50"
+                        }`}>
+                        <Icon
+                          className={`w-5 h-5 ${
+                            paymentMethod === method.code
+                              ? "text-red-700"
+                              : "text-gray-500"
+                          }`}
+                        />
+                        <span
+                          className={`text-xs font-medium ${
+                            paymentMethod === method.code
+                              ? "text-red-700"
+                              : "text-gray-600"
+                          }`}>
+                          {method.name}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1746,7 +1794,7 @@ const CheckoutPage = () => {
                 </div>
               )}
 
-              {/* E-Wallet Form */}
+              {/* E-Wallet Form - With providers from API */}
               {paymentMethod === "e_wallet" && (
                 <div className="space-y-4">
                   <div>
@@ -1754,18 +1802,20 @@ const CheckoutPage = () => {
                       Select E-Wallet
                     </label>
                     <div className="grid grid-cols-3 gap-3">
-                      {["OVO", "GoPay", "DANA"].map((wallet) => (
-                        <button
-                          key={wallet}
-                          onClick={() => setSelectedEWallet(wallet)}
-                          className={`py-2.5 border rounded-lg transition-all text-sm font-medium ${
-                            selectedEWallet === wallet
-                              ? "border-red-700 bg-red-50 text-red-700"
-                              : "border-gray-200 text-gray-600 hover:border-red-300 hover:bg-gray-50"
-                          }`}>
-                          {wallet}
-                        </button>
-                      ))}
+                      {paymentMethods
+                        .find(m => m.code === "e_wallet")
+                        ?.providers?.map((provider) => (
+                          <button
+                            key={provider.id}
+                            onClick={() => setSelectedEWallet(provider.name)}
+                            className={`py-2.5 border rounded-lg transition-all text-sm font-medium ${
+                              selectedEWallet === provider.name
+                                ? "border-red-700 bg-red-50 text-red-700"
+                                : "border-gray-200 text-gray-600 hover:border-red-300 hover:bg-gray-50"
+                            }`}>
+                            {provider.name}
+                          </button>
+                        ))}
                     </div>
                   </div>
 
@@ -1787,7 +1837,7 @@ const CheckoutPage = () => {
                 </div>
               )}
 
-              {/* Bank Transfer Form */}
+              {/* Bank Transfer Form - With banks from API */}
               {paymentMethod === "bank_transfer" && (
                 <div className="space-y-4">
                   <div>
@@ -1795,18 +1845,20 @@ const CheckoutPage = () => {
                       Select Bank
                     </label>
                     <div className="grid grid-cols-2 gap-3">
-                      {["BCA", "Mandiri", "BNI", "BRI"].map((bank) => (
-                        <button
-                          key={bank}
-                          onClick={() => setSelectedBank(bank)}
-                          className={`py-2.5 border rounded-lg transition-all text-sm font-medium ${
-                            selectedBank === bank
-                              ? "border-red-700 bg-red-50 text-red-700"
-                              : "border-gray-200 text-gray-600 hover:border-red-300 hover:bg-gray-50"
-                          }`}>
-                          {bank}
-                        </button>
-                      ))}
+                      {paymentMethods
+                        .find(m => m.code === "bank_transfer")
+                        ?.banks?.map((bank) => (
+                          <button
+                            key={bank.id}
+                            onClick={() => setSelectedBank(bank.name)}
+                            className={`py-2.5 border rounded-lg transition-all text-sm font-medium ${
+                              selectedBank === bank.name
+                                ? "border-red-700 bg-red-50 text-red-700"
+                                : "border-gray-200 text-gray-600 hover:border-red-300 hover:bg-gray-50"
+                            }`}>
+                            {bank.name}
+                          </button>
+                        ))}
                     </div>
                   </div>
 

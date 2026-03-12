@@ -22,7 +22,10 @@ import {
   FaArrowLeft,
   FaPrint,
   FaDownload,
+  FaWallet,
+  FaUniversity,
 } from "react-icons/fa";
+import { SiMastercard, SiVisa, SiGojek, SiAna } from "react-icons/si";
 import api from "../../api/axios";
 
 interface OrderDetailModalProps {
@@ -44,10 +47,29 @@ interface OrderItem {
 
 interface Order {
   id: number;
+  user_id: number;
   order_number: string;
   status: "PROCESSING" | "COMPLETED" | "CANCELLED";
   total_price: number;
-  payment_method: string;
+  payment_method: {
+    // ← ini object, bukan string
+    id: number;
+    code: string;
+    name: string;
+    icon: string;
+    description: string;
+  };
+  payment_details?: {
+    card_number?: string;
+    card_last4?: string;
+    card_brand?: string;
+    provider?: string;
+    phone?: string;
+    bank?: string;
+  };
+  e_wallet_provider?: string;
+  bank_code?: string;
+  card_last4?: string;
   delivery_type: "delivery" | "pickup";
   shipping_cost: number;
   shipping_address?: any;
@@ -57,6 +79,7 @@ interface Order {
   created_at: string;
   items: OrderItem[];
   user?: {
+    id: number;
     name: string;
     email: string;
   };
@@ -134,7 +157,6 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
       }),
     );
 
-
     if (order.status === "PROCESSING") {
       const updateTime = () => {
         const now = new Date().getTime();
@@ -178,6 +200,15 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
 
       const response = await api.get(`/orders/${id}`);
       const orderData = response.data.data || response.data;
+
+      console.log("🔍 Order data:", {
+        method: orderData.method,
+        method_type: typeof orderData.method,
+        e_wallet_provider: orderData.e_wallet_provider,
+        bank_code: orderData.bank_code,
+        card_last4: orderData.card_last4,
+        full_data: orderData,
+      });
 
       if (!orderData.estimated_minutes) {
         orderData.estimated_minutes = 15;
@@ -283,6 +314,70 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
         return "Cancelled";
       default:
         return status;
+    }
+  };
+
+  const getPaymentMethodIcon = (
+    paymentMethod: { code?: string } | undefined,
+  ) => {
+    if (!paymentMethod?.code) {
+      return <FaMoneyBillWave className="w-4 h-4 text-gray-600" />;
+    }
+
+    const code = paymentMethod.code.toLowerCase();
+
+    switch (code) {
+      case "credit_card":
+        return <FaCreditCard className="w-4 h-4 text-blue-600" />;
+      case "e_wallet":
+        return <FaWallet className="w-4 h-4 text-purple-600" />;
+      case "bank_transfer":
+        return <FaUniversity className="w-4 h-4 text-emerald-600" />;
+      default:
+        return <FaMoneyBillWave className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
+  const getPaymentMethodName = (
+    paymentMethod: { name?: string; code?: string } | undefined,
+  ) => {
+    if (paymentMethod?.name) return paymentMethod.name;
+
+    const methods: Record<string, string> = {
+      credit_card: "Credit Card",
+      e_wallet: "E-Wallet",
+      bank_transfer: "Bank Transfer",
+    };
+
+    return paymentMethod?.code
+      ? methods[paymentMethod.code] || paymentMethod.code
+      : "Cash";
+  };
+
+  const getEWalletIcon = (provider?: string) => {
+    if (!provider) return null;
+    const providerLower = provider.toLowerCase();
+    switch (providerLower) {
+      case "ovo":
+        return <span className="text-blue-600 font-bold">OVO</span>;
+      case "gopay":
+        return <span className="text-green-600 font-bold">GoPay</span>;
+      case "dana":
+        return <span className="text-blue-500 font-bold">DANA</span>;
+      default:
+        return <span>{provider}</span>;
+    }
+  };
+  const getCardBrandIcon = (brand?: string) => {
+    if (!brand) return null;
+    const brandLower = brand.toLowerCase();
+    switch (brandLower) {
+      case "visa":
+        return <SiVisa className="w-5 h-5 text-blue-600" />;
+      case "mastercard":
+        return <SiMastercard className="w-5 h-5 text-orange-600" />;
+      default:
+        return null;
     }
   };
 
@@ -444,8 +539,38 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               <div class="payment-info">
                 <div class="info-row">
                   <span>Payment Method</span>
-                  <span>${order.payment_method === "cash" ? "CASH" : "DEBIT/CREDIT"}</span>
+                  <span>${getPaymentMethodName(order.payment_method).toUpperCase()}</span>
                 </div>
+                ${
+                  order.payment_method?.code === "e_wallet" && order.e_wallet_provider
+                    ? `
+                <div class="info-row">
+                  <span>Provider</span>
+                  <span>${order.e_wallet_provider}</span>
+                </div>
+                `
+                    : ""
+                }
+                ${
+                  order.payment_method?.code === "bank_transfer" && order.bank_code
+                    ? `
+                <div class="info-row">
+                  <span>Bank</span>
+                  <span>${order.bank_code.toUpperCase()}</span>
+                </div>
+                `
+                    : ""
+                }
+                ${
+                  order.payment_method?.code === "credit_card" && order.card_last4
+                    ? `
+                <div class="info-row">
+                  <span>Card</span>
+                  <span>•••• ${order.card_last4}</span>
+                </div>
+                `
+                    : ""
+                }
                 <div class="info-row">
                   <span>Status</span>
                   <span>${getStatusText(order.status).toUpperCase()}</span>
@@ -564,10 +689,48 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
         <div className="space-y-1 text-xs mb-4 p-3 bg-gray-50 rounded">
           <div className="flex justify-between">
             <span className="text-gray-600">Payment Method</span>
-            <span className="font-medium">
-              {order.payment_method === "cash" ? "CASH" : "DEBIT/CREDIT"}
+            <span className="font-medium flex items-center gap-1">
+              {getPaymentMethodIcon(order.payment_method)}
+              {getPaymentMethodName(order.payment_method)}
             </span>
           </div>
+
+          {/* Payment Details */}
+          {order.payment_method?.code === "e_wallet" && (
+            <>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Provider</span>
+                <span className="font-medium">
+                  {order.e_wallet_provider || order.payment_details?.provider}
+                </span>
+              </div>
+              {order.payment_details?.phone && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Phone</span>
+                  <span className="font-medium">
+                    {order.payment_details.phone}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
+
+          {order.payment_method?.code === "bank_transfer" && (
+            <div className="flex justify-between">
+              <span className="text-gray-600">Bank</span>
+              <span className="font-medium uppercase">
+                {order.bank_code || order.payment_details?.bank}
+              </span>
+            </div>
+          )}
+
+          {order.payment_method?.code === "credit_card" && order.card_last4 && (
+            <div className="flex justify-between">
+              <span className="text-gray-600">Card</span>
+              <span className="font-medium">•••• {order.card_last4}</span>
+            </div>
+          )}
+
           <div className="flex justify-between">
             <span className="text-gray-600">Status</span>
             <span
@@ -799,9 +962,6 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   </div>
                 )}
 
-                {/* Pending Message */}
-        
-
                 {/* Date & Time */}
                 <div className="bg-gray-50 p-4 rounded-xl">
                   <div className="flex items-center gap-3">
@@ -865,7 +1025,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   )}
                 </div>
 
-                {/* Payment Info */}
+                {/* Payment Info - Enhanced */}
                 <div className="bg-gray-50 p-4 rounded-xl">
                   <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                     <FaReceipt className="w-4 h-4 text-red-600" />
@@ -875,16 +1035,53 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Payment Method</span>
                       <span className="font-medium text-gray-800 flex items-center gap-1">
-                        {order.payment_method === "cash" ? (
-                          <FaMoneyBillWave className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <FaCreditCard className="w-4 h-4 text-blue-600" />
-                        )}
-                        {order.payment_method === "cash"
-                          ? "Cash on Delivery"
-                          : "Debit/Credit Card"}
+                        {getPaymentMethodIcon(order?.payment_method ?? "")}
+                        {getPaymentMethodName(order?.payment_method ?? "")}
                       </span>
                     </div>
+
+                    {/* E-Wallet Details */}
+                    {order.payment_method?.code === "e_wallet" && (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Provider</span>
+                          <span className="font-medium text-gray-800">
+                            {order.e_wallet_provider ||
+                              order.payment_details?.provider}
+                          </span>
+                        </div>
+                        {order.payment_details?.phone && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Phone Number</span>
+                            <span className="font-medium text-gray-800">
+                              {order.payment_details.phone}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Bank Transfer Details */}
+                    {order.payment_method?.code === "bank_transfer" && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Bank</span>
+                        <span className="font-medium text-gray-800 uppercase">
+                          {order.bank_code || order.payment_details?.bank}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Credit Card Details */}
+                    {order.payment_method?.code === "credit_card" && order.card_last4 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Card Number</span>
+                        <span className="font-medium text-gray-800 flex items-center gap-1">
+                          {getCardBrandIcon(order.payment_details?.card_brand)}
+                          •••• •••• •••• {order.card_last4}
+                        </span>
+                      </div>
+                    )}
+
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Subtotal</span>
                       <span className="text-gray-800">
