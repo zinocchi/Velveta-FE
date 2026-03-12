@@ -45,7 +45,7 @@ interface OrderItem {
 interface Order {
   id: number;
   order_number: string;
-  status: "PENDING" | "PROCESSING" | "COMPLETED" | "CANCELLED";
+  status: "PROCESSING" | "COMPLETED" | "CANCELLED";
   total_price: number;
   payment_method: string;
   delivery_type: "delivery" | "pickup";
@@ -134,11 +134,6 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
       }),
     );
 
-    if (order.status === "PENDING") {
-      pendingTimerRef.current = setTimeout(() => {
-        setOrder((prev) => (prev ? { ...prev, status: "PROCESSING" } : null));
-      }, 5000);
-    }
 
     if (order.status === "PROCESSING") {
       const updateTime = () => {
@@ -805,24 +800,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 )}
 
                 {/* Pending Message */}
-                {order.status === "PENDING" && (
-                  <div className="bg-yellow-50 border border-yellow-200 p-6 rounded-xl">
-                    <div className="text-center">
-                      <FaHourglassHalf className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
-                      <h3 className="text-lg font-semibold text-yellow-800 mb-2">
-                        Waiting for Payment
-                      </h3>
-                      <p className="text-sm text-yellow-700">
-                        Your order is pending. We'll start processing once
-                        payment is confirmed.
-                      </p>
-                      <p className="text-xs text-yellow-600 mt-3">
-                        Estimated preparation time: {order.estimated_minutes}{" "}
-                        minutes
-                      </p>
-                    </div>
-                  </div>
-                )}
+        
 
                 {/* Date & Time */}
                 <div className="bg-gray-50 p-4 rounded-xl">

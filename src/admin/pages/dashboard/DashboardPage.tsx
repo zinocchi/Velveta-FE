@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../../api/axios";
 import {
@@ -12,20 +12,28 @@ import {
   FaCheckCircle,
   FaStar,
   FaChevronRight,
+  FaDownload,
+  FaCalendarAlt,
 } from "react-icons/fa";
-import type { DashboardStats } from "../../types";
+import type { DashboardStats, RevenueData } from "../../types";
+import RevenueChart from "../../components/charts/RevenueChart";
+import ChartControls from "../../components/charts/ChartControl";
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [chartType, setChartType] = useState<'line' | 'area' | 'bar'>('area');
   const [dateRange, setDateRange] = useState({
     start: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
     end: new Date().toISOString().split('T')[0],
   });
+  const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
+  const [chartLoading, setChartLoading] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
+    fetchRevenueData();
   }, []);
 
   const fetchDashboardData = async () => {
@@ -38,6 +46,64 @@ const DashboardPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchRevenueData = useCallback(async () => {
+    try {
+      setChartLoading(true);
+      const response = await api.get("/admin/dashboard/revenue-report", {
+        params: {
+          start_date: dateRange.start,
+          end_date: dateRange.end,
+          group_by: 'day'
+        }
+      });
+      
+      // Format data untuk chart
+      const formattedData = response.data.data.chart_data.map((item: any) => ({
+        ...item,
+        revenue: Number(item.revenue),
+        orders: Number(item.orders)
+      }));
+      
+      setRevenueData(formattedData);
+    } catch (error) {
+      console.error("Failed to fetch revenue data:", error);
+      // Set dummy data kalau error (untuk development)
+      // setRevenueData(generateDummyRevenueData(14));
+    } finally {
+      setChartLoading(false);
+    }
+  }, [dateRange]);
+
+  const handleDateRangeChange = (newRange: { start: string; end: string }) => {
+    setDateRange(newRange);
+  };
+
+  const handleRefresh = () => {
+    fetchRevenueData();
+  };
+
+  const handleExportData = () => {
+    // Export data sebagai CSV
+    const headers = ['Date', 'Revenue', 'Orders'];
+    const csvData = revenueData.map(item => [
+      item.date,
+      item.revenue,
+      item.orders
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `revenue-report-${dateRange.start}-to-${dateRange.end}.csv`;
+    a.click();
   };
 
   const formatCurrency = (amount: number) => {
@@ -276,24 +342,59 @@ const DashboardPage: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-gray-900">Revenue Overview</h3>
             <div className="flex items-center gap-2">
-              <input
-                type="date"
-                value={dateRange.start}
-                onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                className="text-xs border border-gray-200 rounded-lg px-2 py-1"
-              />
-              <span className="text-xs text-gray-400">to</span>
-              <input
-                type="date"
-                value={dateRange.end}
-                onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                className="text-xs border border-gray-200 rounded-lg px-2 py-1"
-              />
+              <button
+                onClick={handleExportData}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Export as CSV"
+              >
+                <FaDownload className="w-4 h-4 text-gray-500" />
+              </button>
             </div>
           </div>
-          <div className="h-64 flex items-center justify-center border border-gray-100 rounded-xl bg-gray-50">
-            <p className="text-gray-400">Revenue chart will be displayed here</p>
+
+          <ChartControls
+            chartType={chartType}
+            onChartTypeChange={setChartType}
+            dateRange={dateRange}
+            onDateRangeChange={handleDateRangeChange}
+            onRefresh={handleRefresh}
+            loading={chartLoading}
+          />
+
+          <div className="h-80">
+            <RevenueChart 
+              data={revenueData} 
+              chartType={chartType}
+              height={320}
+            />
           </div>
+
+          {/* Summary Stats */}
+          {revenueData.length > 0 && (
+            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-100">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Total Revenue</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {formatCurrency(revenueData.reduce((sum, item) => sum + item.revenue, 0))}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Total Orders</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {revenueData.reduce((sum, item) => sum + item.orders, 0)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Average Order</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {formatCurrency(
+                    revenueData.reduce((sum, item) => sum + item.revenue, 0) / 
+                    revenueData.reduce((sum, item) => sum + item.orders, 0) || 0
+                  )}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Recent Orders */}
@@ -308,9 +409,9 @@ const DashboardPage: React.FC = () => {
               <FaChevronRight className="w-3 h-3" />
             </button>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-3 max-h-96 overflow-y-auto">
             {stats?.recentOrders && stats.recentOrders.length > 0 ? (
-              stats.recentOrders.slice(0, 5).map((order) => (
+              stats.recentOrders.map((order) => (
                 <div
                   key={order.id}
                   onClick={() => navigate(`/admin/orders/${order.id}`)}
@@ -320,7 +421,12 @@ const DashboardPage: React.FC = () => {
                     <span className="text-xs font-medium text-gray-400">
                       #{order.order_number}
                     </span>
-                    <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      order.status === 'COMPLETED' ? 'bg-green-50 text-green-700' :
+                      order.status === 'PENDING' ? 'bg-yellow-50 text-yellow-700' :
+                      order.status === 'PROCESSING' ? 'bg-blue-50 text-blue-700' :
+                      'bg-red-50 text-red-700'
+                    }`}>
                       {order.status}
                     </span>
                   </div>
@@ -330,7 +436,7 @@ const DashboardPage: React.FC = () => {
                         {order.user?.name || "Unknown"}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {order.items?.length || 0} items
+                        {order.items?.length || 0} items • {new Date(order.created_at).toLocaleDateString()}
                       </p>
                     </div>
                     <p className="text-sm font-bold text-gray-900">
@@ -340,7 +446,10 @@ const DashboardPage: React.FC = () => {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-gray-500 text-center py-4">No recent orders</p>
+              <div className="text-center py-8">
+                <FaShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-sm text-gray-500">No recent orders</p>
+              </div>
             )}
           </div>
         </div>

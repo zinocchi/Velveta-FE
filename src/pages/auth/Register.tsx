@@ -18,7 +18,6 @@ const AdminRegister = () => {
   const [loginMode, setLoginMode] = useState<"user" | "admin">("user");
 
   const [form, setForm] = useState({
-    // fullname: "",
     username: "",
     email: "",
     password: "",
@@ -97,7 +96,6 @@ const AdminRegister = () => {
   const handleModeSwitch = (mode: "user" | "admin") => {
     setLoginMode(mode);
     setForm({
-      // fullname: "",
       username: "",
       email: "",
       password: "",
@@ -150,7 +148,6 @@ const AdminRegister = () => {
 
       if (loginMode === "admin") {
         response = await api.post("/admin/register", {
-          // fullname: form.fullname,
           username: form.username,
           email: form.email,
           password: form.password,
@@ -176,7 +173,6 @@ const AdminRegister = () => {
         }, 1500);
       } else {
         response = await api.post("/register", {
-          // fullname: form.fullname,
           username: form.username,
           email: form.email,
           password: form.password,
@@ -432,7 +428,7 @@ const AdminRegister = () => {
                     value={form.username}
                     onChange={handleChange}
                     className={`w-full px-4 py-3 border ${
-                      errors.fullname ? "border-red-500" : "border-gray-300"
+                      errors.username ? "border-red-500" : "border-gray-300"
                     } rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200`}
                     placeholder="Enter your username"
                   />

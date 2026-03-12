@@ -235,11 +235,11 @@ const Navbar = () => {
                         src={
                           user?.avatar ||
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                            user?.fullname || "User",
+                            user?.username || "User",
                           )}&background=random&color=fff&bold=true`
                         }
                         className="h-9 w-9 md:h-10 md:w-10 rounded-full object-cover border-2 border-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-                        alt={user?.fullname || "User"}
+                        alt={user?.username|| "User"}
                       />
                     </button>
 
@@ -247,7 +247,7 @@ const Navbar = () => {
                       <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-xl py-2 z-50 transition-all duration-200 animate-fadeIn">
                         <div className="px-4 py-2 border-b border-gray-100">
                           <p className="font-medium text-gray-900 text-sm truncate">
-                            {user?.fullname || "User"}
+                            {user?.username || "User"}
                           </p>
                           <p className="text-xs text-gray-500 truncate">
                             {user?.email || ""}
@@ -367,11 +367,11 @@ const Navbar = () => {
                       src={
                         user?.avatar ||
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          user?.fullname || "User",
+                          user?.username || "User",
                         )}&background=random&color=fff&bold=true`
                       }
                       className="h-9 w-9 rounded-full object-cover border-2 border-white"
-                      alt={user?.fullname || "User"}
+                      alt={user?.username || "User"}
                     />
                   </button>
                 </div>
@@ -564,16 +564,16 @@ const Navbar = () => {
                         src={
                           user?.avatar ||
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                            user?.fullname || "User",
+                            user?.username || "User",
                           )}&background=random&color=fff&bold=true`
                         }
                         className="h-10 w-10 rounded-full object-cover border-2 border-white"
-                        alt={user?.fullname || "User"}
+                        alt={user?.username || "User"}
                       />
                     )}
                     <div>
                       <h3 className="font-bold text-gray-900">
-                        {isLoggedIn ? user?.fullname || "User" : "Welcome"}
+                        {isLoggedIn ? user?.username || "User" : "Welcome"}
                       </h3>
                       {isLoggedIn && user?.email && (
                         <p className="text-xs text-gray-500">{user.email}</p>

@@ -1,3 +1,4 @@
+// admin/types/index.ts
 export interface OrderItem {
   id: number;
   menu_id: number;
@@ -23,14 +24,14 @@ export interface ShippingAddress {
 export interface Order {
   id: number;
   order_number: string;
-  status: "PENDING" | "PROCESSING" | "COMPLETED" | "CANCELLED";
+  status: "PROCESSING" | "COMPLETED" | "CANCELLED";
   total_price: number;
   payment_method: string;
   delivery_type: "delivery" | "pickup";
   shipping_cost: number;
   estimated_minutes?: number;
   created_at: string;
-  shipping_address?: ShippingAddress | null;  // Bisa object atau null
+  shipping_address?: ShippingAddress | null;
   user: {
     id: number;
     name: string;
@@ -49,6 +50,13 @@ export interface Menu {
   image: string | null;
   is_available: boolean;
   created_at: string;
+}
+
+export interface RevenueData {
+  date: string;
+  revenue: number;
+  orders: number;
+  day_name?: string;
 }
 
 export interface DashboardStats {
@@ -76,11 +84,7 @@ export interface DashboardStats {
     total_sold: number;
     image: string | null;
   }[];
-  revenueChart: {
-    date: string;
-    revenue: number;
-    orders: number;
-  }[];
+  revenueChart: RevenueData[]; // Data untuk grafik
 }
 
 export interface MenuFormData {

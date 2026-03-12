@@ -243,7 +243,7 @@ const DashboardContent: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-1">
           Welcome back,{" "}
           <span className="text-red-700">
-            {user?.fullname?.split(" ")[0] || "Coffee Lover"}
+          {user?.username?.split(" ")[0] || "Coffee Lover"}
           </span>
         </h1>
         <p className="text-gray-500">Here's your activity overview</p>

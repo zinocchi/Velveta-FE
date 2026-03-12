@@ -17,7 +17,7 @@ const AdminHeader = () => {
         <div className="flex items-center gap-3">
           <FaUserCircle className="w-8 h-8 text-gray-400" />
           <div>
-            <p className="text-sm font-medium text-gray-900">{user?.fullname || "Admin"}</p>
+            <p className="text-sm font-medium text-gray-900">{user?.username || "Admin"}</p>
             <p className="text-xs text-gray-500">Administrator</p>
           </div>
         </div>
