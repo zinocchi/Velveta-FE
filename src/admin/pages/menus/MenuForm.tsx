@@ -9,12 +9,17 @@ interface MenuFormProps {
   onSuccess: () => void;
 }
 
+interface Category {
+  id?: number;
+  name: string;
+}
+
 const MenuForm: React.FC<MenuFormProps> = ({ menu, onClose, onSuccess }) => {
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [newCategory, setNewCategory] = useState("");
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
-  
+
   const [formData, setFormData] = useState<MenuFormData>({
     name: menu?.name || "",
     description: menu?.description || "",
@@ -24,8 +29,10 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onClose, onSuccess }) => {
     image: null,
     is_available: menu?.is_available ?? true,
   });
-  
-  const [imagePreview, setImagePreview] = useState<string | null>(menu?.image || null);
+
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    menu?.image || null,
+  );
   const [loading, setLoading] = useState(false);
 
   // Fetch categories on mount
@@ -37,23 +44,47 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onClose, onSuccess }) => {
     try {
       setLoadingCategories(true);
       const response = await api.get("/admin/categories");
-      // Assuming the response structure: { data: ["Coffee", "Tea", ...] }
-      const cats = response.data.data || response.data || [];
+
+      // Handle berbagai format response
+      let cats: Category[] = [];
+      const data = response.data.data || response.data;
+
+      if (Array.isArray(data)) {
+        if (data.length > 0 && typeof data[0] === "string") {
+          // Jika array of strings
+          cats = data.map((cat, index) => ({ id: index, name: cat }));
+        } else if (data.length > 0 && typeof data[0] === "object") {
+          // Jika array of objects
+          cats = data.map((cat: any) => ({
+            id: cat.id || cat.category_id,
+            name: cat.name || cat.category,
+          }));
+        }
+      }
+
       setCategories(cats);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
-      // Fallback categories if API fails
-      setCategories(["Coffee", "Tea", "Pastry", "Snacks", "Beverages"]);
+      // Fallback categories
+      setCategories([
+        { id: 1, name: "Coffee" },
+        { id: 2, name: "Tea" },
+        { id: 3, name: "Pastry" },
+        { id: 4, name: "Snacks" },
+        { id: 5, name: "Beverages" },
+      ]);
     } finally {
       setLoadingCategories(false);
     }
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: type === "number" ? Number(value) : value,
     }));
@@ -62,15 +93,19 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onClose, onSuccess }) => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setFormData(prev => ({ ...prev, image: file }));
+      setFormData((prev) => ({ ...prev, image: file }));
       setImagePreview(URL.createObjectURL(file));
     }
   };
 
   const handleAddNewCategory = () => {
     if (newCategory.trim()) {
-      setCategories(prev => [...prev, newCategory.trim()]);
-      setFormData(prev => ({ ...prev, category: newCategory.trim() }));
+      const newCat = {
+        id: Date.now(),
+        name: newCategory.trim(),
+      };
+      setCategories((prev) => [...prev, newCat]);
+      setFormData((prev) => ({ ...prev, category: newCategory.trim() }));
       setNewCategory("");
       setShowNewCategoryInput(false);
     }
@@ -82,31 +117,61 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onClose, onSuccess }) => {
 
     try {
       const formDataToSend = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          if (key === "image" && value instanceof File) {
-            formDataToSend.append(key, value);
-          } else {
-            formDataToSend.append(key, String(value));
-          }
+
+      // Mapping data sesuai backend
+      const fields = [
+        { name: "name", value: formData.name },
+        { name: "description", value: formData.description },
+        { name: "price", value: String(formData.price) },
+        { name: "category", value: formData.category },
+        { name: "stock", value: String(Math.floor(formData.stock)) },
+        { name: "is_available", value: formData.is_available ? "1" : "0" },
+      ];
+
+      // Append semua field text
+      fields.forEach((field) => {
+        if (
+          field.value !== null &&
+          field.value !== undefined &&
+          field.value !== ""
+        ) {
+          formDataToSend.append(field.name, field.value);
         }
       });
 
-      if (menu) {
-        // For edit, we need to use POST with _method PUT or send as POST
-        formDataToSend.append('_method', 'PUT');
-        await api.post(`/admin/menus/${menu.id}`, formDataToSend, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-      } else {
-        await api.post("/admin/menus", formDataToSend, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+      // Append image jika ada
+      if (formData.image instanceof File) {
+        formDataToSend.append("image", formData.image);
       }
 
+      // Log untuk debugging
+      console.log("📤 Sending FormData:");
+      for (let pair of formDataToSend.entries()) {
+        console.log(`  ${pair[0]}:`, pair[1]);
+      }
+
+      const response = await api.post(
+        menu ? `/admin/menus/${menu.id}` : "/admin/menus",
+        formDataToSend,
+        { headers: { "Content-Type": "multipart/form-data" } },
+      );
+
+      console.log("✅ Success:", response.data);
       onSuccess();
-    } catch (error) {
-      console.error("Failed to save menu:", error);
+    } catch (error: any) {
+      console.error("❌ Error:", error);
+
+      if (error.response?.status === 422) {
+        const errors = error.response.data.errors || {};
+        const errorMessages = Object.values(errors).flat().join("\n");
+        alert(`Validation Error:\n${errorMessages}`);
+      } else {
+        alert(
+          error.response?.data?.message ||
+            error.message ||
+            "Failed to save menu",
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -197,12 +262,12 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onClose, onSuccess }) => {
                 className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Category *
               </label>
-              
+
               {!showNewCategoryInput ? (
                 <div className="flex gap-2">
                   <select
@@ -210,15 +275,18 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onClose, onSuccess }) => {
                     value={formData.category}
                     onChange={handleChange}
                     required
-                    className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 bg-white"
-                  >
-                    <option value="" disabled>Select a category</option>
+                    className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 bg-white">
+                    <option value="" disabled>
+                      Select a category
+                    </option>
                     {loadingCategories ? (
-                      <option disabled>Loading categories...</option>
+                      <option value="" disabled>
+                        Loading categories...
+                      </option>
                     ) : (
                       categories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
+                        <option key={cat.id || cat.name} value={cat.name}>
+                          {cat.name}
                         </option>
                       ))
                     )}
@@ -227,8 +295,7 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onClose, onSuccess }) => {
                     type="button"
                     onClick={() => setShowNewCategoryInput(true)}
                     className="px-3 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-                    title="Add new category"
-                  >
+                    title="Add new category">
                     +
                   </button>
                 </div>
@@ -246,8 +313,7 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onClose, onSuccess }) => {
                     type="button"
                     onClick={handleAddNewCategory}
                     className="px-3 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors"
-                    title="Add"
-                  >
+                    title="Add">
                     ✓
                   </button>
                   <button
@@ -257,8 +323,7 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onClose, onSuccess }) => {
                       setNewCategory("");
                     }}
                     className="px-3 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-                    title="Cancel"
-                  >
+                    title="Cancel">
                     ✗
                   </button>
                 </div>
@@ -290,10 +355,17 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onClose, onSuccess }) => {
               id="is_available"
               name="is_available"
               checked={formData.is_available}
-              onChange={(e) => setFormData(prev => ({ ...prev, is_available: e.target.checked }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  is_available: e.target.checked,
+                }))
+              }
               className="w-4 h-4 text-red-700 rounded border-gray-300 focus:ring-red-200"
             />
-            <label htmlFor="is_available" className="text-sm font-medium text-gray-700">
+            <label
+              htmlFor="is_available"
+              className="text-sm font-medium text-gray-700">
               Available for ordering
             </label>
           </div>
@@ -303,26 +375,39 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, onClose, onSuccess }) => {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-red-700 text-white rounded-xl font-medium hover:bg-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+              className="flex-1 px-4 py-2 bg-red-700 text-white rounded-xl font-medium hover:bg-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   {menu ? "Updating..." : "Creating..."}
                 </span>
+              ) : menu ? (
+                "Update Menu"
               ) : (
-                menu ? "Update Menu" : "Create Menu"
+                "Create Menu"
               )}
             </button>
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors disabled:opacity-50"
-            >
+              className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors disabled:opacity-50">
               Cancel
             </button>
           </div>
