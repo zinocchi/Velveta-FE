@@ -64,6 +64,17 @@ const MenuList: React.FC<MenuListProps> = ({
       {loading ? (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-700"></div>
+          <p className="mt-2 text-gray-500">Loading menus...</p>
+        </div>
+      ) : menus.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-2xl border border-gray-100">
+          <FaSearch className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-600 text-lg font-medium mb-2">No menus found</p>
+          <p className="text-gray-500 text-sm">
+            {search || category !== 'all' 
+              ? "Try adjusting your search or filter" 
+              : "Click 'Add New Menu' to create your first menu"}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

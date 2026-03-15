@@ -34,7 +34,7 @@ export interface Order {
   shipping_address?: ShippingAddress | null;
   user: {
     id: number;
-    name: string;
+    username: string;
     email: string;
   };
   items: OrderItem[];

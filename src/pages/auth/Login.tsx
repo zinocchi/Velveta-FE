@@ -461,9 +461,6 @@ const Login: React.FC = () => {
                     placeholder="Enter your 6-digit work PIN"
                     maxLength={9}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Format: VELVETA01, VELVETA02, etc
-                  </p>
                 </div>
               )}
 

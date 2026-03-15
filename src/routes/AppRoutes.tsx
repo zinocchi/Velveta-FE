@@ -8,6 +8,7 @@ import AdminLayout from "../admin/layout/AdminLayout";
 import AdminDashboardPage from "../admin/pages/dashboard/DashboardPage";
 import MenuPage from "../admin/pages/menus/MenuPage";
 import OrdersPage from "../admin/pages/orders/OrderPage";
+import OrderList from "../admin/pages/orders/OrderList";
 // import ReportsPage from "../admin/pages/reports/ReportPage";
 import AdminProtectedRoute from "../admin/components/AdminProtectedRoute";
 

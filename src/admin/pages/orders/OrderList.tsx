@@ -1,8 +1,20 @@
-import React from "react";
+import React, { useState } from "react"; // Tambahkan useState
 import { useNavigate } from "react-router-dom";
-import { FaSearch, FaEye, FaCalendarAlt, FaMotorcycle, FaStore } from "react-icons/fa";
+import { 
+  FaSearch, 
+  FaEye, 
+  FaCalendarAlt, 
+  FaMotorcycle, 
+  FaStore,
+  FaCreditCard,
+  FaWallet,
+  FaUniversity,
+  FaMoneyBillWave,
+  FaReceipt // Tambahkan icon receipt
+} from "react-icons/fa";
 import type { Order } from "../../types";
 import OrderStatusBadge from "./components/OrderStatusBadges";
+import ReceiptModal from "../../components/ReceiptModal"; // Import komponen receipt
 
 interface OrderListProps {
   orders: Order[];
@@ -14,7 +26,7 @@ interface OrderListProps {
   selectedOrders: number[];
   onSelectOrder: (orderId: number, checked: boolean) => void;
   onSelectAll: (checked: boolean) => void;
-  onUpdateStatus: (orderId: number, status: string) => void;
+  onUpdateStatus: (orderId: number, newStatus: string,currentStatus?: string, orderNumber?: string) => void;
 }
 
 const OrderList: React.FC<OrderListProps> = ({
@@ -30,6 +42,16 @@ const OrderList: React.FC<OrderListProps> = ({
   onUpdateStatus,
 }) => {
   const navigate = useNavigate();
+  
+  // State untuk receipt modal
+  const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
+  const [showReceipt, setShowReceipt] = useState(false);
+
+  // Handler untuk membuka receipt
+  const handleViewReceipt = (order: Order) => {
+    setReceiptOrder(order);
+    setShowReceipt(true);
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -40,13 +62,76 @@ const OrderList: React.FC<OrderListProps> = ({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+    const date = new Date(dateString);
+    return date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getPaymentMethodIcon = (method: any) => {
+    if (method && typeof method === 'object' && method.code) {
+      switch (method.code.toLowerCase()) {
+        case 'credit_card':
+          return <FaCreditCard className="w-3 h-3 text-blue-600" />;
+        case 'e_wallet':
+          return <FaWallet className="w-3 h-3 text-purple-600" />;
+        case 'bank_transfer':
+          return <FaUniversity className="w-3 h-3 text-emerald-600" />;
+        default:
+          return <FaMoneyBillWave className="w-3 h-3 text-gray-500" />;
+      }
+    }
+    
+    if (typeof method === 'string') {
+      switch (method.toLowerCase()) {
+        case 'credit_card':
+          return <FaCreditCard className="w-3 h-3 text-blue-600" />;
+        case 'e_wallet':
+          return <FaWallet className="w-3 h-3 text-purple-600" />;
+        case 'bank_transfer':
+          return <FaUniversity className="w-3 h-3 text-emerald-600" />;
+        default:
+          return <FaMoneyBillWave className="w-3 h-3 text-gray-500" />;
+      }
+    }
+    
+    return <FaMoneyBillWave className="w-3 h-3 text-gray-500" />;
+  };
+
+  const getPaymentMethodName = (method: any) => {
+    if (method && typeof method === 'object' && method.name) {
+      return method.name;
+    }
+    
+    if (method && typeof method === 'object' && method.code) {
+      const methods: Record<string, string> = {
+        credit_card: "Credit Card",
+        e_wallet: "E-Wallet",
+        bank_transfer: "Bank Transfer",
+      };
+      return methods[method.code.toLowerCase()] || method.code;
+    }
+    
+    if (typeof method === 'string') {
+      const methods: Record<string, string> = {
+        credit_card: "Credit Card",
+        e_wallet: "E-Wallet",
+        bank_transfer: "Bank Transfer",
+      };
+      return methods[method.toLowerCase()] || method.replace('_', ' ');
+    }
+    
+    return "Cash";
   };
 
   if (loading) {
     return (
       <div className="text-center py-12">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-700"></div>
+        <p className="mt-2 text-gray-500">Loading orders...</p>
       </div>
     );
   }
@@ -103,7 +188,7 @@ const OrderList: React.FC<OrderListProps> = ({
                   <div>Items</div>
                   <div>Total</div>
                 </div>
-                <div className="w-32">Status</div>
+                <div className="w-40">Status & Actions</div> {/* Lebar ditambah */}
               </div>
             </div>
 
@@ -124,7 +209,7 @@ const OrderList: React.FC<OrderListProps> = ({
                   {/* Order Info */}
                   <div className="flex-1 grid grid-cols-4 gap-4">
                     <div>
-                      <p className="text-sm font-medium text-gray-400">#{order.order_number}</p>
+                      <p className="text-sm font-medium text-gray-900">#{order.order_number}</p>
                       <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
                         <FaCalendarAlt className="w-3 h-3" />
                         {formatDate(order.created_at)}
@@ -145,15 +230,15 @@ const OrderList: React.FC<OrderListProps> = ({
                     </div>
 
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{order.user?.name}</p>
-                      <p className="text-xs text-gray-500">{order.user?.email}</p>
+                      <p className="text-sm font-medium text-gray-900">{order.user?.username || "N/A"}</p>
+                      <p className="text-xs text-gray-500">{order.user?.email || "N/A"}</p>
                     </div>
 
                     <div>
                       <div className="flex flex-wrap gap-1">
                         {order.items.slice(0, 2).map((item, idx) => (
                           <span key={idx} className="text-xs text-gray-700 bg-gray-50 px-2 py-1 rounded-md">
-                            {item.menu?.name} x{item.qty}
+                            {item.menu?.name || "Unknown"} x{item.qty}
                           </span>
                         ))}
                         {order.items.length > 2 && (
@@ -168,18 +253,22 @@ const OrderList: React.FC<OrderListProps> = ({
                       <p className="text-sm font-bold text-gray-900">
                         {formatCurrency(order.total_price)}
                       </p>
-                      <p className="text-xs text-gray-500">{order.payment_method}</p>
+                      <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                        {getPaymentMethodIcon(order.payment_method)}
+                        <span>{getPaymentMethodName(order.payment_method)}</span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Status & Actions */}
-                  <div className="w-32 flex flex-col items-end gap-2">
+                  <div className="w-40 flex flex-col items-end gap-2">
                     <OrderStatusBadge status={order.status} />
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
+                      {/* Status Update Dropdown */}
                       <select
                         value=""
-                        onChange={(e) => onUpdateStatus(order.id, e.target.value)}
+                        onChange={(e) => onUpdateStatus(order.id, e.target.value, order.status, order.order_number)}
                         className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-red-200"
                       >
                         <option value="">Update</option>
@@ -188,11 +277,22 @@ const OrderList: React.FC<OrderListProps> = ({
                         <option value="CANCELLED">Cancelled</option>
                       </select>
                       
+                      {/* View Details Button */}
                       <button
                         onClick={() => navigate(`/admin/orders/${order.id}`)}
                         className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="View Details"
                       >
                         <FaEye className="w-4 h-4 text-gray-500" />
+                      </button>
+
+                      {/* Receipt Button - INI YANG BARU */}
+                      <button
+                        onClick={() => handleViewReceipt(order)}
+                        className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="View Receipt"
+                      >
+                        <FaReceipt className="w-4 h-4 text-gray-500" />
                       </button>
                     </div>
                   </div>
@@ -214,6 +314,13 @@ const OrderList: React.FC<OrderListProps> = ({
           </div>
         )}
       </div>
+
+      {/* Receipt Modal */}
+      <ReceiptModal
+        isOpen={showReceipt}
+        onClose={() => setShowReceipt(false)}
+        order={receiptOrder}
+      />
     </>
   );
 };
