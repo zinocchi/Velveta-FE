@@ -118,7 +118,6 @@ export default function CategoryPage() {
       return;
     }
 
-    // Cek apakah admin preview mode
     if (isAdminPreview) {
       showAlert("Admin cannot add items to cart in preview mode", "warning");
       return;

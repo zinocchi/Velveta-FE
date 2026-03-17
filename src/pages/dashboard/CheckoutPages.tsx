@@ -123,11 +123,9 @@ const CheckoutPage = () => {
   const [showOrderDetail, setShowOrderDetail] = useState(false);
   const [lastOrderId, setLastOrderId] = useState<string | null>(null);
 
-  // Payment methods from API
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(true);
 
-  // Notification state
   const [notification, setNotification] = useState<{
     show: boolean;
     message: string;
@@ -207,7 +205,6 @@ const CheckoutPage = () => {
     timeRange: string;
   } | null>(null);
 
-  // UI States
   const [pageLoading, setPageLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -239,7 +236,6 @@ const CheckoutPage = () => {
     }, 3000);
   };
 
-  // Fetch payment methods from API
   useEffect(() => {
     const fetchPaymentMethods = async () => {
       try {
@@ -748,7 +744,7 @@ const CheckoutPage = () => {
     }
   };
 
-  // Get icon component based on icon string
+
   const getIconComponent = (iconName: string) => {
     const icons: { [key: string]: any } = {
       FaCreditCard,
