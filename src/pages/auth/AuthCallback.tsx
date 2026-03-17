@@ -1,12 +1,11 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api/axios";
-import { useAuth } from "../../auth/useAuth";
+import api from "../../services/api/config";
+import { useAuth } from "../../hooks/useAuth";
 
-// Page to handle authentication callback from external providers (Google)
 const AuthCallback = () => {
   const navigate = useNavigate();
-  const { setUser, setIsLoggedIn } = useAuth();
+  const { setUser } = useAuth();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -14,29 +13,33 @@ const AuthCallback = () => {
 
     if (token) {
       localStorage.setItem("token", token);
+
       api
         .get("/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
-        .then((res) => {
+        .then((res: { data: { user: any } }) => {
           const userData = res.data.user;
 
           localStorage.setItem("user", JSON.stringify(userData));
 
           setUser(userData);
-          setIsLoggedIn(true);
 
-          navigate("/");
+          if (userData.role === "admin") {
+            navigate("/admin/dashboard");
+          } else {
+            navigate("/");
+          }
         })
         .catch(() => {
-          navigate("/");
+          navigate("/login");
         });
     } else {
       navigate("/register");
     }
-  }, [navigate, setUser, setIsLoggedIn]);
+  }, [navigate, setUser]);
 
   return (
     <div className="flex justify-center items-center h-screen text-lg font-semibold">

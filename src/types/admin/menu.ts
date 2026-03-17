@@ -1,0 +1,74 @@
+// src/types/admin/menu.ts
+
+import type { Menu } from '../menu';
+
+/**
+ * Menu form data for create/update
+ */
+export interface MenuFormData {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  stock: number;
+  image: File | null;
+  is_available: boolean;
+}
+
+/**
+ * Create menu request
+ */
+export interface CreateMenuRequest {
+  name: string;
+  price: number;
+  category: string;
+  description?: string;
+  stock: number;
+  image?: File;
+  is_available?: boolean;
+}
+
+/**
+ * Update menu request
+ */
+export interface UpdateMenuRequest extends Partial<CreateMenuRequest> {
+  id: number;
+}
+
+/**
+ * Stock update request
+ */
+export interface UpdateStockRequest {
+  stock: number;
+  operation?: 'set' | 'add' | 'subtract';
+}
+
+/**
+ * Bulk stock update item
+ */
+export interface BulkStockItem {
+  id: number;
+  stock: number;
+  operation?: 'set' | 'add' | 'subtract';
+}
+
+/**
+ * Low stock item
+ */
+export interface LowStockItem extends Menu {
+  stock_status: 'low' | 'out';
+}
+
+/**
+ * Stock statistics
+ */
+export interface StockStats {
+  total_items: number;
+  low_stock: number;
+  out_of_stock: number;
+  available_items: number;
+  items: {
+    low_stock: LowStockItem[];
+    out_of_stock: LowStockItem[];
+  };
+}

@@ -1,4 +1,3 @@
-// components/OrderStatusBadges.tsx
 import React from 'react';
 import { FaClock, FaSpinner, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 

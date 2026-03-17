@@ -1,44 +1,24 @@
 import React from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import DashboardNavbar from "../components/dashboard/DashboardNavbar";
-import DashboardSidebar from "../components/dashboard/DashboardSidebar";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useAuthContext } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 
+import { DashboardNavbar, DashboardSidebar } from "../components/layout";
 
-// Main layout for the user dashboard, including a navbar and sidebar for navigation between dashboard sections
 const DashboardLayout: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const getActiveTab = () => {
-    const path = location.pathname.split("/").pop();
-    switch (path) {
-      case "dashboard":
-      case "":
-        return "dashboard";
-      case "menu":
-        return "menu";
-      case "orders":
-        return "orders";
-      case "favorites":
-        return "favorites";
-      default:
-        return "dashboard";
-    }
-  };
-
-  
-
-  const activeTab = getActiveTab();
+  const { logout } = useAuthContext();
+  const { totalItems } = useCart();
 
   const stats = {
-    cartCount: 3,
-    notificationCount: 2,
-    totalOrders: 12,
-    favoriteDrinksCount: 8,
+    totalOrders: 12, 
+    favoriteDrinksCount: 8, 
+    cartCount: totalItems,
+    notificationCount: 2, 
   };
 
-  const handleTabChange = (tabId: string) => {
-    navigate(`/dashboard/${tabId}`);
+  const handleEditProfile = () => {
+    navigate("/dashboard/profile");
   };
 
   const handleViewOrders = () => {
@@ -49,29 +29,33 @@ const DashboardLayout: React.FC = () => {
     navigate("/dashboard/favorites");
   };
 
-  const handleEditProfile = () => {
-    navigate("/dashboard/profile");
+  const handleLogout = async () => {
+    await logout();
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+  const handleNotificationClick = () => {
+    console.log("Notification clicked");
+  };
+
+  const handleCartClick = () => {
+    navigate("/dashboard/checkout");
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Navbar */}
       <DashboardNavbar
         cartCount={stats.cartCount}
         notificationCount={stats.notificationCount}
-        onNotificationClick={() => console.log("Notification clicked")}
-        onCartClick={() => console.log("Cart clicked")}
+        onNotificationClick={handleNotificationClick}
+        onCartClick={handleCartClick}
         onEditProfile={handleEditProfile}
         onViewOrders={handleViewOrders}
         onViewFavorites={handleViewFavorites}
         onLogout={handleLogout}
-        logoUrl="/velveta.png"
       />
 
+      {/* Main Layout with Sidebar */}
       <div className="flex pt-16">
         <DashboardSidebar
           onBackToHome={() => navigate("/")}
@@ -79,8 +63,9 @@ const DashboardLayout: React.FC = () => {
           favoritesCount={stats.favoriteDrinksCount}
         />
 
-        <main className="flex-1 p-6 md:p-8">
-          <Outlet /> {/* This renders the dashboard page content */}
+        {/* Main Content */}
+        <main className="flex-1 p-6 md:p-8 bg-white min-h-[calc(100vh-4rem)] overflow-auto">
+          <Outlet />
         </main>
       </div>
     </div>

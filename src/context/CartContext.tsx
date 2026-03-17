@@ -6,7 +6,6 @@ import React, {
   type ReactNode,
 } from "react";
 
-// Context for managing shopping cart state across the app
 export interface CartItem {
   id: number;
   name: string;

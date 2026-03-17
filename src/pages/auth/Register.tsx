@@ -1,10 +1,14 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api/axios";
+import api from "../../services/api/config";
 import type { AxiosError } from "axios";
 import VelvetaLogo from "../../assets/icon/velveta.png";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { FaUser, FaUserShield } from "react-icons/fa";
+
+import { LoadingSpinner } from "../../components/ui/loading/LoadingSpinner";
+import { Alert } from "../../components/ui/Alert";
+import { cn } from "../../libs/utils";
 
 interface ApiErrorResponse {
   message?: string;
@@ -13,11 +17,23 @@ interface ApiErrorResponse {
   next_pin?: string;
 }
 
-const AdminRegister = () => {
-  const navigate = useNavigate();
-  const [loginMode, setLoginMode] = useState<"user" | "admin">("user");
+interface FormData {
+  username: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  work_pin: string;
+  newsletter: boolean;
+  terms: boolean;
+}
 
-  const [form, setForm] = useState({
+type RegisterMode = "user" | "admin";
+
+const Register: React.FC = () => {
+  const navigate = useNavigate();
+  const [mode, setMode] = useState<RegisterMode>("user");
+
+  const [form, setForm] = useState<FormData>({
     username: "",
     email: "",
     password: "",
@@ -28,21 +44,47 @@ const AdminRegister = () => {
   });
 
   const [errors, setErrors] = useState<Record<string, string[]>>({});
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [expectedPin, setExpectedPin] = useState<string | null>(null);
   const [nextPin, setNextPin] = useState<string | null>(null);
   const [availablePins, setAvailablePins] = useState<string[]>([]);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+3  const [alertState, setAlertState] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error' | 'warning' | 'info';
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  // Password visibility
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showWorkPin, setShowWorkPin] = useState(false);
 
+  // Fetch available pins when mode is admin
   useEffect(() => {
-    if (loginMode === "admin") {
+    if (mode === "admin") {
       fetchAvailablePins();
     }
-  }, [loginMode]);
+  }, [mode]);
+
+  const showAlert = (
+    message: string,
+    type: 'success' | 'error' | 'warning' | 'info' = 'success'
+  ) => {
+    setAlertState({
+      show: true,
+      message,
+      type,
+    });
+
+    setTimeout(() => {
+      setAlertState(prev => ({ ...prev, show: false }));
+    }, 5000);
+  };
 
   const fetchAvailablePins = async () => {
     try {
@@ -67,13 +109,13 @@ const AdminRegister = () => {
 
     const newValue = name === "work_pin" ? value.toUpperCase() : value;
 
-    setForm({
-      ...form,
+    setForm(prev => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : newValue,
-    });
+    }));
 
     if (errors[name]) {
-      setErrors((prev) => {
+      setErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors[name];
         return newErrors;
@@ -81,20 +123,8 @@ const AdminRegister = () => {
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
-  };
-
-  const toggleWorkPinVisibility = () => {
-    setShowWorkPin(!showWorkPin);
-  };
-
-  const handleModeSwitch = (mode: "user" | "admin") => {
-    setLoginMode(mode);
+  const handleModeSwitch = (newMode: RegisterMode) => {
+    setMode(newMode);
     setForm({
       username: "",
       email: "",
@@ -107,46 +137,57 @@ const AdminRegister = () => {
     setErrors({});
     setExpectedPin(null);
     setNextPin(null);
-    setSuccessMessage(null);
+    setAlertState(prev => ({ ...prev, show: false }));
 
-    if (mode === "admin") {
+    if (newMode === "admin") {
       fetchAvailablePins();
     }
+  };
+
+  const validateForm = (): boolean => {
+    // Check terms
+    if (!form.terms) {
+      setErrors({ terms: ["You must agree to the terms"] });
+      return false;
+    }
+
+    if (form.password !== form.password_confirmation) {
+      setErrors({ password_confirmation: ["Passwords do not match"] });
+      return false;
+    }
+
+    if (mode === "admin") {
+      if (!form.work_pin) {
+        setErrors({ work_pin: ["Work PIN is required"] });
+        return false;
+      }
+
+      if (!/^VELVETA\d{2}$/.test(form.work_pin)) {
+        setErrors({
+          work_pin: ["Invalid PIN format. Must be VELVETA followed by 2 digits (e.g., VELVETA01)"],
+        });
+        return false;
+      }
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.terms) {
-      setErrors({ terms: ["You must agree to the terms"] });
+    if (!validateForm()) {
       return;
     }
 
-    if (form.password !== form.password_confirmation) {
-      setErrors({ password_confirmation: ["Passwords do not match"] });
-      return;
-    }
-
-    if (loginMode === "admin" && !form.work_pin) {
-      setErrors({ work_pin: ["Work PIN is required"] });
-      return;
-    }
-
-    if (loginMode === "admin" && !/^VELVETA\d{2}$/.test(form.work_pin)) {
-      setErrors({
-        work_pin: ["work pin failed"],
-      });
-      return;
-    }
-
-    setLoading(true);
+    setIsLoading(true);
     setErrors({});
-    setSuccessMessage(null);
+    setAlertState(prev => ({ ...prev, show: false }));
 
     try {
       let response;
 
-      if (loginMode === "admin") {
+      if (mode === "admin") {
         response = await api.post("/admin/register", {
           username: form.username,
           email: form.email,
@@ -164,9 +205,7 @@ const AdminRegister = () => {
           setNextPin(data.next_pin);
         }
 
-        setSuccessMessage(
-          "Admin registration successful! Redirecting to dashboard...",
-        );
+        showAlert("Admin registration successful! Redirecting to dashboard...", "success");
 
         setTimeout(() => {
           window.location.href = "/admin/dashboard";
@@ -184,9 +223,7 @@ const AdminRegister = () => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        setSuccessMessage(
-          "User registration successful! Redirecting to homepage...",
-        );
+        showAlert("User registration successful! Redirecting to homepage...", "success");
 
         setTimeout(() => {
           navigate("/");
@@ -220,38 +257,22 @@ const AdminRegister = () => {
         }
       }
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen font-['Segoe_UI',sans-serif]">
-      {/* Success Alert */}
-      {successMessage && (
+    <div className="min-h-screen bg-gray-50">
+      {/* Alert Notification */}
+      {alertState.show && (
         <div className="fixed top-24 right-4 z-50 animate-slideIn">
-          <div className="bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow-lg p-4 max-w-sm">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-6 w-6 text-green-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-green-700">
-                  {successMessage}
-                </p>
-              </div>
-            </div>
-          </div>
+          <Alert
+            type={alertState.type}
+            message={alertState.message}
+            dismissible
+            onDismiss={() => setAlertState(prev => ({ ...prev, show: false }))}
+            className="shadow-lg max-w-sm"
+          />
         </div>
       )}
 
@@ -263,44 +284,53 @@ const AdminRegister = () => {
         .animate-slideIn { animation: slideIn 0.3s ease-out; }
       `}</style>
 
-      <header className="fixed top-0 left-0 w-full bg-white text-black py-3 px-6 shadow-md z-50 flex justify-between items-center">
+      {/* Header */}
+      <header className="fixed top-0 left-0 w-full bg-white text-black py-3 px-6 shadow-md z-40 flex justify-between items-center">
         <div className="logo">
           <img src={VelvetaLogo} alt="Velveta Logo" className="h-14" />
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="pt-32 pb-16 px-5 flex justify-center">
         <div className="w-full max-w-2xl">
-          <h2 className="text-2xl font-bold text-center mb-6 font-['Montserrat',sans-serif] text-gray-800">
+          <h2 className="text-2xl font-bold text-center mb-6 font-['Montserrat'] text-gray-800">
             Create an Account
           </h2>
 
-          {/* SWITCH ROLE */}
+          {/* Role Selection */}
           <div className="flex justify-between gap-4 mb-8">
             {/* User Registration Card */}
             <button
               onClick={() => handleModeSwitch("user")}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 ${
-                loginMode === "user"
+              className={cn(
+                "flex-1 p-4 rounded-xl border-2 transition-all duration-300",
+                mode === "user"
                   ? "border-red-600 bg-red-50 shadow-md"
                   : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-              }`}>
+              )}
+              disabled={isLoading}
+            >
               <div className="flex flex-col items-center gap-2">
                 <div
-                  className={`p-3 rounded-full ${
-                    loginMode === "user"
+                  className={cn(
+                    "p-3 rounded-full transition-colors",
+                    mode === "user"
                       ? "bg-red-600 text-white"
                       : "bg-gray-100 text-gray-600"
-                  }`}>
+                  )}
+                >
                   <FaUser className="w-6 h-6" />
                 </div>
                 <span
-                  className={`font-medium ${
-                    loginMode === "user" ? "text-red-600" : "text-gray-700"
-                  }`}>
+                  className={cn(
+                    "font-medium",
+                    mode === "user" ? "text-red-600" : "text-gray-700"
+                  )}
+                >
                   Register as User
                 </span>
-                {loginMode === "user" && (
+                {mode === "user" && (
                   <span className="text-xs text-red-600 font-medium">
                     Selected
                   </span>
@@ -311,27 +341,34 @@ const AdminRegister = () => {
             {/* Admin Registration Card */}
             <button
               onClick={() => handleModeSwitch("admin")}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 ${
-                loginMode === "admin"
+              className={cn(
+                "flex-1 p-4 rounded-xl border-2 transition-all duration-300",
+                mode === "admin"
                   ? "border-red-600 bg-red-50 shadow-md"
                   : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-              }`}>
+              )}
+              disabled={isLoading}
+            >
               <div className="flex flex-col items-center gap-2">
                 <div
-                  className={`p-3 rounded-full ${
-                    loginMode === "admin"
+                  className={cn(
+                    "p-3 rounded-full transition-colors",
+                    mode === "admin"
                       ? "bg-red-600 text-white"
                       : "bg-gray-100 text-gray-600"
-                  }`}>
+                  )}
+                >
                   <FaUserShield className="w-6 h-6" />
                 </div>
                 <span
-                  className={`font-medium ${
-                    loginMode === "admin" ? "text-red-600" : "text-gray-700"
-                  }`}>
+                  className={cn(
+                    "font-medium",
+                    mode === "admin" ? "text-red-600" : "text-gray-700"
+                  )}
+                >
                   Register as Admin
                 </span>
-                {loginMode === "admin" && (
+                {mode === "admin" && (
                   <span className="text-xs text-red-600 font-medium">
                     Selected
                   </span>
@@ -340,44 +377,40 @@ const AdminRegister = () => {
             </button>
           </div>
 
-          {/* Available PIN Info - Hanya untuk admin */}
-          {loginMode === "admin" && availablePins.length > 0 && (
-            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="text-sm font-semibold text-blue-800 mb-2">
-                Available Work PINs:
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {availablePins.map((pin) => (
-                  <span
-                    key={pin}
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      pin === expectedPin
-                        ? "bg-green-100 text-green-700 border border-green-300"
-                        : "bg-gray-100 text-gray-600"
-                    }`}>
-                    {pin} {pin === expectedPin && "✓"}
-                  </span>
-                ))}
-              </div>
-              <p className="text-xs text-blue-600 mt-2">
-                Use PIN in sequence. Next available:{" "}
-                {expectedPin || "Loading..."}
-              </p>
+          {/* Available PIN Info - Admin only */}
+          {mode === "admin" && availablePins.length > 0 && (
+            <div className="mb-4">
+              <Alert
+                type="info"
+                title="Available Work PINs"
+                message={
+                  <div>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {availablePins.map((pin) => (
+                        <span
+                          key={pin}
+                          className={cn(
+                            "px-3 py-1 rounded-full text-xs font-medium",
+                            pin === expectedPin
+                              ? "bg-green-100 text-green-700 border border-green-300"
+                              : "bg-gray-100 text-gray-600"
+                          )}
+                        >
+                          {pin} {pin === expectedPin && "✓"}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">
+                      Use PIN in sequence. Next available: {expectedPin || "Loading..."}
+                    </p>
+                  </div>
+                }
+                className="mb-4"
+              />
             </div>
           )}
 
-          {/* Info untuk user */}
-          {/* {loginMode === "user" && (
-            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-700 flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                You are registering as a regular user. Click "Register as Admin" for admin registration.
-              </p>
-            </div>
-          )} */}
-
+          {/* Registration Form */}
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
             <p className="text-sm text-gray-500 mb-8">
               * indicates required field
@@ -385,39 +418,44 @@ const AdminRegister = () => {
 
             {/* Error Summary */}
             {Object.keys(errors).length > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                <h4 className="text-sm font-semibold text-red-800 mb-2">
-                  Please fix the following errors:
-                </h4>
-                <ul className="list-disc list-inside text-sm text-red-600">
-                  {Object.entries(errors).map(
-                    ([field, fieldErrors]) =>
-                      field !== "general" &&
-                      fieldErrors.map((error, idx) => (
-                        <li key={`${field}-${idx}`}>{error}</li>
-                      )),
-                  )}
-                </ul>
-              </div>
+              <Alert
+                type="error"
+                title="Please fix the following errors:"
+                message={
+                  <ul className="list-disc list-inside text-sm">
+                    {Object.entries(errors).map(
+                      ([field, fieldErrors]) =>
+                        field !== "general" &&
+                        fieldErrors.map((error, idx) => (
+                          <li key={`${field}-${idx}`}>{error}</li>
+                        )),
+                    )}
+                  </ul>
+                }
+                className="mb-6"
+              />
             )}
 
             {errors.general && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                {errors.general[0]}
-              </div>
+              <Alert
+                type="error"
+                message={errors.general[0]}
+                className="mb-6"
+              />
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Personal Information Section */}
               <div className="pb-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold mb-6 text-gray-700 font-['Montserrat',sans-serif]">
+                <h3 className="text-lg font-semibold mb-6 text-gray-700 font-['Montserrat']">
                   Personal Information
                 </h3>
 
                 <div>
                   <label
                     htmlFor="username"
-                    className="block text-sm font-medium mb-2 text-gray-700">
+                    className="block text-sm font-medium mb-2 text-gray-700"
+                  >
                     * Username
                   </label>
                   <input
@@ -427,9 +465,11 @@ const AdminRegister = () => {
                     required
                     value={form.username}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border ${
+                    disabled={isLoading}
+                    className={cn(
+                      "w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed",
                       errors.username ? "border-red-500" : "border-gray-300"
-                    } rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200`}
+                    )}
                     placeholder="Enter your username"
                   />
                   {errors.username && (
@@ -442,7 +482,8 @@ const AdminRegister = () => {
                 <div className="mt-5">
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium mb-2 text-gray-700">
+                    className="block text-sm font-medium mb-2 text-gray-700"
+                  >
                     * Email Address
                   </label>
                   <input
@@ -452,9 +493,11 @@ const AdminRegister = () => {
                     required
                     value={form.email}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border ${
+                    disabled={isLoading}
+                    className={cn(
+                      "w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed",
                       errors.email ? "border-red-500" : "border-gray-300"
-                    } rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200`}
+                    )}
                     placeholder="Enter your email address"
                   />
                   {errors.email && (
@@ -467,43 +510,16 @@ const AdminRegister = () => {
 
               {/* Account Information Section */}
               <div className="pt-2 pb-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold mb-6 text-gray-700 font-['Montserrat',sans-serif]">
+                <h3 className="text-lg font-semibold mb-6 text-gray-700 font-['Montserrat']">
                   Account Information
                 </h3>
 
-                {/* <div>
-                  <label
-                    htmlFor="username"
-                    className="block text-sm font-medium mb-2 text-gray-700">
-                    * Username
-                  </label>
-                  <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    required
-                    value={form.username}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 border ${
-                      errors.username ? "border-red-500" : "border-gray-300"
-                    } rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200`}
-                    placeholder="Choose a username"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Username must be 4-20 characters
-                  </p>
-                  {errors.username && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.username[0]}
-                    </p>
-                  )}
-                </div> */}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
                     <label
                       htmlFor="password"
-                      className="block text-sm font-medium mb-2 text-gray-700">
+                      className="block text-sm font-medium mb-2 text-gray-700"
+                    >
                       * Password
                     </label>
                     <div className="relative">
@@ -514,15 +530,19 @@ const AdminRegister = () => {
                         required
                         value={form.password}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 border ${
+                        disabled={isLoading}
+                        className={cn(
+                          "w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200 pr-12 disabled:bg-gray-100 disabled:cursor-not-allowed",
                           errors.password ? "border-red-500" : "border-gray-300"
-                        } rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200 pr-12`}
+                        )}
                         placeholder="Create a password"
                       />
                       <button
                         type="button"
-                        onClick={togglePasswordVisibility}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-600">
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={isLoading}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-600 disabled:opacity-50"
+                      >
                         {showPassword ? (
                           <EyeSlashIcon className="w-5 h-5" />
                         ) : (
@@ -540,7 +560,8 @@ const AdminRegister = () => {
                   <div>
                     <label
                       htmlFor="password_confirmation"
-                      className="block text-sm font-medium mb-2 text-gray-700">
+                      className="block text-sm font-medium mb-2 text-gray-700"
+                    >
                       * Confirm Password
                     </label>
                     <div className="relative">
@@ -551,17 +572,19 @@ const AdminRegister = () => {
                         required
                         value={form.password_confirmation}
                         onChange={handleChange}
-                        className={`w-full px-4 py-3 border ${
-                          errors.password_confirmation
-                            ? "border-red-500"
-                            : "border-gray-300"
-                        } rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200 pr-12`}
+                        disabled={isLoading}
+                        className={cn(
+                          "w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200 pr-12 disabled:bg-gray-100 disabled:cursor-not-allowed",
+                          errors.password_confirmation ? "border-red-500" : "border-gray-300"
+                        )}
                         placeholder="Confirm your password"
                       />
                       <button
                         type="button"
-                        onClick={toggleConfirmPasswordVisibility}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-600">
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        disabled={isLoading}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-600 disabled:opacity-50"
+                      >
                         {showConfirmPassword ? (
                           <EyeSlashIcon className="w-5 h-5" />
                         ) : (
@@ -583,17 +606,18 @@ const AdminRegister = () => {
                 </p>
               </div>
 
-              {/* Admin Work PIN Section - Hanya untuk admin */}
-              {loginMode === "admin" && (
+              {/* Admin Work PIN Section */}
+              {mode === "admin" && (
                 <div className="pt-2 pb-4 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold mb-6 text-gray-700 font-['Montserrat',sans-serif]">
+                  <h3 className="text-lg font-semibold mb-6 text-gray-700 font-['Montserrat']">
                     Admin Verification
                   </h3>
 
                   <div>
                     <label
                       htmlFor="work_pin"
-                      className="block text-sm font-medium mb-2 text-gray-700">
+                      className="block text-sm font-medium mb-2 text-gray-700"
+                    >
                       * Work PIN
                     </label>
                     <div className="relative">
@@ -601,19 +625,23 @@ const AdminRegister = () => {
                         type={showWorkPin ? "text" : "password"}
                         id="work_pin"
                         name="work_pin"
-                        required={loginMode === "admin"}
+                        required={mode === "admin"}
                         value={form.work_pin}
                         onChange={handleChange}
-                        placeholder=""
+                        disabled={isLoading}
+                        placeholder="VELVETA01"
                         maxLength={9}
-                        className={`w-full px-4 py-3 border ${
+                        className={cn(
+                          "w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200 pr-12 font-mono uppercase disabled:bg-gray-100 disabled:cursor-not-allowed",
                           errors.work_pin ? "border-red-500" : "border-gray-300"
-                        } rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200 pr-12 font-mono uppercase`}
+                        )}
                       />
                       <button
                         type="button"
-                        onClick={toggleWorkPinVisibility}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-600">
+                        onClick={() => setShowWorkPin(!showWorkPin)}
+                        disabled={isLoading}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-600 disabled:opacity-50"
+                      >
                         {showWorkPin ? (
                           <EyeSlashIcon className="w-5 h-5" />
                         ) : (
@@ -622,9 +650,6 @@ const AdminRegister = () => {
                       </button>
                     </div>
                     <div className="flex items-center justify-between mt-2">
-                      {/* <p className="text-xs text-gray-500">
-                        Format: VELVETA01, VELVETA02 (6 digits after VELVETA)
-                      </p> */}
                       {expectedPin && (
                         <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded">
                           Next: {expectedPin}
@@ -651,7 +676,8 @@ const AdminRegister = () => {
                       required
                       checked={form.terms}
                       onChange={handleChange}
-                      className="w-5 h-5 text-red-600 rounded focus:ring-red-300 border-gray-300"
+                      disabled={isLoading}
+                      className="w-5 h-5 text-red-600 rounded focus:ring-red-300 border-gray-300 disabled:opacity-50"
                     />
                   </div>
                   <div className="ml-3 text-sm">
@@ -674,8 +700,8 @@ const AdminRegister = () => {
                 </div>
               </div>
 
-              {/* Newsletter Option - Hanya untuk admin */}
-              {loginMode === "admin" && (
+              {/* Newsletter Option - Admin only */}
+              {mode === "admin" && (
                 <div className="flex items-start">
                   <div className="flex items-center h-5">
                     <input
@@ -684,6 +710,7 @@ const AdminRegister = () => {
                       name="newsletter"
                       checked={form.newsletter}
                       onChange={handleChange}
+                      disabled={isLoading}
                       className="w-5 h-5 text-red-600 rounded focus:ring-red-300 border-gray-300"
                     />
                   </div>
@@ -695,62 +722,44 @@ const AdminRegister = () => {
                 </div>
               )}
 
-              {/* Success Message for Next PIN - Admin Only */}
-              {nextPin && loginMode === "admin" && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <p className="text-sm text-green-700">
-                    ✅ Registration successful! Next available PIN:{" "}
-                    <span className="font-mono font-bold">{nextPin}</span>
-                  </p>
-                </div>
+              {/* Next PIN Info - Admin only */}
+              {nextPin && mode === "admin" && (
+                <Alert
+                  type="success"
+                  message={`Registration successful! Next available PIN: ${nextPin}`}
+                  className="mb-4"
+                />
               )}
 
               {/* Form Buttons */}
               <div className="pt-8 flex justify-end space-x-4">
                 <button
                   type="button"
-                  onClick={() =>
-                    navigate(loginMode === "admin" ? "/login" : "/login")
-                  }
-                  className="px-6 py-3 bg-white text-red-600 font-medium rounded-full shadow-sm border border-red-600 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300">
+                  onClick={() => navigate("/login")}
+                  disabled={isLoading}
+                  className="px-6 py-3 bg-white text-red-600 font-medium rounded-full shadow-sm border border-red-600 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Back to Login
                 </button>
                 <button
                   type="submit"
-                  disabled={loading || !form.terms}
-                  className="px-8 py-3 bg-red-600 text-white font-medium rounded-full shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300 text-base disabled:opacity-50 disabled:cursor-not-allowed">
-                  {loading ? (
-                    <span className="flex items-center">
-                      <svg
-                        className="animate-spin h-5 w-5 mr-2 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24">
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Registering...
-                    </span>
-                  ) : loginMode === "admin" ? (
-                    "Register as Admin"
+                  disabled={isLoading || !form.terms}
+                  className="px-8 py-3 bg-red-600 text-white font-medium rounded-full shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300 text-base disabled:opacity-50 disabled:cursor-not-allowed min-w-[200px] flex items-center justify-center"
+                >
+                  {isLoading ? (
+                    <>
+                      <LoadingSpinner size="sm" color="white" />
+                      <span className="ml-2">Registering...</span>
+                    </>
                   ) : (
-                    "Register as User"
+                    mode === "admin" ? "Register as Admin" : "Register as User"
                   )}
                 </button>
               </div>
             </form>
 
-            {/* Google Registration - Hanya untuk user */}
-            {loginMode === "user" && (
+            {/* Google Registration - User only */}
+            {mode === "user" && (
               <>
                 <div className="flex items-center my-8">
                   <div className="flex-grow border-t border-gray-300"></div>
@@ -760,11 +769,14 @@ const AdminRegister = () => {
 
                 <button
                   onClick={handleGoogleLogin}
-                  className="flex items-center justify-center gap-2 w-full bg-red-600 text-white rounded-md py-3 mt-4">
+                  disabled={isLoading}
+                  className="flex items-center justify-center gap-2 w-full bg-red-600 text-white rounded-md py-3 hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <svg
                     className="w-5 h-5"
                     xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 48 48">
+                    viewBox="0 0 48 48"
+                  >
                     <path
                       fill="#EA4335"
                       d="M24 9.5c3.5 0 6.3 1.5 8.2 2.8l6-6C34.9 2.7 29.8 0 24 0 14.7 0 6.7 5.4 2.8 13.2l7 5.5C11.7 13.2 17.3 9.5 24 9.5z"
@@ -789,10 +801,9 @@ const AdminRegister = () => {
             <p className="text-gray-600">
               Already have an account?{" "}
               <button
-                onClick={() =>
-                  navigate(loginMode === "admin" ? "/login" : "/login")
-                }
-                className="text-red-600 font-medium hover:text-red-800 transition duration-200">
+                onClick={() => navigate("/login")}
+                className="text-red-600 font-medium hover:text-red-800 transition duration-200 bg-transparent border-none"
+              >
                 Sign in here
               </button>
             </p>
@@ -800,6 +811,7 @@ const AdminRegister = () => {
         </div>
       </main>
 
+      {/* Footer */}
       <footer className="text-center text-gray-500 text-sm pb-8">
         <p>© {new Date().getFullYear()} Velveta. All rights reserved.</p>
       </footer>
@@ -807,4 +819,4 @@ const AdminRegister = () => {
   );
 };
 
-export default AdminRegister;
+export default Register;

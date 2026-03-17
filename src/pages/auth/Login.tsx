@@ -1,50 +1,76 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/useAuth";
-import api from "../../api/axios";
+import { useAuthContext } from "../../context/AuthContext";
+import api from "../../services/api/config";
 import VelvetaLogo from "../../assets/icon/velveta.png";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { FaUser, FaUserShield } from "react-icons/fa";
 
+// Import components
+import { LoadingSpinner } from "../../components/ui/loading/LoadingSpinner";
+import { Alert } from "../../components/ui/Alert";
+import { cn } from "../../libs/utils";
+
+type LoginMode = "user" | "admin";
+
+interface FormData {
+  login: string;
+  password: string;
+  workPin: string;
+}
+
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login, loading, error } = useAuth();
-  const [loginMode, setLoginMode] = useState<"user" | "admin">("user");
-
-  const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8000/auth/google/redirect";
-  };
-
+  const { login: userLogin, loading: authLoading } = useAuthContext(); 
+  
+  const [mode, setMode] = useState<LoginMode>("user");
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     login: "",
     password: "",
     workPin: "",
   });
-
+  
   const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
   const [blockedUntil, setBlockedUntil] = useState<string | null>(null);
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [alertState, setAlertState] = useState<{
+    show: boolean;
+    message: string;
+    type: 'error' | 'success' | 'warning' | 'info';
+  }>({
+    show: false,
+    message: "",
+    type: "error",
+  });
 
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertType, setAlertType] = useState<"error" | "success" | "warning">(
-    "error",
-  );
-
-  const showCustomAlert = (
+  const showAlert = (
     message: string,
-    type: "error" | "success" | "warning" = "error",
+    type: 'error' | 'success' | 'warning' | 'info' = 'error'
   ) => {
-    setAlertMessage(message);
-    setAlertType(type);
-    setShowAlert(true);
+    setAlertState({
+      show: true,
+      message,
+      type,
+    });
 
-    const timer = setTimeout(() => {
-      setShowAlert(false);
+    setTimeout(() => {
+      setAlertState(prev => ({ ...prev, show: false }));
     }, 5000);
+  };
 
-    return () => clearTimeout(timer);
+  const handleModeSwitch = (newMode: LoginMode) => {
+    setMode(newMode);
+    setFormData({ login: "", password: "", workPin: "" });
+    setAttemptsLeft(null);
+    setBlockedUntil(null);
+    setAlertState(prev => ({ ...prev, show: false }));
+
+    if (newMode === "admin") {
+      checkAdminLoginStatus();
+    }
   };
 
   const checkAdminLoginStatus = async () => {
@@ -55,9 +81,9 @@ const Login: React.FC = () => {
       if (response.data.is_blocked) {
         const blockedDate = new Date(response.data.blocked_until);
         setBlockedUntil(blockedDate.toLocaleString());
-        showCustomAlert(
+        showAlert(
           `You are blocked until ${blockedDate.toLocaleString()}`,
-          "warning",
+          "warning"
         );
       }
     } catch (error) {
@@ -65,64 +91,51 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleModeSwitch = (mode: "user" | "admin") => {
-    setLoginMode(mode);
-    setFormData((prev) => ({ ...prev, workPin: "" }));
-    setAttemptsLeft(null);
-    setBlockedUntil(null);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
-    if (mode === "admin") {
-      checkAdminLoginStatus();
-    }
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:8000/auth/google/redirect";
   };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log(`DEBUG: onSubmit called (${loginMode} mode)`);
-
-    setShowAlert(false);
-
     if (!formData.login.trim() || !formData.password.trim()) {
-      showCustomAlert("Username/email and password must be filled in");
+      showAlert("Username/email and password must be filled in");
       return;
     }
 
-    if (loginMode === "admin" && !formData.workPin.trim()) {
-      showCustomAlert("Work PIN must be filled in for admin login");
+    if (mode === "admin" && !formData.workPin.trim()) {
+      showAlert("Work PIN must be filled in for admin login", "warning");
       return;
     }
+
+    setIsLoading(true);
+    setAlertState(prev => ({ ...prev, show: false }));
 
     try {
-      if (loginMode === "user") {
-        console.log("DEBUG: Calling user login...");
-        const result = await login(formData.login, formData.password);
-        console.log("DEBUG: User login successful:", result);
-
-        showCustomAlert("Login successful! Redirecting...", "success");
-
+      if (mode === "user") {
+        await userLogin(formData.login, formData.password);
+        showAlert("Login successful! Redirecting...", "success");
+        
         setTimeout(() => {
           navigate("/");
         }, 1500);
       } else {
-        console.log("DEBUG: Calling admin login...");
-
         const response = await api.post("/admin/login", {
           email: formData.login,
           password: formData.password,
           work_pin: formData.workPin,
         });
 
-        console.log("DEBUG: Admin login response:", response.data);
-
         if (response.data.success) {
           localStorage.setItem("token", response.data.token);
           localStorage.setItem("user", JSON.stringify(response.data.user));
 
-          showCustomAlert(
-            "Admin login successful! Redirecting to dashboard...",
-            "success",
-          );
+          showAlert("Admin login successful! Redirecting to dashboard...", "success");
 
           setTimeout(() => {
             window.location.href = "/admin/dashboard";
@@ -130,7 +143,7 @@ const Login: React.FC = () => {
         }
       }
     } catch (err: any) {
-      console.log(`DEBUG: Error caught in onSubmit (${loginMode} mode):`, err);
+      console.error("Login error:", err);
 
       if (err.response) {
         const data = err.response.data;
@@ -138,136 +151,40 @@ const Login: React.FC = () => {
         if (data.blocked) {
           const blockedDate = new Date(data.blocked_until);
           setBlockedUntil(blockedDate.toLocaleString());
-          showCustomAlert(data.message || "Account is blocked", "warning");
+          showAlert(data.message || "Account is blocked", "warning");
         } else if (data.attempts_left !== undefined) {
           setAttemptsLeft(data.attempts_left);
-          showCustomAlert(
+          showAlert(
             `${data.message}. ${data.attempts_left} attempts left.`,
-            "warning",
+            "warning"
           );
-        } else if (data.expected_pin) {
-          showCustomAlert(data.message, "warning");
         } else {
-          showCustomAlert(data.message || "Login failed. Please try again.");
+          showAlert(data.message || "Login failed. Please try again.");
         }
       } else {
-        showCustomAlert(err.message || "Login failed. Please try again.");
+        showAlert(err.message || "Login failed. Please try again.");
       }
 
-      setFormData((prev) => ({
-        ...prev,
-        password: "",
-      }));
+      setFormData(prev => ({ ...prev, password: "" }));
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  const isDisabled = isLoading || authLoading || !!blockedUntil;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Custom Alert Notification */}
-      {showAlert && (
+      {/* Alert Notification */}
+      {alertState.show && (
         <div className="fixed top-24 right-4 z-50 animate-slideIn">
-          <div
-            className={`border-l-4 rounded-r-lg shadow-lg p-4 max-w-sm ${
-              alertType === "error"
-                ? "bg-red-50 border-red-500"
-                : alertType === "warning"
-                  ? "bg-yellow-50 border-yellow-500"
-                  : "bg-green-50 border-green-500"
-            }`}>
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                {alertType === "error" && (
-                  <svg
-                    className="h-6 w-6 text-red-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                )}
-                {alertType === "warning" && (
-                  <svg
-                    className="h-6 w-6 text-yellow-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                    />
-                  </svg>
-                )}
-                {alertType === "success" && (
-                  <svg
-                    className="h-6 w-6 text-green-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                )}
-              </div>
-              <div className="ml-3">
-                <p
-                  className={`text-sm font-medium ${
-                    alertType === "error"
-                      ? "text-red-700"
-                      : alertType === "warning"
-                        ? "text-yellow-700"
-                        : "text-green-700"
-                  }`}>
-                  {alertMessage}
-                </p>
-              </div>
-              <button
-                onClick={() => setShowAlert(false)}
-                className={`ml-auto -mx-1.5 -my-1.5 rounded-lg p-1.5 focus:outline-none focus:ring-2 ${
-                  alertType === "error"
-                    ? "bg-red-50 text-red-500 hover:bg-red-100 focus:ring-red-300"
-                    : alertType === "warning"
-                      ? "bg-yellow-50 text-yellow-500 hover:bg-yellow-100 focus:ring-yellow-300"
-                      : "bg-green-50 text-green-500 hover:bg-green-100 focus:ring-green-300"
-                }`}>
-                <span className="sr-only">Close</span>
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
+          <Alert
+            type={alertState.type}
+            message={alertState.message}
+            dismissible
+            onDismiss={() => setAlertState(prev => ({ ...prev, show: false }))}
+            className="shadow-lg max-w-sm"
+          />
         </div>
       )}
 
@@ -279,6 +196,7 @@ const Login: React.FC = () => {
         .animate-slideIn { animation: slideIn 0.3s ease-out; }
       `}</style>
 
+      {/* Header */}
       <header className="fixed top-0 left-0 w-full bg-white text-black py-3 px-6 shadow-md z-40 flex justify-between items-center">
         <div className="logo">
           <img src={VelvetaLogo} alt="Logo" className="h-14" />
@@ -291,32 +209,39 @@ const Login: React.FC = () => {
             Welcome Back
           </h2>
 
-          {/* SWITCH ROLE AL GAMBAR - DUA TOMBOL TERPISAH DENGAN IKON */}
+          {/* Role Selection */}
           <div className="flex justify-between gap-4 mb-8">
             {/* User Login Card */}
             <button
               onClick={() => handleModeSwitch("user")}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 ${
-                loginMode === "user"
+              className={cn(
+                "flex-1 p-4 rounded-xl border-2 transition-all duration-300",
+                mode === "user"
                   ? "border-red-600 bg-red-50 shadow-md"
                   : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-              }`}>
+              )}
+              disabled={isDisabled}
+            >
               <div className="flex flex-col items-center gap-2">
                 <div
-                  className={`p-3 rounded-full ${
-                    loginMode === "user"
+                  className={cn(
+                    "p-3 rounded-full transition-colors",
+                    mode === "user"
                       ? "bg-red-600 text-white"
                       : "bg-gray-100 text-gray-600"
-                  }`}>
+                  )}
+                >
                   <FaUser className="w-6 h-6" />
                 </div>
                 <span
-                  className={`font-medium ${
-                    loginMode === "user" ? "text-red-600" : "text-gray-700"
-                  }`}>
+                  className={cn(
+                    "font-medium",
+                    mode === "user" ? "text-red-600" : "text-gray-700"
+                  )}
+                >
                   Login by User
                 </span>
-                {loginMode === "user" && (
+                {mode === "user" && (
                   <span className="text-xs text-red-600 font-medium">
                     Selected
                   </span>
@@ -327,27 +252,34 @@ const Login: React.FC = () => {
             {/* Admin Login Card */}
             <button
               onClick={() => handleModeSwitch("admin")}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all duration-300 ${
-                loginMode === "admin"
+              className={cn(
+                "flex-1 p-4 rounded-xl border-2 transition-all duration-300",
+                mode === "admin"
                   ? "border-red-600 bg-red-50 shadow-md"
                   : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-              }`}>
+              )}
+              disabled={isDisabled}
+            >
               <div className="flex flex-col items-center gap-2">
                 <div
-                  className={`p-3 rounded-full ${
-                    loginMode === "admin"
+                  className={cn(
+                    "p-3 rounded-full transition-colors",
+                    mode === "admin"
                       ? "bg-red-600 text-white"
                       : "bg-gray-100 text-gray-600"
-                  }`}>
+                  )}
+                >
                   <FaUserShield className="w-6 h-6" />
                 </div>
                 <span
-                  className={`font-medium ${
-                    loginMode === "admin" ? "text-red-600" : "text-gray-700"
-                  }`}>
+                  className={cn(
+                    "font-medium",
+                    mode === "admin" ? "text-red-600" : "text-gray-700"
+                  )}
+                >
                   Login by Admin
                 </span>
-                {loginMode === "admin" && (
+                {mode === "admin" && (
                   <span className="text-xs text-red-600 font-medium">
                     Selected
                   </span>
@@ -356,52 +288,51 @@ const Login: React.FC = () => {
             </button>
           </div>
 
-          {/* Status Info untuk Admin */}
-          {loginMode === "admin" && (
+          {/* Admin Status Info */}
+          {mode === "admin" && (
             <div className="mb-4">
               {blockedUntil ? (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                  ⚠️ Account is blocked until {blockedUntil}
-                </div>
+                <Alert
+                  type="error"
+                  message={`Account is blocked until ${blockedUntil}`}
+                  className="mb-4"
+                />
               ) : attemptsLeft !== null && attemptsLeft < 3 ? (
-                <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg text-sm">
-                  ⚠️ {attemptsLeft} login attempts remaining
-                </div>
+                <Alert
+                  type="warning"
+                  message={`${attemptsLeft} login attempts remaining`}
+                  className="mb-4"
+                />
               ) : null}
             </div>
           )}
 
+          {/* Login Form */}
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
             <p className="text-sm text-gray-500 mb-8">
               * indicates required field
             </p>
-
-            {/* Tampilkan error dari useAuth jika ada (untuk user) */}
-            {loginMode === "user" && error && !showAlert && (
-              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
 
             <form onSubmit={onSubmit} className="space-y-6">
               {/* Email/Username Field */}
               <div>
                 <label
                   htmlFor="login"
-                  className="block text-sm font-medium mb-2 text-gray-700">
-                  * {loginMode === "admin" ? "Email" : "Username or Email"}
+                  className="block text-sm font-medium mb-2 text-gray-700"
+                >
+                  * {mode === "admin" ? "Email" : "Username or Email"}
                 </label>
                 <input
-                  type={loginMode === "admin" ? "email" : "text"}
+                  type={mode === "admin" ? "email" : "text"}
                   id="login"
                   name="login"
                   required
-                  disabled={loading || !!blockedUntil}
+                  disabled={isDisabled}
                   value={formData.login}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder={
-                    loginMode === "admin"
+                    mode === "admin"
                       ? "Enter your admin email"
                       : "Enter your username or email"
                   }
@@ -412,7 +343,8 @@ const Login: React.FC = () => {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium mb-2 text-gray-700">
+                  className="block text-sm font-medium mb-2 text-gray-700"
+                >
                   * Password
                 </label>
                 <div className="relative">
@@ -421,7 +353,7 @@ const Login: React.FC = () => {
                     id="password"
                     name="password"
                     required
-                    disabled={loading || !!blockedUntil}
+                    disabled={isDisabled}
                     value={formData.password}
                     onChange={handleChange}
                     className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
@@ -429,24 +361,26 @@ const Login: React.FC = () => {
                   />
                   <button
                     type="button"
-                    onClick={togglePasswordVisibility}
-                    disabled={loading || !!blockedUntil}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-500 hover:text-red-600 transition duration-200 disabled:cursor-not-allowed">
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={isDisabled}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-transparent border-none cursor-pointer text-gray-500 hover:text-red-600 transition duration-200 disabled:cursor-not-allowed"
+                  >
                     {showPassword ? (
-                      <EyeSlashIcon className="w-5 h-5 text-gray-700" />
+                      <EyeSlashIcon className="w-5 h-5" />
                     ) : (
-                      <EyeIcon className="w-5 h-5 text-gray-700" />
+                      <EyeIcon className="w-5 h-5" />
                     )}
                   </button>
                 </div>
               </div>
 
-              {/* Work PIN Field (khusus admin) */}
-              {loginMode === "admin" && (
+              {/* Work PIN Field (admin only) */}
+              {mode === "admin" && (
                 <div>
                   <label
                     htmlFor="workPin"
-                    className="block text-sm font-medium mb-2 text-gray-700">
+                    className="block text-sm font-medium mb-2 text-gray-700"
+                  >
                     * Work PIN
                   </label>
                   <input
@@ -454,7 +388,7 @@ const Login: React.FC = () => {
                     id="workPin"
                     name="workPin"
                     required
-                    disabled={loading || !!blockedUntil}
+                    disabled={isDisabled}
                     value={formData.workPin}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
@@ -464,20 +398,21 @@ const Login: React.FC = () => {
                 </div>
               )}
 
-              {/* Keep signed in (hanya untuk user) */}
-              {loginMode === "user" && (
+              {/* Keep signed in (user only) */}
+              {mode === "user" && (
                 <div className="flex items-center pt-2">
                   <input
                     type="checkbox"
                     id="keep-signed-in"
                     checked={keepSignedIn}
-                    disabled={loading}
+                    disabled={isDisabled}
                     onChange={(e) => setKeepSignedIn(e.target.checked)}
-                    className="w-5 h-5 text-red-600 rounded focus:ring-red-300 border-gray-300 disabled:cursor-not-allowed"
+                    className="w-5 h-5 text-red-600 rounded focus:ring-red-300 border-gray-300"
                   />
                   <label
                     htmlFor="keep-signed-in"
-                    className="ml-3 text-gray-700">
+                    className="ml-3 text-gray-700"
+                  >
                     Keep me signed in
                   </label>
                 </div>
@@ -487,40 +422,25 @@ const Login: React.FC = () => {
               <div className="pt-6 flex justify-end">
                 <button
                   type="submit"
-                  disabled={loading || !!blockedUntil}
-                  className="px-8 py-3 bg-red-600 text-white font-medium rounded-full shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300 text-base disabled:opacity-50 disabled:cursor-not-allowed">
-                  {loading ? (
-                    <span className="flex items-center justify-center">
-                      <svg
-                        className="animate-spin h-5 w-5 mr-2 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24">
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      {loginMode === "admin" ? "Verifying..." : "Signing in..."}
-                    </span>
-                  ) : loginMode === "admin" ? (
-                    "Login as Admin"
+                  disabled={isDisabled}
+                  className="px-8 py-3 bg-red-600 text-white font-medium rounded-full shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300 text-base disabled:opacity-50 disabled:cursor-not-allowed min-w-[160px] flex items-center justify-center"
+                >
+                  {isLoading ? (
+                    <>
+                      <LoadingSpinner size="sm" color="white" />
+                      <span className="ml-2">
+                        {mode === "admin" ? "Verifying..." : "Signing in..."}
+                      </span>
+                    </>
                   ) : (
-                    "Sign in"
+                    mode === "admin" ? "Login as Admin" : "Sign in"
                   )}
                 </button>
               </div>
             </form>
 
-            {/* Google Login - Hanya untuk user */}
-            {loginMode === "user" && (
+            {/* Google Login - User only */}
+            {mode === "user" && (
               <>
                 <div className="flex items-center my-8">
                   <div className="flex-grow border-t border-gray-300"></div>
@@ -530,11 +450,14 @@ const Login: React.FC = () => {
 
                 <button
                   onClick={handleGoogleLogin}
-                  className="flex items-center justify-center gap-2 w-full bg-red-600 text-white rounded-md py-3 mt-4">
+                  disabled={isLoading}
+                  className="flex items-center justify-center gap-2 w-full bg-red-600 text-white rounded-md py-3 hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <svg
                     className="w-5 h-5"
                     xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 48 48">
+                    viewBox="0 0 48 48"
+                  >
                     <path
                       fill="#EA4335"
                       d="M24 9.5c3.5 0 6.3 1.5 8.2 2.8l6-6C34.9 2.7 29.8 0 24 0 14.7 0 6.7 5.4 2.8 13.2l7 5.5C11.7 13.2 17.3 9.5 24 9.5z"
@@ -557,33 +480,13 @@ const Login: React.FC = () => {
           {/* Register Link */}
           <div className="text-center mt-8">
             <p className="text-gray-600">
-              {loginMode === "admin" ? (
-                <>
-                  Don't have admin access?{" "}
-                  <a
-                    href="#"
-                    className="text-red-600 font-medium hover:text-red-800 transition duration-200"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate("/register");
-                    }}>
-                    Register as Admin
-                  </a>
-                </>
-              ) : (
-                <>
-                  Don't have an account?{" "}
-                  <a
-                    href="#"
-                    className="text-red-600 font-medium hover:text-red-800 transition duration-200"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate("/register");
-                    }}>
-                    Register now
-                  </a>
-                </>
-              )}
+              Don't have an account?{" "}
+              <button
+                onClick={() => navigate("/register")}
+                className="text-red-600 font-medium hover:text-red-800 transition duration-200 bg-transparent border-none"
+              >
+                Register now
+              </button>
             </p>
           </div>
         </div>
