@@ -1,6 +1,4 @@
-// src/services/admin/menu.service.ts
-
-import { apiClient } from '../api/config';
+import { api } from '../api/config';
 import { API_ENDPOINTS } from '../api/endpoint';
 import { ApiResponse, Menu, type MenuFilters } from '../../types';
 import { 
@@ -25,7 +23,7 @@ class AdminMenuService {
     if (filters?.sort_direction) params.append('sort_direction', filters.sort_direction);
     
     const queryString = params.toString() ? `?${params.toString()}` : '';
-    const response = await apiClient.get<ApiResponse<Menu[]>>(
+    const response = await api.get<ApiResponse<Menu[]>>(
       `${API_ENDPOINTS.ADMIN_MENU.LIST}${queryString}`
     );
     
@@ -36,7 +34,7 @@ class AdminMenuService {
    * Get single menu
    */
   async getById(id: number): Promise<Menu> {
-    const response = await apiClient.get<ApiResponse<Menu>>(
+    const response = await api.get<ApiResponse<Menu>>(
       API_ENDPOINTS.ADMIN_MENU.DETAIL(id)
     );
     return response.data;
@@ -57,7 +55,7 @@ class AdminMenuService {
       }
     });
 
-    const response = await apiClient.post<ApiResponse<Menu>>(
+    const response = await api.post<ApiResponse<Menu>>(
       API_ENDPOINTS.ADMIN_MENU.CREATE,
       formData,
       {
@@ -84,7 +82,7 @@ class AdminMenuService {
       }
     });
 
-    const response = await apiClient.post<ApiResponse<Menu>>(
+    const response = await api.post<ApiResponse<Menu>>(
       API_ENDPOINTS.ADMIN_MENU.UPDATE(id),
       formData,
       {
@@ -98,7 +96,7 @@ class AdminMenuService {
    * Delete menu
    */
   async delete(id: number): Promise<void> {
-    await apiClient.delete<ApiResponse<void>>(
+    await api.delete<ApiResponse<void>>(
       API_ENDPOINTS.ADMIN_MENU.DELETE(id)
     );
   }
@@ -107,7 +105,7 @@ class AdminMenuService {
    * Update stock
    */
   async updateStock(id: number, data: UpdateStockRequest): Promise<Menu> {
-    const response = await apiClient.put<ApiResponse<Menu>>(
+    const response = await api.put<ApiResponse<Menu>>(
       API_ENDPOINTS.ADMIN_MENU.UPDATE_STOCK(id),
       data
     );
@@ -118,7 +116,7 @@ class AdminMenuService {
    * Bulk update stock
    */
   async bulkUpdateStock(items: BulkStockItem[]): Promise<any> {
-    const response = await apiClient.post<ApiResponse<any>>(
+    const response = await api.post<ApiResponse<any>>(
       API_ENDPOINTS.ADMIN_MENU.BULK_UPDATE_STOCK,
       { items }
     );
@@ -129,7 +127,7 @@ class AdminMenuService {
    * Toggle menu availability
    */
   async toggleAvailability(id: number): Promise<{ is_available: boolean }> {
-    const response = await apiClient.patch<ApiResponse<any>>(
+    const response = await api.patch<ApiResponse<any>>(
       API_ENDPOINTS.ADMIN_MENU.TOGGLE_AVAILABILITY(id)
     );
     return response.data;
@@ -139,7 +137,7 @@ class AdminMenuService {
    * Get all categories
    */
   async getCategories(): Promise<string[]> {
-    const response = await apiClient.get<ApiResponse<string[]>>(
+    const response = await api.get<ApiResponse<string[]>>(
       API_ENDPOINTS.ADMIN_MENU.CATEGORIES
     );
     return response.data;
@@ -149,7 +147,7 @@ class AdminMenuService {
    * Get low stock items
    */
   async getLowStockItems(): Promise<StockStats> {
-    const response = await apiClient.get<ApiResponse<StockStats>>(
+    const response = await api.get<ApiResponse<StockStats>>(
       API_ENDPOINTS.ADMIN_MENU.LOW_STOCK
     );
     return response.data;
