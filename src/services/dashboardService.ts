@@ -11,7 +11,6 @@ class DashboardService {
       const response = await api.get<ApiResponse<Order[]>>("/orders/my");
       const ordersData = response.data.data || response.data;
 
-      // Calculate completed orders total spent
       const completedOrders = ordersData.filter(
         (o: Order) => o.status === "COMPLETED"
       );
@@ -55,7 +54,7 @@ class DashboardService {
         favoriteDrink,
         favoriteCount,
         recentOrders,
-        points: 0, // Coming soon
+        points: 0, 
       };
     } catch (error) {
       console.error("Failed to fetch dashboard stats:", error);
