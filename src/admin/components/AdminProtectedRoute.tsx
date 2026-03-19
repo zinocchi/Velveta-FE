@@ -33,7 +33,6 @@ const AdminProtectedRoute = () => {
     return <Navigate to="/admin/login" replace />;
   }
   
-  // Kalau bukan admin, redirect ke login admin (gaboleh akses)
   if (user.role !== 'admin') {
     console.log('⛔ Not admin, redirecting to admin login');
     return <Navigate to="/admin/login" replace />;

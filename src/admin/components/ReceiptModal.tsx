@@ -14,7 +14,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
   if (!isOpen || !order) return null;
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("id-ID", {
+    return new Intl.NumberFormat("id-ID", {   
       style: "currency",
       currency: "IDR",
       minimumFractionDigits: 0,
