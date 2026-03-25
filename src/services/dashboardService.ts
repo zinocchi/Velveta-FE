@@ -19,7 +19,6 @@ class DashboardService {
         0
       );
 
-      // Calculate favorite drink
       const drinkCount: Record<string, { count: number; name: string }> = {};
       ordersData.forEach((order: Order) => {
         order.items.forEach((item) => {

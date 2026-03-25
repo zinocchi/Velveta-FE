@@ -1,5 +1,3 @@
-// src/types/admin/index.ts
-
 import type { DashboardStats, PopularMenu, RevenueData } from './dashboard';
 import type { BulkStockItem, MenuFormData, UpdateStockRequest } from './menu';
 import type { AdminOrder, OrderStatistics } from './order';

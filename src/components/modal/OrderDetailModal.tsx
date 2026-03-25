@@ -26,7 +26,7 @@ import {
   FaUniversity,
 } from "react-icons/fa";
 import { SiMastercard, SiVisa, SiGojek, SiAna } from "react-icons/si";
-import api from "../../api/axios";
+import api from "../../services/api/config";
 
 interface OrderDetailModalProps {
   isOpen: boolean;

@@ -16,7 +16,7 @@ import {
   FaBan,
   FaHistory,
 } from "react-icons/fa";
-import api from "../../api/axios";
+import api from "../../services/api/config";
 import OrderDetailModal from "./OrderDetailModal";
 
 interface OrderHistoryModalProps {

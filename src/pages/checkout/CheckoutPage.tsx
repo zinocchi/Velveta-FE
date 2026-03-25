@@ -17,8 +17,8 @@ import SuccessState from './components/SuccesState';
 import OrderDetailModal from '../../components/modal/OrderDetailModal';
 
 // UI Components
-import Notification from '../../components/ui/Alert/Alert';
-import ConfirmModal from '../../components/ui/Modal/ConfirmModal';
+// import Notification from '../../components/ui/Alert/Alert';
+// import ConfirmModal from '../../components/ui/Alert/Alert';
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();

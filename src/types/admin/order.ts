@@ -1,5 +1,3 @@
-// src/types/admin/order.ts
-
 import type { Order, OrderStatus, OrderItem, ShippingAddress } from '../order';
 
 /**

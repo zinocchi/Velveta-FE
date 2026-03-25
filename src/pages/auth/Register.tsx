@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api/config";
 import type { AxiosError } from "axios";
-import VelvetaLogo from "../../assets/icon/velveta.png";
+import VelvetaLogo from "../../assets/icon/velveta.jpeg";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { FaUser, FaUserShield } from "react-icons/fa";
 
@@ -49,10 +49,10 @@ const Register: React.FC = () => {
   const [nextPin, setNextPin] = useState<string | null>(null);
   const [availablePins, setAvailablePins] = useState<string[]>([]);
 
-3  const [alertState, setAlertState] = useState<{
+  const [alertState, setAlertState] = useState<{
     show: boolean;
     message: string;
-    type: 'success' | 'error' | 'warning' | 'info';
+    type: "success" | "error" | "warning" | "info";
   }>({
     show: false,
     message: "",
@@ -73,7 +73,7 @@ const Register: React.FC = () => {
 
   const showAlert = (
     message: string,
-    type: 'success' | 'error' | 'warning' | 'info' = 'success'
+    type: "success" | "error" | "warning" | "info" = "success",
   ) => {
     setAlertState({
       show: true,
@@ -82,7 +82,7 @@ const Register: React.FC = () => {
     });
 
     setTimeout(() => {
-      setAlertState(prev => ({ ...prev, show: false }));
+      setAlertState((prev) => ({ ...prev, show: false }));
     }, 5000);
   };
 
@@ -109,13 +109,13 @@ const Register: React.FC = () => {
 
     const newValue = name === "work_pin" ? value.toUpperCase() : value;
 
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : newValue,
     }));
 
     if (errors[name]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[name];
         return newErrors;
@@ -137,7 +137,7 @@ const Register: React.FC = () => {
     setErrors({});
     setExpectedPin(null);
     setNextPin(null);
-    setAlertState(prev => ({ ...prev, show: false }));
+    setAlertState((prev) => ({ ...prev, show: false }));
 
     if (newMode === "admin") {
       fetchAvailablePins();
@@ -164,7 +164,9 @@ const Register: React.FC = () => {
 
       if (!/^VELVETA\d{2}$/.test(form.work_pin)) {
         setErrors({
-          work_pin: ["Invalid PIN format. Must be VELVETA followed by 2 digits (e.g., VELVETA01)"],
+          work_pin: [
+            "Invalid PIN format. Must be VELVETA followed by 2 digits (e.g., VELVETA01)",
+          ],
         });
         return false;
       }
@@ -182,7 +184,7 @@ const Register: React.FC = () => {
 
     setIsLoading(true);
     setErrors({});
-    setAlertState(prev => ({ ...prev, show: false }));
+    setAlertState((prev) => ({ ...prev, show: false }));
 
     try {
       let response;
@@ -205,7 +207,10 @@ const Register: React.FC = () => {
           setNextPin(data.next_pin);
         }
 
-        showAlert("Admin registration successful! Redirecting to dashboard...", "success");
+        showAlert(
+          "Admin registration successful! Redirecting to dashboard...",
+          "success",
+        );
 
         setTimeout(() => {
           window.location.href = "/admin/dashboard";
@@ -223,7 +228,10 @@ const Register: React.FC = () => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        showAlert("User registration successful! Redirecting to homepage...", "success");
+        showAlert(
+          "User registration successful! Redirecting to homepage...",
+          "success",
+        );
 
         setTimeout(() => {
           navigate("/");
@@ -270,7 +278,9 @@ const Register: React.FC = () => {
             type={alertState.type}
             message={alertState.message}
             dismissible
-            onDismiss={() => setAlertState(prev => ({ ...prev, show: false }))}
+            onDismiss={() =>
+              setAlertState((prev) => ({ ...prev, show: false }))
+            }
             className="shadow-lg max-w-sm"
           />
         </div>
@@ -307,27 +317,24 @@ const Register: React.FC = () => {
                 "flex-1 p-4 rounded-xl border-2 transition-all duration-300",
                 mode === "user"
                   ? "border-red-600 bg-red-50 shadow-md"
-                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
               )}
-              disabled={isLoading}
-            >
+              disabled={isLoading}>
               <div className="flex flex-col items-center gap-2">
                 <div
                   className={cn(
                     "p-3 rounded-full transition-colors",
                     mode === "user"
                       ? "bg-red-600 text-white"
-                      : "bg-gray-100 text-gray-600"
-                  )}
-                >
+                      : "bg-gray-100 text-gray-600",
+                  )}>
                   <FaUser className="w-6 h-6" />
                 </div>
                 <span
                   className={cn(
                     "font-medium",
-                    mode === "user" ? "text-red-600" : "text-gray-700"
-                  )}
-                >
+                    mode === "user" ? "text-red-600" : "text-gray-700",
+                  )}>
                   Register as User
                 </span>
                 {mode === "user" && (
@@ -345,27 +352,24 @@ const Register: React.FC = () => {
                 "flex-1 p-4 rounded-xl border-2 transition-all duration-300",
                 mode === "admin"
                   ? "border-red-600 bg-red-50 shadow-md"
-                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50",
               )}
-              disabled={isLoading}
-            >
+              disabled={isLoading}>
               <div className="flex flex-col items-center gap-2">
                 <div
                   className={cn(
                     "p-3 rounded-full transition-colors",
                     mode === "admin"
                       ? "bg-red-600 text-white"
-                      : "bg-gray-100 text-gray-600"
-                  )}
-                >
+                      : "bg-gray-100 text-gray-600",
+                  )}>
                   <FaUserShield className="w-6 h-6" />
                 </div>
                 <span
                   className={cn(
                     "font-medium",
-                    mode === "admin" ? "text-red-600" : "text-gray-700"
-                  )}
-                >
+                    mode === "admin" ? "text-red-600" : "text-gray-700",
+                  )}>
                   Register as Admin
                 </span>
                 {mode === "admin" && (
@@ -393,15 +397,15 @@ const Register: React.FC = () => {
                             "px-3 py-1 rounded-full text-xs font-medium",
                             pin === expectedPin
                               ? "bg-green-100 text-green-700 border border-green-300"
-                              : "bg-gray-100 text-gray-600"
-                          )}
-                        >
+                              : "bg-gray-100 text-gray-600",
+                          )}>
                           {pin} {pin === expectedPin && "✓"}
                         </span>
                       ))}
                     </div>
                     <p className="text-xs text-blue-600 mt-2">
-                      Use PIN in sequence. Next available: {expectedPin || "Loading..."}
+                      Use PIN in sequence. Next available:{" "}
+                      {expectedPin || "Loading..."}
                     </p>
                   </div>
                 }
@@ -454,8 +458,7 @@ const Register: React.FC = () => {
                 <div>
                   <label
                     htmlFor="username"
-                    className="block text-sm font-medium mb-2 text-gray-700"
-                  >
+                    className="block text-sm font-medium mb-2 text-gray-700">
                     * Username
                   </label>
                   <input
@@ -468,7 +471,7 @@ const Register: React.FC = () => {
                     disabled={isLoading}
                     className={cn(
                       "w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                      errors.username ? "border-red-500" : "border-gray-300"
+                      errors.username ? "border-red-500" : "border-gray-300",
                     )}
                     placeholder="Enter your username"
                   />
@@ -482,8 +485,7 @@ const Register: React.FC = () => {
                 <div className="mt-5">
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium mb-2 text-gray-700"
-                  >
+                    className="block text-sm font-medium mb-2 text-gray-700">
                     * Email Address
                   </label>
                   <input
@@ -496,7 +498,7 @@ const Register: React.FC = () => {
                     disabled={isLoading}
                     className={cn(
                       "w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                      errors.email ? "border-red-500" : "border-gray-300"
+                      errors.email ? "border-red-500" : "border-gray-300",
                     )}
                     placeholder="Enter your email address"
                   />
@@ -518,8 +520,7 @@ const Register: React.FC = () => {
                   <div>
                     <label
                       htmlFor="password"
-                      className="block text-sm font-medium mb-2 text-gray-700"
-                    >
+                      className="block text-sm font-medium mb-2 text-gray-700">
                       * Password
                     </label>
                     <div className="relative">
@@ -533,7 +534,9 @@ const Register: React.FC = () => {
                         disabled={isLoading}
                         className={cn(
                           "w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200 pr-12 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                          errors.password ? "border-red-500" : "border-gray-300"
+                          errors.password
+                            ? "border-red-500"
+                            : "border-gray-300",
                         )}
                         placeholder="Create a password"
                       />
@@ -541,8 +544,7 @@ const Register: React.FC = () => {
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         disabled={isLoading}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-600 disabled:opacity-50"
-                      >
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-600 disabled:opacity-50">
                         {showPassword ? (
                           <EyeSlashIcon className="w-5 h-5" />
                         ) : (
@@ -560,8 +562,7 @@ const Register: React.FC = () => {
                   <div>
                     <label
                       htmlFor="password_confirmation"
-                      className="block text-sm font-medium mb-2 text-gray-700"
-                    >
+                      className="block text-sm font-medium mb-2 text-gray-700">
                       * Confirm Password
                     </label>
                     <div className="relative">
@@ -575,16 +576,19 @@ const Register: React.FC = () => {
                         disabled={isLoading}
                         className={cn(
                           "w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200 pr-12 disabled:bg-gray-100 disabled:cursor-not-allowed",
-                          errors.password_confirmation ? "border-red-500" : "border-gray-300"
+                          errors.password_confirmation
+                            ? "border-red-500"
+                            : "border-gray-300",
                         )}
                         placeholder="Confirm your password"
                       />
                       <button
                         type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
                         disabled={isLoading}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-600 disabled:opacity-50"
-                      >
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-600 disabled:opacity-50">
                         {showConfirmPassword ? (
                           <EyeSlashIcon className="w-5 h-5" />
                         ) : (
@@ -616,8 +620,7 @@ const Register: React.FC = () => {
                   <div>
                     <label
                       htmlFor="work_pin"
-                      className="block text-sm font-medium mb-2 text-gray-700"
-                    >
+                      className="block text-sm font-medium mb-2 text-gray-700">
                       * Work PIN
                     </label>
                     <div className="relative">
@@ -633,15 +636,16 @@ const Register: React.FC = () => {
                         maxLength={9}
                         className={cn(
                           "w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-600 transition duration-200 pr-12 font-mono uppercase disabled:bg-gray-100 disabled:cursor-not-allowed",
-                          errors.work_pin ? "border-red-500" : "border-gray-300"
+                          errors.work_pin
+                            ? "border-red-500"
+                            : "border-gray-300",
                         )}
                       />
                       <button
                         type="button"
                         onClick={() => setShowWorkPin(!showWorkPin)}
                         disabled={isLoading}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-600 disabled:opacity-50"
-                      >
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-600 disabled:opacity-50">
                         {showWorkPin ? (
                           <EyeSlashIcon className="w-5 h-5" />
                         ) : (
@@ -737,22 +741,22 @@ const Register: React.FC = () => {
                   type="button"
                   onClick={() => navigate("/login")}
                   disabled={isLoading}
-                  className="px-6 py-3 bg-white text-red-600 font-medium rounded-full shadow-sm border border-red-600 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                  className="px-6 py-3 bg-white text-red-600 font-medium rounded-full shadow-sm border border-red-600 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
                   Back to Login
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading || !form.terms}
-                  className="px-8 py-3 bg-red-600 text-white font-medium rounded-full shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300 text-base disabled:opacity-50 disabled:cursor-not-allowed min-w-[200px] flex items-center justify-center"
-                >
+                  className="px-8 py-3 bg-red-600 text-white font-medium rounded-full shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 transition duration-300 text-base disabled:opacity-50 disabled:cursor-not-allowed min-w-[200px] flex items-center justify-center">
                   {isLoading ? (
                     <>
                       <LoadingSpinner size="sm" color="white" />
                       <span className="ml-2">Registering...</span>
                     </>
+                  ) : mode === "admin" ? (
+                    "Register as Admin"
                   ) : (
-                    mode === "admin" ? "Register as Admin" : "Register as User"
+                    "Register as User"
                   )}
                 </button>
               </div>
@@ -770,13 +774,11 @@ const Register: React.FC = () => {
                 <button
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
-                  className="flex items-center justify-center gap-2 w-full bg-red-600 text-white rounded-md py-3 hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                  className="flex items-center justify-center gap-2 w-full bg-red-600 text-white rounded-md py-3 hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                   <svg
                     className="w-5 h-5"
                     xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 48 48"
-                  >
+                    viewBox="0 0 48 48">
                     <path
                       fill="#EA4335"
                       d="M24 9.5c3.5 0 6.3 1.5 8.2 2.8l6-6C34.9 2.7 29.8 0 24 0 14.7 0 6.7 5.4 2.8 13.2l7 5.5C11.7 13.2 17.3 9.5 24 9.5z"
@@ -802,8 +804,7 @@ const Register: React.FC = () => {
               Already have an account?{" "}
               <button
                 onClick={() => navigate("/login")}
-                className="text-red-600 font-medium hover:text-red-800 transition duration-200 bg-transparent border-none"
-              >
+                className="text-red-600 font-medium hover:text-red-800 transition duration-200 bg-transparent border-none">
                 Sign in here
               </button>
             </p>

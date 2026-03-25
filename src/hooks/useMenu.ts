@@ -32,7 +32,6 @@ export const useMenu = (initialFilters?: MenuFilters): UseMenuReturn => {
     fetchMenu();
   }, [fetchMenu]);
 
-  // Group items by category
   const groupedCategories = items.reduce((acc: GroupedCategories, menu) => {
     const category = menu.category?.trim() || 'uncategorized';
     if (!acc[category]) {
@@ -41,6 +40,9 @@ export const useMenu = (initialFilters?: MenuFilters): UseMenuReturn => {
     acc[category].push(menu);
     return acc;
   }, {});
+
+  console.log('useMenu - Items fetched:', items.length);
+  console.log('useMenu - Grouped categories:', (groupedCategories));
 
   return {
     items,

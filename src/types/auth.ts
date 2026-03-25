@@ -1,5 +1,3 @@
-// src/types/auth.ts
-
 import type { User } from './user';
 
 /**

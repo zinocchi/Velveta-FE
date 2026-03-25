@@ -2,11 +2,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import api from "../../services/api/config";
-import VelvetaLogo from "../../assets/icon/velveta.png";
+import VelvetaLogo from "../../assets/icon/velveta.jpeg";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { FaUser, FaUserShield } from "react-icons/fa";
 
-// Import components
 import { LoadingSpinner } from "../../components/ui/loading/LoadingSpinner";
 import { Alert } from "../../components/ui/Alert";
 import { cn } from "../../libs/utils";

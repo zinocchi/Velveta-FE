@@ -5,7 +5,6 @@ import { DRINK_CATEGORIES, FOOD_CATEGORIES } from '../../types/category';
 
 import { LoadingPage } from '../../components/ui/loading';
 import { Alert } from '../../components/ui/Alert';
-import MenuSidebar from './components/MenuSidebar';
 import CategorySection from './components/CategorySection';
 
 const MenuPage = () => {
@@ -62,7 +61,7 @@ const MenuPage = () => {
   }
 
   const getMainPaddingTop = () => {
-    return isFromDashboard ? 'pt-4' : 'pt-24';
+  return isFromDashboard ? 'pt-4' : 'pt-24';
   };
 
   return (
@@ -70,10 +69,6 @@ const MenuPage = () => {
       className={`${getMainPaddingTop()} pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`}
     >
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar */}
-        <div className="lg:w-64 flex-shrink-0">
-          <MenuSidebar />
-        </div>
 
         {/* Main Content */}
         <div className="flex-1">

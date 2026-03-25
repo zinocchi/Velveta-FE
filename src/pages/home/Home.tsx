@@ -3,7 +3,7 @@ import ScrollReveal from "scrollreveal";
 import "animate.css";
 import "../../styles/Global.css";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 const Home = () => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);

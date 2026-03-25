@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useCart } from "../../../context/CartContext";
-import VelvetaLogo from "../../../assets/icon/velveta.png";
+import VelvetaLogo from "../../../assets/icon/velveta.jpeg";
 import CartModal from "../../modal/CartModal";
 
 // Import sub-components

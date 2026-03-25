@@ -1,4 +1,5 @@
-import api from "../services/api/config";
+// services/menuService.ts
+import api from "./api/config";
 import { Menu, MenuFilters } from "../types/menu";
 import { ApiResponse } from "../types/api";
 
@@ -19,9 +20,21 @@ class MenuService {
       }
 
       const queryString = params.toString() ? `?${params.toString()}` : '';
-      const response = await api.get<ApiResponse<Menu[]>>(`/menu${queryString}`);
+      const response = await api.get<ApiResponse<Menu[]> | Menu[]>(`/menu${queryString}`);
       
-      return response.data.data || response.data;
+      // Handle response structure yang mungkin berbeda
+      // Response bisa berupa { data: [...] } atau langsung array
+      if (response.data && typeof response.data === 'object') {
+        if ('data' in response.data && Array.isArray(response.data.data)) {
+          return response.data.data;
+        }
+        if (Array.isArray(response.data)) {
+          return response.data;
+        }
+      }
+      
+      // Fallback
+      return [];
     } catch (error) {
       console.error('Error fetching menus:', error);
       throw error;
@@ -33,7 +46,10 @@ class MenuService {
    */
   async getById(id: number): Promise<Menu> {
     const response = await api.get<ApiResponse<Menu>>(`/menu/${id}`);
-    return response.data.data || response.data;
+    if (response.data && 'data' in response.data) {
+      return response.data.data;
+    }
+    return response.data as unknown as Menu;
   }
 
   /**
@@ -41,7 +57,10 @@ class MenuService {
    */
   async getCategories(): Promise<string[]> {
     const response = await api.get<ApiResponse<string[]>>('/menu/categories');
-    return response.data.data || response.data;
+    if (response.data && 'data' in response.data && Array.isArray(response.data.data)) {
+      return response.data.data;
+    }
+    return response.data as unknown as string[];
   }
 
   /**

@@ -1,5 +1,3 @@
-// src/types/admin/dashboard.ts
-
 import type { Order } from '../order';
 import type { Menu } from '../menu';
 

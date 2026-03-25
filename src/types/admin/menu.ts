@@ -1,5 +1,3 @@
-// src/types/admin/menu.ts
-
 import type { Menu } from '../menu';
 
 /**

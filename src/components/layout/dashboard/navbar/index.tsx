@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import VelvetaLogo from "../../../assets/icon/velveta.png";
+import VelvetaLogo from "../../../../assets/icon/velveta.jpeg";
 
 // Hooks & Context
 import { useAuthContext } from "../../../../context/AuthContext";

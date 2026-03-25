@@ -1,5 +1,6 @@
+// src/App.tsx
+
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
@@ -11,15 +12,15 @@ import MainLayout from "./layouts/MainLayout";
 import MenuLayout from "./layouts/MenuLayouts";
 import DashboardLayout from "./layouts/DashboardLayout";
 
-// Admin Layouts & Components
-import AdminLayout from "./admin/layout/AdminLayout";
-import AdminProtectedRoute from "./admin/components/AdminProtectedRoute";
+// // Admin Layouts & Components
+// import AdminLayout from "./admin/layouts/AdminLayout"; // Perbaiki path (layouts plural)
+// import AdminProtectedRoute from "./admin/components/AdminProtectedRoute";
 
-// Admin Pages
-import AdminDashboardPage from "./admin/pages/dashboard/DashboardPage";
-import adminMenuPage from "./admin/pages/menus/MenuPage";
-import OrdersPage from "./admin/pages/orders/OrderPage";
-// import ReportsPage from "../admin/pages/reports/ReportPage";
+// // Admin Pages
+// import AdminDashboardPage from "./admin/pages/dashboard/DashboardPage";
+// import AdminMenuPage from "./admin/pages/menus/MenuPage"; // Perbaiki nama (capital M)
+// import AdminOrdersPage from "./admin/pages/orders/OrdersPage"; // Perbaiki import
+// import AdminOrderDetailPage from "./admin/pages/orders/OrderDetailPage"; // Tambah untuk detail
 
 // User Pages
 import Home from "./pages/home/Home";
@@ -36,9 +37,10 @@ import AuthCallback from "./pages/auth/AuthCallback";
 
 // Dashboard Pages
 import DashboardPage from "./pages/dashboard/DashboardPage";
-import Favorites from "./pages/dashboard/Favorites";
-import Profile from "./pages/dashboard/Profile";
-import CheckoutPages from "./pages/dashboard/CheckoutPages";
+// import FavoritesPage from "./pages/dashboard/FavoritesPage"; // Perbaiki nama
+// import ProfilePage from "./pages/dashboard/ProfilePage"; // Perbaiki nama
+import OrdersPage from "./pages/checkout/CheckoutPage"; // Tambah halaman orders user
+import CheckoutPage from "./pages/checkout/CheckoutPage"; // Pindah ke folder checkout
 
 // Components
 import ScrollToTop from "./components/ScrollToTop";
@@ -46,7 +48,6 @@ import UserProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
-    <Router>
       <AuthProvider>
         <ScrollToTop />
 
@@ -75,34 +76,30 @@ function App() {
               <Route index element={<DashboardPage />} />
               <Route path="menu" element={<MenuPage />} />
               <Route path="orders" element={<OrdersPage />} />
-              <Route path="orders/:id" element={<OrdersPage />} />{" "}
-              {/* Order detail */}
+              <Route path="orders/:id" element={<OrdersPage />} /> {/* Order detail */}
               {/* <Route path="favorites" element={<FavoritesPage />} />
               <Route path="profile" element={<ProfilePage />} /> */}
-              <Route path="checkout" element={<CheckoutPages />} />
+              <Route path="checkout" element={<CheckoutPage />} />
             </Route>
           </Route>
 
-          {/* ===== ADMIN PROTECTED ROUTES ===== */}
+          {/* ===== ADMIN PROTECTED ROUTES (DISABLED SEMENTARA) ===== */}
+          {/* 
           <Route element={<AdminProtectedRoute />}>
             <Route path="/admin" element={<AdminLayout />}>
-              {/* Default redirect to dashboard */}
               <Route index element={<Navigate to="dashboard" replace />} />
-
-              {/* Admin Pages */}
               <Route path="dashboard" element={<AdminDashboardPage />} />
-              <Route path="menus" element={<MenuPage />} />
-              <Route path="orders" element={<OrdersPage />} />
-              <Route path="orders/:id" element={<OrdersPage />} />
-              {/* <Route path="reports" element={<ReportsPage />} /> */}
+              <Route path="menus" element={<AdminMenuPage />} />
+              <Route path="orders" element={<AdminOrdersPage />} />
+              <Route path="orders/:id" element={<AdminOrderDetailPage />} />
             </Route>
           </Route>
+          */}
 
           {/* ===== 404 - NOT FOUND ===== */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
-    </Router>
   );
 }
 

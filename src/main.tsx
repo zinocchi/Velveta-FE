@@ -1,9 +1,10 @@
-import React from "react";
+import React from "react"; 
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./styles/Index.css";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
+import { BrowserRouter } from "react-router-dom"; 
 
 const rootElement = document.getElementById("root");
 
@@ -13,11 +14,13 @@ if (!rootElement) {
   try {
     ReactDOM.createRoot(rootElement).render(
       <React.StrictMode>
-        <CartProvider>
+        <BrowserRouter> 
           <AuthProvider>
-            <App /> 
+            <CartProvider>
+              <App /> 
+            </CartProvider>
           </AuthProvider>
-        </CartProvider>
+        </BrowserRouter>
       </React.StrictMode>
     );
     console.log("React berhasil di-mount!");

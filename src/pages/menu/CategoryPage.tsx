@@ -5,15 +5,14 @@ import { useCart } from '../../context/CartContext';
 import { useAuthContext } from '../../context/AuthContext';
 import { getCategoryInfo } from '../../types/category';
 
-// Components
 import { LoadingPage } from '../../components/ui/loading';
 import { Alert } from '../../components/ui/Alert';
 import CategoryHeader from './components/CategoryHeader';
 import MenuGrid from './components/MenuGrid';
-import MenuSidebar from './components/MenuSidebar';
 
 
 import { flyToCart } from '../../utils/flyToCart';
+import { Menu } from '../../types';
 
 const CategoryPage = () => {
   const { category } = useParams<{ category: string }>();
@@ -118,9 +117,7 @@ const CategoryPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
-          <div className="lg:w-64 flex-shrink-0">
-            <MenuSidebar />
-          </div>
+  
 
           {/* Main Content */}
           <div className="flex-1">
@@ -134,8 +131,7 @@ const CategoryPage = () => {
               )}
               onAddToCart={handleAddToCart}
               onIncrease={handleIncrease}
-              onDecrease={handleDecrease}
-            />
+              onDecrease={handleDecrease} isLoggedIn={false} isAdminPreview={false}       />
           </div>
         </div>
       </div>

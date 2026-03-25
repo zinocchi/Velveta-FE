@@ -1,6 +1,4 @@
-// src/services/order.service.ts
-
-import { apiClient } from './api/config';
+import { api } from './api/config';
 import { API_ENDPOINTS } from './api/endpoint';
 import { ApiResponse, Order, type CreateOrderRequest } from '../types';
 
@@ -9,17 +7,16 @@ class OrderService {
    * Get user's orders
    */
   async getUserOrders(): Promise<Order[]> {
-    const response = await apiClient.get<ApiResponse<Order[]>>(
+    const response = await api.get<ApiResponse<Order[]>>(
       API_ENDPOINTS.ORDERS.MY_ORDERS
     );
     return response.data;
   }
 
   /**
-   * Get all orders (with auth)
    */
   async getAll(): Promise<Order[]> {
-    const response = await apiClient.get<ApiResponse<Order[]>>(
+    const response = await api.get<ApiResponse<Order[]>>(
       API_ENDPOINTS.ORDERS.LIST
     );
     return response.data;
@@ -29,7 +26,7 @@ class OrderService {
    * Get single order by ID
    */
   async getById(id: number): Promise<Order> {
-    const response = await apiClient.get<ApiResponse<Order>>(
+    const response = await api.get<ApiResponse<Order>>(
       API_ENDPOINTS.ORDERS.DETAIL(id)
     );
     return response.data;
@@ -44,7 +41,7 @@ class OrderService {
     status: string;
     total: number;
   }> {
-    const response = await apiClient.post<ApiResponse<any>>(
+    const response = await api.post<ApiResponse<any>>(
       API_ENDPOINTS.ORDERS.CREATE,
       data
     );
