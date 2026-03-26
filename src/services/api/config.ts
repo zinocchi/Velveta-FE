@@ -29,13 +29,13 @@ api.interceptors.response.use(
 
       localStorage.removeItem("user");
 
-      // if (
-      //   !window.location.pathname.includes("/") &&
-      //   !window.location.pathname.includes("/")
-      // ) {
-      //   const isAdmin = window.location.pathname.startsWith("/");
-      //   window.location.href = isAdmin ? "/admin/login" : "/login";
-      // }
+      if (
+        !window.location.pathname.includes("/") &&
+        !window.location.pathname.includes("/")
+      ) {
+        const isAdmin = window.location.pathname.startsWith("/");
+        window.location.href = isAdmin ? "/admin/login" : "/login";
+      }
     }
 
     return Promise.reject(error);

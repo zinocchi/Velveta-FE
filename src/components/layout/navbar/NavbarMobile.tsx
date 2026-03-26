@@ -9,7 +9,6 @@ interface NavbarMobileBottomProps extends NavbarMobileProps {
   isLoggedIn: boolean;
   user: User | null;
 }
-
 const NavbarMobileBottom: React.FC<NavbarMobileBottomProps> = ({
   onCartClick,
   onMenuToggle,
@@ -18,7 +17,7 @@ const NavbarMobileBottom: React.FC<NavbarMobileBottomProps> = ({
   user,
 }) => {
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-10">
       <div className="flex justify-around items-center h-16">
         <Link
           to="/"

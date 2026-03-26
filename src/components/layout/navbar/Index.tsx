@@ -1,5 +1,3 @@
-// src/components/layout/Navbar/index.tsx
-
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../../context/AuthContext";
@@ -7,7 +5,6 @@ import { useCart } from "../../../context/CartContext";
 import VelvetaLogo from "../../../assets/icon/velveta.jpeg";
 import CartModal from "../../modal/CartModal";
 
-// Import sub-components
 import NavbarDesktop from "./NavbarDekstop";
 import NavbarMobileBottom from "./NavbarMobile";
 import NavbarMobileMenu from "./NavbarMobileMenu";
@@ -18,14 +15,12 @@ const Navbar: React.FC = () => {
   const { totalItems } = useCart();
   const location = useLocation();
 
-  // UI States
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -34,12 +29,10 @@ const Navbar: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Close menu on scroll
   useEffect(() => {
     const closeOnScroll = () => {
       setIsUserMenuOpen(false);
@@ -72,8 +65,7 @@ const Navbar: React.FC = () => {
       <header
         className={`fixed top-0 w-full bg-white z-50 transition-all duration-300 ${
           scrolled ? "shadow-md border-b border-gray-200" : ""
-        }`}
-      >
+        }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 md:h-20">
             {/* Logo and Navigation */}
@@ -99,44 +91,42 @@ const Navbar: React.FC = () => {
                 {isNotHomePage && (
                   <Link
                     to="/"
-                    className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
-                  >
+                    className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300">
                     Home
                   </Link>
                 )}
                 <Link
                   to="/menu"
-                  className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
-                >
+                  className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300">
                   Menu
                 </Link>
                 <Link
                   to="/about"
-                  className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
-                >
+                  className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300">
                   About Us
                 </Link>
                 <Link
                   to="/reward"
-                  className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300"
-                >
+                  className="menu-item text-gray-900 hover:text-red-700 font-semibold uppercase text-sm tracking-wider transition-colors duration-300">
                   Reward
                 </Link>
               </nav>
             </div>
 
             {/* Desktop Right Side */}
-            <NavbarDesktop
-              user={user}
-              isLoggedIn={isLoggedIn}
-              isAdminPreview={isAdminPreview}
-              totalItems={totalItems}
-              onCartClick={() => setIsCartOpen(true)}
-              onLogoutClick={handleLogoutClick}
-              isUserMenuOpen={isUserMenuOpen}
-              onUserMenuToggle={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              onUserMenuClose={() => setIsUserMenuOpen(false)}
-            />
+            <div className="relative z-50">
+              <NavbarDesktop
+                user={user}
+                isLoggedIn={isLoggedIn}
+                isAdminPreview={isAdminPreview}
+                totalItems={totalItems}
+                onCartClick={() => setIsCartOpen(true)}
+                onLogoutClick={handleLogoutClick}
+                isUserMenuOpen={isUserMenuOpen}
+                onUserMenuToggle={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                onUserMenuClose={() => setIsUserMenuOpen(false)}
+              />
+            </div>
 
             {/* Mobile Right Side */}
             <div className="flex lg:hidden items-center space-x-4">
@@ -145,14 +135,12 @@ const Navbar: React.FC = () => {
                 <button
                   onClick={() => setIsCartOpen(true)}
                   className="relative p-2 text-gray-700 hover:text-red-700 transition-colors duration-300"
-                  aria-label="Cart"
-                >
+                  aria-label="Cart">
                   <svg
                     className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -173,13 +161,12 @@ const Navbar: React.FC = () => {
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center focus:outline-none"
-                  aria-label="User menu"
-                >
+                  aria-label="User menu">
                   <img
                     src={
                       user?.avatar ||
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        user?.username || "User"
+                        user?.username || "User",
                       )}&background=random&color=fff&bold=true`
                     }
                     className="h-9 w-9 rounded-full object-cover border-2 border-white"
@@ -189,8 +176,7 @@ const Navbar: React.FC = () => {
               ) : (
                 <Link
                   to="/login"
-                  className="px-3 py-1.5 border border-gray-800 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors duration-300"
-                >
+                  className="px-3 py-1.5 border border-gray-800 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors duration-300">
                   Sign in
                 </Link>
               )}
@@ -200,15 +186,13 @@ const Navbar: React.FC = () => {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="text-gray-700 hover:text-red-700 focus:outline-none p-2"
                 data-mobile-toggle="true"
-                aria-label="Toggle menu"
-              >
+                aria-label="Toggle menu">
                 {isMobileMenuOpen ? (
                   <svg
                     className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -221,8 +205,7 @@ const Navbar: React.FC = () => {
                     className="w-6 h-6"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -238,23 +221,27 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Bottom Navigation (hidden when mobile menu is open) */}
         {!isMobileMenuOpen && (
-          <NavbarMobileBottom
-            onCartClick={() => setIsCartOpen(true)}
-            onMenuToggle={() => setIsMobileMenuOpen(true)}
-            totalItems={totalItems}
-            isLoggedIn={isLoggedIn}
-            user={user}
-          />
+          <div className="lg:hidden pointer-events-auto">
+            <NavbarMobileBottom
+              onCartClick={() => setIsCartOpen(true)}
+              onMenuToggle={() => setIsMobileMenuOpen(true)}
+              totalItems={totalItems}
+              isLoggedIn={isLoggedIn}
+              user={user}
+            />
+          </div>
         )}
 
         {/* Mobile Slide Menu */}
-        <NavbarMobileMenu
-          isOpen={isMobileMenuOpen}
-          onClose={() => setIsMobileMenuOpen(false)}
-          user={user}
-          isLoggedIn={isLoggedIn}
-          onLogout={handleLogoutClick}
-        />
+        <div className="lg:hidden">
+          <NavbarMobileMenu
+            isOpen={isMobileMenuOpen}
+            onClose={() => setIsMobileMenuOpen(false)}
+            user={user}
+            isLoggedIn={isLoggedIn}
+            onLogout={handleLogoutClick}
+          />
+        </div>
       </header>
 
       {/* Spacer for fixed header */}

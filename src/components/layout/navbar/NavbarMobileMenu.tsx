@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Navb, NavbarMobileMenuProps } from "./types";
+import { NavbarMobileMenuProps } from "./types";
 
 const NavbarMobileMenu: React.FC<NavbarMobileMenuProps> = ({
   isOpen,

@@ -312,7 +312,6 @@ const Home = () => {
         clearTimeout(timer);
         document.head.removeChild(style);
 
-        // Cleanup event listeners
         buttons.forEach((button) => {
           const buttonElement = button as HTMLElement;
           buttonElement.onmouseenter = null;

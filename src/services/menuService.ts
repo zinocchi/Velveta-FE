@@ -22,8 +22,6 @@ class MenuService {
       const queryString = params.toString() ? `?${params.toString()}` : '';
       const response = await api.get<ApiResponse<Menu[]> | Menu[]>(`/menu${queryString}`);
       
-      // Handle response structure yang mungkin berbeda
-      // Response bisa berupa { data: [...] } atau langsung array
       if (response.data && typeof response.data === 'object') {
         if ('data' in response.data && Array.isArray(response.data.data)) {
           return response.data.data;

@@ -1,31 +1,33 @@
-import { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useCategoryMenu } from '../../hooks/useMenu';
-import { useCart } from '../../context/CartContext';
-import { useAuthContext } from '../../context/AuthContext';
-import { getCategoryInfo } from '../../types/category';
+import { useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useCategoryMenu } from "../../hooks/useMenu";
+import { useCart } from "../../context/CartContext";
+import { useAuthContext } from "../../context/AuthContext";
+import { getCategoryInfo } from "../../types/category";
 
-import { LoadingPage } from '../../components/ui/loading';
-import { Alert } from '../../components/ui/Alert';
-import CategoryHeader from './components/CategoryHeader';
-import MenuGrid from './components/MenuGrid';
+import { LoadingPage } from "../../components/ui/loading";
+import { Alert } from "../../components/ui/Alert";
+import CategoryHeader from "./components/CategoryHeader";
+import MenuGrid from "./components/MenuGrid";
 
-
-import { flyToCart } from '../../utils/flyToCart';
-import { Menu } from '../../types';
+import { flyToCart } from "../../utils/flyToCart";
+import { Menu } from "../../types";
 
 const CategoryPage = () => {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
-  const { items, loading, error } = useCategoryMenu(category || '');
+  const { items, loading, error, regroup } = useCategoryMenu(category || "");
+
   const { state, dispatch } = useCart();
   const { isLoggedIn, isAdminPreview } = useAuthContext();
 
-  const categoryInfo = getCategoryInfo(category || '');
+  const categoryInfo = getCategoryInfo(category || "");
 
   useEffect(() => {
     if (!category) {
-      navigate('/menu');
+      navigate("/menu");
+    } else {
+      regroup();
     }
   }, [category, navigate]);
 
@@ -49,12 +51,12 @@ const CategoryPage = () => {
 
     if (currentQty === 0) {
       flyToCart(
-        (e.currentTarget as HTMLElement).closest('.cart-source') as HTMLElement
+        (e.currentTarget as HTMLElement).closest(".cart-source") as HTMLElement,
       );
     }
 
     dispatch({
-      type: 'ADD_TO_CART',
+      type: "ADD_TO_CART",
       payload: {
         id: item.id,
         name: item.name,
@@ -73,12 +75,12 @@ const CategoryPage = () => {
 
     if (currentQty === 0) {
       flyToCart(
-        (e.currentTarget as HTMLElement).closest('.cart-source') as HTMLElement
+        (e.currentTarget as HTMLElement).closest(".cart-source") as HTMLElement,
       );
     }
 
     dispatch({
-      type: 'ADD_TO_CART',
+      type: "ADD_TO_CART",
       payload: {
         id: item.id,
         name: item.name,
@@ -93,7 +95,7 @@ const CategoryPage = () => {
 
     if (!isLoggedIn || isAdminPreview) return;
 
-    dispatch({ type: 'DECREMENT', payload: itemId });
+    dispatch({ type: "DECREMENT", payload: itemId });
   };
 
   if (loading) {
@@ -103,11 +105,7 @@ const CategoryPage = () => {
   if (error) {
     return (
       <main className="pt-20 md:pt-28 pb-16 max-w-7xl mx-auto px-4">
-        <Alert
-          type="error"
-          message={error}
-          className="mb-4"
-        />
+        <Alert type="error" message={error} className="mb-4" />
       </main>
     );
   }
@@ -117,7 +115,6 @@ const CategoryPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
-  
 
           {/* Main Content */}
           <div className="flex-1">
@@ -127,11 +124,14 @@ const CategoryPage = () => {
               items={items}
               category={category}
               quantities={Object.fromEntries(
-                items.map(item => [item.id, getItemQuantity(item.id)])
+                items.map((item) => [item.id, getItemQuantity(item.id)]),
               )}
               onAddToCart={handleAddToCart}
               onIncrease={handleIncrease}
-              onDecrease={handleDecrease} isLoggedIn={false} isAdminPreview={false}       />
+              onDecrease={handleDecrease}
+              isLoggedIn={false}
+              isAdminPreview={false}
+            />
           </div>
         </div>
       </div>
