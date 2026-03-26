@@ -63,9 +63,11 @@ const NavbarDesktop: React.FC<NavbarDesktopProps> = ({
         <span className="xl:hidden">Store</span>
       </a>
 
-      {/* Cart - hanya untuk user biasa, bukan admin preview */}
+      {/* Cart Icon with cart-source wrapper */}
       {isLoggedIn && !isAdminPreview && (
-        <CartIcon totalItems={totalItems} onClick={onCartClick} />
+        <div className="cart-source relative">
+          <CartIcon totalItems={totalItems} onClick={onCartClick} />
+        </div>
       )}
 
       {/* User Menu */}

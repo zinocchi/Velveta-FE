@@ -28,6 +28,7 @@ export interface NavbarMobileMenuProps {
   user: User | null;
   isLoggedIn: boolean;
   onLogout: () => void;
+  onCartClick: () => void;
 }
 
 export interface NavbarMobileProps {

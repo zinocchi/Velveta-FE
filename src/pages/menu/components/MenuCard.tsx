@@ -1,4 +1,3 @@
-// components/MenuCard.tsx
 import React from 'react';
 import { Menu } from '../../../types/menu';
 import { getCategoryInfo } from '../../../types/category';

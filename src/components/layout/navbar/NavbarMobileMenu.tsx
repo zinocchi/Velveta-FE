@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { NavbarMobileMenuProps } from "./types";
-
 const NavbarMobileMenu: React.FC<NavbarMobileMenuProps> = ({
   isOpen,
   onClose,
   user,
   isLoggedIn,
   onLogout,
+  onCartClick
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();

@@ -38,8 +38,18 @@ const MenuPage = () => {
     return () => observer.disconnect();
   }, [groupedCategories]);
 
+  const getMainPaddingTop = () => {
+    return isFromDashboard ? 'pt-4' : 'pt-24';
+  };
+
   if (loading) {
-    return <LoadingPage message="Loading menu..." fullScreen />;
+    return (
+      <main
+        className={`${getMainPaddingTop()} pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`}
+      >
+        <LoadingPage message="Loading menu..." fullScreen={false} />
+      </main>
+    );
   }
 
   if (error) {
@@ -59,10 +69,6 @@ const MenuPage = () => {
       </main>
     );
   }
-
-  const getMainPaddingTop = () => {
-  return isFromDashboard ? 'pt-4' : 'pt-24';
-  };
 
   return (
     <main

@@ -10,7 +10,6 @@ export * from './constant';
 // Admin types
 export * as Admin from './admin';
 
-// Re-export specific types for convenience
 export type {
   User,
   Menu,

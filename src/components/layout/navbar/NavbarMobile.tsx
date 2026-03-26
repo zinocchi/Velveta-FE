@@ -1,139 +1,336 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { NavbarMobileProps } from "./types";
-import CartIcon from "./CartIcon";
-import { User } from "../../../types";
+import React, { useEffect, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { NavbarMobileMenuProps } from "./types";
 
-interface NavbarMobileBottomProps extends NavbarMobileProps {
-  totalItems: number;
-  isLoggedIn: boolean;
-  user: User | null;
-}
-const NavbarMobileBottom: React.FC<NavbarMobileBottomProps> = ({
-  onCartClick,
-  onMenuToggle,
-  totalItems,
-  isLoggedIn,
+const NavbarMobileMenu: React.FC<NavbarMobileMenuProps> = ({
+  isOpen,
+  onClose,
   user,
+  isLoggedIn,
+  onLogout,
+  onCartClick,
+  totalItems 
 }) => {
+  const menuRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const isNotHomePage = location.pathname !== "/";
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-10">
-      <div className="flex justify-around items-center h-16">
-        <Link
-          to="/"
-          className="flex flex-col items-center justify-center text-gray-700 hover:text-red-700 transition-colors duration-300 p-2"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-            />
-          </svg>
-          <span className="text-xs mt-1">Home</span>
-        </Link>
+    <>
+      {/* Overlay */}
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+        onClick={onClose}
+      />
 
-        <Link
-          to="/menu"
-          className="flex flex-col items-center justify-center text-gray-700 hover:text-red-700 transition-colors duration-300 p-2"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v13m8-8v13m-8-13V8m-8 8v13"
-            />
-          </svg>
-          <span className="text-xs mt-1">Menu</span>
-        </Link>
+      {/* Slide-in Menu */}
+      <div
+        ref={menuRef}
+        className="fixed inset-y-0 right-0 w-4/5 max-w-sm bg-white shadow-2xl z-50 transform transition-transform duration-300 lg:hidden"
+        style={{
+          transform: isOpen ? "translateX(0)" : "translateX(100%)",
+        }}
+      >
+        <div className="h-full flex flex-col">
+          {/* Menu Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="flex items-center space-x-3">
+              {isLoggedIn && user && (
+                <img
+                  src={
+                    user?.avatar ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      user?.username || "User"
+                    )}&background=random&color=fff&bold=true`
+                  }
+                  className="h-10 w-10 rounded-full object-cover border-2 border-white"
+                  alt={user?.username || "User"}
+                />
+              )}
+              <div>
+                <h3 className="font-bold text-gray-900">
+                  {isLoggedIn ? user?.username || "User" : "Welcome"}
+                </h3>
+                {isLoggedIn && user?.email && (
+                  <p className="text-xs text-gray-500">{user.email}</p>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-500 hover:text-red-700"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
 
-        <Link
-          to="/about"
-          className="flex flex-col items-center justify-center text-gray-700 hover:text-red-700 transition-colors duration-300 p-2"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span className="text-xs mt-1">About</span>
-        </Link>
+          {/* Menu Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="space-y-6">
+              {/* Main Navigation */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                  Navigation
+                </h4>
+                {isNotHomePage && (
+                  <Link
+                    to="/"
+                    onClick={onClose}
+                    className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                      />
+                    </svg>
+                    <span>Back to Home</span>
+                  </Link>
+                )}
+                <Link
+                  to="/menu"
+                  onClick={onClose}
+                  className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v13m8-8v13m-8-13V8m-8 8v13"
+                    />
+                  </svg>
+                  <span>Menu</span>
+                </Link>
+                <Link
+                  to="/about"
+                  onClick={onClose}
+                  className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>About Us</span>
+                </Link>
+                <Link
+                  to="/reward"
+                  onClick={onClose}
+                  className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>Reward</span>
+                </Link>
+              </div>
 
-        <Link
-          to="/reward"
-          className="flex flex-col items-center justify-center text-gray-700 hover:text-red-700 transition-colors duration-300 p-2"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span className="text-xs mt-1">Reward</span>
-        </Link>
+              {/* Cart Section - Added */}
+              {isLoggedIn && onCartClick && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                    Shopping
+                  </h4>
+                  <div className="cart-source relative">
+                    <button
+                      onClick={() => {
+                        onCartClick();
+                        onClose();
+                      }}
+                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 w-full"
+                    >
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                        />
+                      </svg>
+                      <span>My Cart</span>
+                      {totalItems > 0 && (
+                        <span className="ml-auto bg-amber-600 text-white text-xs rounded-full px-2 py-1">
+                          {totalItems} items
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
 
-        <a
-          href="https://www.google.com/maps"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex flex-col items-center justify-center text-gray-700 hover:text-red-700 transition-colors duration-300 p-2"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-          <span className="text-xs mt-1">Store</span>
-        </a>
+              {/* User Actions */}
+              {isLoggedIn ? (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                    Account
+                  </h4>
+                  <Link
+                    to="/dashboard"
+                    onClick={onClose}
+                    className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700"
+                  >
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                      />
+                    </svg>
+                    <span>Dashboard</span>
+                  </Link>
+                  <Link
+                    to="/profile"
+                    onClick={onClose}
+                    className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700"
+                  >
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                    <span>Profile</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      onLogout();
+                      onClose();
+                    }}
+                    className="flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 text-red-600 w-full text-left"
+                  >
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                      />
+                    </svg>
+                    <span>Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex space-x-3">
+                    <Link
+                      to="/login"
+                      onClick={onClose}
+                      className="flex-1 px-4 py-3 border border-gray-800 rounded-lg text-center font-medium hover:bg-gray-100"
+                    >
+                      Sign in
+                    </Link>
+                    <Link
+                      to="/register"
+                      onClick={onClose}
+                      className="flex-1 px-4 py-3 bg-gray-900 text-white rounded-lg text-center font-medium hover:bg-gray-700"
+                    >
+                      Join now
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Menu Footer */}
+          <div className="p-4 border-t border-gray-200">
+            <div className="text-center text-sm text-gray-500">
+              <p>© {new Date().getFullYear()} Velveta Coffee</p>
+              <p className="mt-1">All rights reserved</p>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
-export default NavbarMobileBottom;
+export default NavbarMobileMenu;

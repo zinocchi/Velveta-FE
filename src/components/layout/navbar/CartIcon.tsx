@@ -2,14 +2,23 @@ import React from "react";
 import { CartIconProps } from "./types";
 
 const CartIcon: React.FC<CartIconProps> = ({ totalItems, onClick }) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onClick) {
+      onClick(e);
+    }
+  };
+
   return (
     <button
-      onClick={onClick}
-      className="relative p-2 text-gray-700 hover:text-red-700 transition-colors duration-300"
+      onClick={handleClick}
+      className="relative p-2 text-gray-700 hover:text-red-700 transition-colors duration-300 cursor-pointer z-10"
       aria-label="Cart"
+      type="button"
     >
       <svg
-        className="w-6 h-6"
+        className="w-6 h-6 pointer-events-none"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -22,7 +31,7 @@ const CartIcon: React.FC<CartIconProps> = ({ totalItems, onClick }) => {
         />
       </svg>
       {totalItems > 0 && (
-        <span className="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+        <span className="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center pointer-events-none">
           {totalItems > 99 ? "99+" : totalItems}
         </span>
       )}

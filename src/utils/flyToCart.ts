@@ -1,12 +1,15 @@
 export const flyToCart = (sourceEl: HTMLElement) => {
-  const cart = document.getElementById("cart-icon");
-  if (!cart) return;
+  const cartTarget = document.querySelector(".cart-source");
+  if (!cartTarget) {
+    console.warn("Cart target (.cart-source) not found");
+    return;
+  }
 
   const img = sourceEl.querySelector("img") as HTMLImageElement;
   if (!img) return;
 
   const imgRect = img.getBoundingClientRect();
-  const cartRect = cart.getBoundingClientRect();
+  const cartRect = cartTarget.getBoundingClientRect();
 
   const clone = img.cloneNode(true) as HTMLImageElement;
   clone.style.position = "fixed";

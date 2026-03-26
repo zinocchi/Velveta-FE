@@ -16,7 +16,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Generate menu items with current counts
   const menuItems = useMemo<MenuItem[]>(() => {
     if (customMenuItems) {
       return customMenuItems;

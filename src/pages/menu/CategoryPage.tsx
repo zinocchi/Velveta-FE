@@ -17,6 +17,7 @@ const CategoryPage = () => {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
   const { items, loading, error, regroup } = useCategoryMenu(category || "");
+  const isFromDashboard = location.pathname.includes("/dashboard");
 
   const { state, dispatch } = useCart();
   const { isLoggedIn, isAdminPreview } = useAuthContext();
@@ -40,19 +41,22 @@ const CategoryPage = () => {
     e.stopPropagation();
 
     if (!isLoggedIn) {
+      console.log("Not logged in, returning early");
       return;
     }
 
     if (isAdminPreview) {
+      console.log("Admin preview mode, returning early");
       return;
     }
 
     const currentQty = getItemQuantity(item.id);
 
-    if (currentQty === 0) {
-      flyToCart(
-        (e.currentTarget as HTMLElement).closest(".cart-source") as HTMLElement,
-      );
+    const sourceElement = (e.currentTarget as HTMLElement).closest(
+      ".cart-source",
+    ) as HTMLElement;
+    if (sourceElement) {
+      flyToCart(sourceElement);
     }
 
     dispatch({
@@ -73,10 +77,11 @@ const CategoryPage = () => {
 
     const currentQty = getItemQuantity(item.id);
 
-    if (currentQty === 0) {
-      flyToCart(
-        (e.currentTarget as HTMLElement).closest(".cart-source") as HTMLElement,
-      );
+    const sourceElement = (e.currentTarget as HTMLElement).closest(
+      ".cart-source",
+    ) as HTMLElement;
+    if (sourceElement) {
+      flyToCart(sourceElement);
     }
 
     dispatch({
@@ -98,8 +103,17 @@ const CategoryPage = () => {
     dispatch({ type: "DECREMENT", payload: itemId });
   };
 
+  const getMainPaddingTop = () => {
+    return isFromDashboard ? "pt-4" : "pt-24";
+  };
+
   if (loading) {
-    return <LoadingPage message="Loading menu..." fullScreen />;
+    return (
+      <main
+        className={`${getMainPaddingTop()} pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`}>
+        <LoadingPage message="Loading menu..." fullScreen={false} />
+      </main>
+    );
   }
 
   if (error) {
@@ -114,9 +128,6 @@ const CategoryPage = () => {
     <main className="pt-20 md:pt-28 pb-16 md:pb-20 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-
-          {/* Main Content */}
           <div className="flex-1">
             <CategoryHeader categoryInfo={categoryInfo} />
 
@@ -129,8 +140,8 @@ const CategoryPage = () => {
               onAddToCart={handleAddToCart}
               onIncrease={handleIncrease}
               onDecrease={handleDecrease}
-              isLoggedIn={false}
-              isAdminPreview={false}
+              isLoggedIn={isLoggedIn}
+              isAdminPreview={isAdminPreview}
             />
           </div>
         </div>

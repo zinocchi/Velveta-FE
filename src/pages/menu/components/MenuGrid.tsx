@@ -1,4 +1,3 @@
-// components/MenuGrid.tsx
 import React from 'react';
 import { Menu } from '../../../types/menu';
 import MenuCard from './MenuCard';
