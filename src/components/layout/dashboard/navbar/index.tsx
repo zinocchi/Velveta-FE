@@ -2,18 +2,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import VelvetaLogo from "../../../../assets/icon/velveta.jpeg";
 
-// Hooks & Context
 import { useAuthContext } from "../../../../context/AuthContext";
 import { useCart } from "../../../../context/CartContext";
 
-// Components - Reusable dari Navbar
 import CartIcon from "../../navbar/CartIcon";
 import LogoutConfirm from "../../navbar/LogoutConfirm";
 
-// Components - Dashboard Specific
 import DashboardUserMenu from "./DashboardUserMenu";
 
-// Modals
 import CartModal from "../../../modal/CartModal";
 import OrderHistoryModal from "../../../modal/OrderHistoryModal";
 import { DashboardNavbarProps } from "./types";
@@ -23,6 +19,7 @@ const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
   onViewOrders,
   onViewFavorites,
   onLogout: externalLogout,
+  cartCount,
   className = "",
 }) => {
   const { user, logout } = useAuthContext();

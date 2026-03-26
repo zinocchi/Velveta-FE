@@ -3,6 +3,7 @@ import { User } from "../../../../types/user";
 export interface DashboardNavbarProps {
   onEditProfile?: () => void;
   onViewOrders?: () => void;
+  cartCount: number;
   onViewFavorites?: () => void;
   onLogout?: () => void;
   className?: string;

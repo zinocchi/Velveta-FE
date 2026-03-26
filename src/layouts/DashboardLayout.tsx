@@ -56,7 +56,7 @@ const DashboardLayout: React.FC = () => {
       />
 
       {/* Main Layout with Sidebar */}
-      <div className="flex pt-16">
+      <div className="flex">
         <DashboardSidebar
           onBackToHome={() => navigate("/")}
           ordersCount={stats.totalOrders}
@@ -64,7 +64,7 @@ const DashboardLayout: React.FC = () => {
         />
 
         {/* Main Content */}
-        <main className="flex-1 p-6 md:p-8 bg-white min-h-[calc(100vh-4rem)] overflow-auto">
+        <main className="flex-1 p-6 md:p-8 bg-white min-h-screen overflow-auto">
           <Outlet />
         </main>
       </div>

@@ -9,27 +9,54 @@ class DashboardService {
   async getDashboardStats(): Promise<DashboardStats> {
     try {
       const response = await api.get<ApiResponse<Order[]>>("/orders/my");
-      const ordersData = response.data.data || response.data;
-
+      
+      console.log("Dashboard API Response:", response);
+      
+      if (!response.data) {
+        console.error("No data in response");
+        return this.getEmptyStats();
+      }
+      
+      let ordersData: Order[] = [];
+      
+      if (response.data.data && Array.isArray(response.data.data)) {
+        ordersData = response.data.data;
+      } else if (Array.isArray(response.data)) {
+        ordersData = response.data;
+      } else {
+        console.error("Unexpected response structure:", response.data);
+        return this.getEmptyStats();
+      }
+      
+      if (ordersData.length === 0) {
+        return this.getEmptyStats();
+      }
+      
       const completedOrders = ordersData.filter(
         (o: Order) => o.status === "COMPLETED"
       );
+      
       const totalSpent = completedOrders.reduce(
-        (sum: number, o: Order) => sum + o.total_price,
+        (sum: number, o: Order) => sum + (o.total_price || 0),
         0
       );
-
+      
       const drinkCount: Record<string, { count: number; name: string }> = {};
+      
       ordersData.forEach((order: Order) => {
-        order.items.forEach((item) => {
-          const drinkName = item.menu?.name || "Unknown";
-          if (!drinkCount[drinkName]) {
-            drinkCount[drinkName] = { count: 0, name: drinkName };
-          }
-          drinkCount[drinkName].count += item.qty;
-        });
+        if (order.items && Array.isArray(order.items)) {
+          order.items.forEach((item) => {
+            if (item && item.qty) {
+              const drinkName = item.menu?.name || item.menu_name || "Unknown";
+              if (!drinkCount[drinkName]) {
+                drinkCount[drinkName] = { count: 0, name: drinkName };
+              }
+              drinkCount[drinkName].count += item.qty;
+            }
+          });
+        }
       });
-
+      
       let favoriteDrink = "-";
       let favoriteCount = 0;
       Object.values(drinkCount).forEach((drink) => {
@@ -38,35 +65,66 @@ class DashboardService {
           favoriteDrink = drink.name;
         }
       });
-
-      // Get recent orders (last 5)
+      
       const recentOrders = [...ordersData]
+        .filter(order => order.created_at) 
         .sort(
           (a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         )
         .slice(0, 5);
-
+      
       return {
         totalOrders: ordersData.length,
         totalSpent,
         favoriteDrink,
         favoriteCount,
         recentOrders,
-        points: 0, 
+        points: 0,
       };
-    } catch (error) {
+      
+    } catch (error: any) {
       console.error("Failed to fetch dashboard stats:", error);
-      throw error;
+      
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+        console.error("Error response headers:", error.response.headers);
+      } else if (error.request) {
+        console.error("Error request:", error.request);
+      } else {
+        console.error("Error message:", error.message);
+      }
+      
+      return this.getEmptyStats();
     }
   }
-
+  
+  /**
+   * Get empty dashboard stats
+   */
+  private getEmptyStats(): DashboardStats {
+    return {
+      totalOrders: 0,
+      totalSpent: 0,
+      favoriteDrink: "-",
+      favoriteCount: 0,
+      recentOrders: [],
+      points: 0,
+    };
+  }
+  
   /**
    * Get single order details
    */
   async getOrderById(orderId: number): Promise<Order> {
-    const response = await api.get<ApiResponse<Order>>(`/orders/${orderId}`);
-    return response.data.data || response.data;
+    try {
+      const response = await api.get<ApiResponse<Order>>(`/orders/${orderId}`);
+      return response.data.data || response.data;
+    } catch (error: any) {
+      console.error(`Failed to fetch order ${orderId}:`, error);
+      throw error;
+    }
   }
 }
 
