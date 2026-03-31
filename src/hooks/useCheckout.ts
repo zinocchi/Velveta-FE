@@ -101,7 +101,6 @@ export const useCheckout = () => {
     fetchPaymentMethods();
   }, []);
 
-  // Update delivery estimate
   useEffect(() => {
     if (deliveryType === 'delivery' && selectedDeliveryOption) {
       const option = DELIVERY_OPTIONS.find((opt) => opt.id === selectedDeliveryOption);
@@ -210,55 +209,102 @@ export const useCheckout = () => {
       }
     }
 
+    // Validate address for delivery
+    if (deliveryType === 'delivery' && !selectedAddressId) {
+      showNotification('Please select a delivery address', 'error');
+      return;
+    }
+
     setPaymentStep('processing');
 
-    setTimeout(async () => {
-      try {
-        setProcessing(true);
+    try {
+      setProcessing(true);
 
-        const selectedAddress = addresses.find((addr) => addr.id === selectedAddressId);
-        const deliveryOption = DELIVERY_OPTIONS.find((opt) => opt.id === selectedDeliveryOption);
+      const selectedAddress = deliveryType === 'delivery' 
+        ? addresses.find((addr) => addr.id === selectedAddressId)
+        : undefined;
+        
+      const deliveryOption = DELIVERY_OPTIONS.find((opt) => opt.id === selectedDeliveryOption);
 
-        const orderPayload = checkoutService.buildOrderPayload({
-          items: state.items,
-          deliveryType,
-          selectedAddress,
-          deliveryOption,
-          paymentMethod,
-          shippingCost,
-          total,
-          cardDetails,
-          selectedEWallet,
-          phoneNumber,
-          selectedBank,
-        });
+      // Log payload untuk debugging
+      console.log('Building order payload...');
+      
+      const orderPayload = checkoutService.buildOrderPayload({
+        items: state.items,
+        deliveryType,
+        selectedAddress,
+        deliveryOption,
+        paymentMethod,
+        shippingCost,
+        total,
+        cardDetails,
+        selectedEWallet,
+        phoneNumber,
+        selectedBank,
+      });
 
-        const response = await checkoutService.createOrder(orderPayload);
+      console.log('Order payload:', JSON.stringify(orderPayload, null, 2));
 
-        const orderId = response.order_id || response.data?.id || response.data?.order_id;
+      console.log('Creating order...');
+      const response = await checkoutService.createOrder(orderPayload);
+      
+      console.log('Order response:', response);
 
-        setPaymentStep('success');
+      const orderId = response.order_id || response.data?.id || response.data?.order_id;
 
-        setTimeout(() => {
-          dispatch({ type: 'CLEAR_CART' });
-          setLastOrderId(orderId);
-          setShowOrderDetail(true);
-        }, 2000);
-      } catch (err: any) {
-        console.error('Checkout error:', err);
-        const errorMessage =
-          err.response?.data?.message ||
-          err.response?.data?.error ||
-          err.response?.data?.detail ||
-          err.message ||
-          'Failed to checkout. Please try again.';
+      setPaymentStep('success');
 
-        showNotification(errorMessage, 'error');
-        setPaymentStep('payment');
-      } finally {
-        setProcessing(false);
+      setTimeout(() => {
+        dispatch({ type: 'CLEAR_CART' });
+        setLastOrderId(orderId);
+        setShowOrderDetail(true);
+      }, 2000);
+      
+    } catch (err: any) {
+      console.error('Checkout error DETAILS:', err);
+      
+      // Log detail error untuk debugging
+      if (err.response) {
+        console.error('Error response status:', err.response.status);
+        console.error('Error response data:', err.response.data);
+        console.error('Error response headers:', err.response.headers);
+      } else if (err.request) {
+        console.error('Error request:', err.request);
+      } else {
+        console.error('Error message:', err.message);
       }
-    }, 3000);
+      
+      // Extract error message dengan lebih baik
+      let errorMessage = 'Failed to checkout. Please try again.';
+      
+      if (err.response?.data) {
+        const errorData = err.response.data;
+        
+        // Handle berbagai format error response
+        if (typeof errorData === 'string') {
+          errorMessage = errorData;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.error) {
+          errorMessage = errorData.error;
+        } else if (errorData.detail) {
+          errorMessage = errorData.detail;
+        } else if (errorData.errors) {
+          // Handle validation errors
+          const validationErrors = Object.values(errorData.errors).flat();
+          if (validationErrors.length > 0) {
+            errorMessage = validationErrors.join(', ');
+          }
+        } else {
+          errorMessage = JSON.stringify(errorData);
+        }
+      }
+
+      showNotification(errorMessage, 'error');
+      setPaymentStep('payment');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleBackToConfirmation = () => {
@@ -329,6 +375,7 @@ export const useCheckout = () => {
     // Order detail
     showOrderDetail,
     lastOrderId,
+    handleCloseOrderDetail,
     
     // Calculations
     subtotal,
@@ -341,7 +388,6 @@ export const useCheckout = () => {
     handleConfirmOrder,
     handleProcessPayment,
     handleBackToConfirmation,
-    handleCloseOrderDetail,
     
     validateCardDetails,
   };

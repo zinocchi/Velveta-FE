@@ -1,45 +1,33 @@
-// src/services/admin/dashboard.service.ts
+// src/admin/services/dashboard.service.ts
 
-import { apiClient } from '../api/config';
-import { API_ENDPOINTS } from '../api/endpoint';
-import { ApiResponse } from '../../types';
-import { 
-  type DashboardStats, 
-  type RevenueReportRequest, 
-  type RevenueReportResponse 
-} from '../../types/admin';
+import api from '../../../api/axios';
+import { DashboardStats, RevenueData } from '../types/dashboard';
+import { DateRange } from '../types/chart';
 
-class AdminDashboardService {
-  /**
-   * Get dashboard overview
-   */
-  async getDashboard(): Promise<DashboardStats> {
-    const response = await apiClient.get<ApiResponse<DashboardStats>>(
-      API_ENDPOINTS.ADMIN_DASHBOARD.INDEX
-    );
-    return response.data;
+class DashboardService {
+  async getDashboardStats(): Promise<DashboardStats> {
+    const response = await api.get('/admin/dashboard');
+    return response.data.data;
   }
 
-  /**
-   * Get revenue report
-   */
-  async getRevenueReport(params: RevenueReportRequest): Promise<RevenueReportResponse> {
-    const searchParams = new URLSearchParams(params as any);
-    const response = await apiClient.get<ApiResponse<RevenueReportResponse>>(
-      `${API_ENDPOINTS.ADMIN_DASHBOARD.REVENUE_REPORT}?${searchParams}`
-    );
-    return response.data;
+  async getRevenueReport(params: {
+    start_date: string;
+    end_date: string;
+    group_by?: 'day' | 'week' | 'month';
+  }): Promise<{ chart_data: RevenueData[] }> {
+    const response = await api.get('/admin/dashboard/revenue-report', { params });
+    return response.data.data;
   }
 
-  /**
-   * Get order statistics
-   */
-  async getStatistics(): Promise<any> {
-    const response = await apiClient.get<ApiResponse<any>>(
-      API_ENDPOINTS.ADMIN_DASHBOARD.STATISTICS
-    );
-    return response.data;
+  async getOrderStatistics() {
+    const response = await api.get('/admin/orders/statistics/overview');
+    return response.data.data;
+  }
+
+  async getRecentOrders(limit: number = 10) {
+    const response = await api.get('/admin/orders/recent/recent-list');
+    return response.data.data;
   }
 }
 
-export const adminDashboardService = new AdminDashboardService();
+export const dashboardService = new DashboardService();
