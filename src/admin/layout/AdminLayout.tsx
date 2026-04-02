@@ -1,19 +1,20 @@
-// import { Outlet } from "react-router-dom";
-// import AdminSidebar from "../components/AdminSideBar";
-// import AdminHeader from "../components/AdminHeader";
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import AdminNavbar from './components/AdminNavbar';
+import AdminSidebar from './components/AdminSidebar';
 
-// const AdminLayout = () => {
-//   return (
-//     <div className="flex h-screen w-screen overflow-hidden bg-gray-50">
-//       <AdminSidebar />
-//       <div className="flex-1 flex flex-col overflow-hidden">
-//         <AdminHeader />
-//         <main className="flex-1 overflow-y-auto bg-white">
-//           <Outlet />
-//         </main>
-//       </div>
-//     </div>
-//   );
-// };
+const AdminLayout: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <AdminNavbar />
+      <div className="flex">
+        <AdminSidebar />
+        <main className="flex-1 ml-64 mt-16 p-6">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+};
 
-// export default AdminLayout;
+export default AdminLayout;

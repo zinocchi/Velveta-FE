@@ -1,98 +1,95 @@
-// // admin/components/charts/ChartControls.tsx
-// import React from 'react';
-// import { FaChartLine, FaChartBar, FaChartArea } from 'react-icons/fa';
+import React from 'react';
+import { ChartType, DateRange } from '../../../types/chart';
+import { FaCalendarAlt, FaSyncAlt, FaDownload } from 'react-icons/fa';
+import { cn } from '../../../libs/utils';
 
-// interface ChartControlsProps {
-//   chartType: 'line' | 'area' | 'bar';
-//   onChartTypeChange: (type: 'line' | 'area' | 'bar') => void;
-//   dateRange: { start: string; end: string };
-//   onDateRangeChange: (range: { start: string; end: string }) => void;
-//   onRefresh: () => void;
-//   loading?: boolean;
-// }
+interface ChartControlsProps {
+  chartType: ChartType;
+  onChartTypeChange: (type: ChartType) => void;
+  dateRange: DateRange;
+  onDateRangeChange: (range: DateRange) => void;
+  onRefresh: () => void;
+  onExport?: () => void;
+  loading?: boolean;
+}
 
-// const ChartControls: React.FC<ChartControlsProps> = ({
-//   chartType,
-//   onChartTypeChange,
-//   dateRange,
-//   onDateRangeChange,
-//   onRefresh,
-//   loading = false,
-// }) => {
-//   return (
-//     <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-//       <div className="flex items-center gap-2">
-//         <button
-//           onClick={() => onChartTypeChange('area')}
-//           className={`p-2 rounded-lg transition-colors ${
-//             chartType === 'area'
-//               ? 'bg-red-100 text-red-600'
-//               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-//           }`}
-//           title="Area Chart"
-//         >
-//           <FaChartArea className="w-4 h-4" />
-//         </button>
-//         <button
-//           onClick={() => onChartTypeChange('line')}
-//           className={`p-2 rounded-lg transition-colors ${
-//             chartType === 'line'
-//               ? 'bg-red-100 text-red-600'
-//               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-//           }`}
-//           title="Line Chart"
-//         >
-//           <FaChartLine className="w-4 h-4" />
-//         </button>
-//         <button
-//           onClick={() => onChartTypeChange('bar')}
-//           className={`p-2 rounded-lg transition-colors ${
-//             chartType === 'bar'
-//               ? 'bg-red-100 text-red-600'
-//               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-//           }`}
-//           title="Bar Chart"
-//         >
-//           <FaChartBar className="w-4 h-4" />
-//         </button>
-//       </div>
+const chartTypes: { value: ChartType; label: string }[] = [
+  { value: 'area', label: 'Area' },
+  { value: 'line', label: 'Line' },
+  { value: 'bar', label: 'Bar' },
+];
 
-//       <div className="flex items-center gap-3">
-//         <div className="flex items-center gap-2">
-//           <input
-//             type="date"
-//             value={dateRange.start}
-//             onChange={(e) => onDateRangeChange({ ...dateRange, start: e.target.value })}
-//             className="text-xs border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-200"
-//           />
-//           <span className="text-xs text-gray-400">to</span>
-//           <input
-//             type="date"
-//             value={dateRange.end}
-//             onChange={(e) => onDateRangeChange({ ...dateRange, end: e.target.value })}
-//             className="text-xs border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-200"
-//           />
-//         </div>
-//         <button
-//           onClick={onRefresh}
-//           disabled={loading}
-//           className="px-4 py-2 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-//         >
-//           {loading ? (
-//             <>
-//               <svg className="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-//                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-//                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-//               </svg>
-//               <span>Loading...</span>
-//             </>
-//           ) : (
-//             'Apply'
-//           )}
-//         </button>
-//       </div>
-//     </div>
-//   );
-// };
+const ChartControls: React.FC<ChartControlsProps> = ({
+  chartType,
+  onChartTypeChange,
+  dateRange,
+  onDateRangeChange,
+  onRefresh,
+  onExport,
+  loading = false,
+}) => {
+  return (
+    <div className="flex flex-wrap items-center gap-4 mb-4">
+      {/* Chart Type Selector */}
+      <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+        {chartTypes.map((type) => (
+          <button
+            key={type.value}
+            onClick={() => onChartTypeChange(type.value)}
+            className={cn(
+              'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
+              chartType === type.value
+                ? 'bg-white text-red-700 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            )}
+          >
+            {type.label}
+          </button>
+        ))}
+      </div>
 
-// export default ChartControls;
+      {/* Date Range Selector */}
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <FaCalendarAlt className="w-4 h-4 text-gray-400" />
+          <input
+            type="date"
+            value={dateRange.start}
+            onChange={(e) => onDateRangeChange({ ...dateRange, start: e.target.value })}
+            className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-200"
+          />
+        </div>
+        <span className="text-gray-400">-</span>
+        <input
+          type="date"
+          value={dateRange.end}
+          onChange={(e) => onDateRangeChange({ ...dateRange, end: e.target.value })}
+          className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-200"
+        />
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex items-center gap-2 ml-auto">
+        <button
+          onClick={onRefresh}
+          disabled={loading}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+          title="Refresh"
+        >
+          <FaSyncAlt className={cn('w-4 h-4 text-gray-500', loading && 'animate-spin')} />
+        </button>
+        {onExport && (
+          <button
+            onClick={onExport}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Export as CSV"
+          >
+            <FaDownload className="w-4 h-4 text-gray-500" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ChartControls;

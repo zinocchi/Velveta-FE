@@ -1,10 +1,10 @@
-import React from "react"; 
+import React from "react";
 import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./styles/Index.css";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
-import { BrowserRouter } from "react-router-dom"; 
 
 const rootElement = document.getElementById("root");
 
@@ -14,10 +14,10 @@ if (!rootElement) {
   try {
     ReactDOM.createRoot(rootElement).render(
       <React.StrictMode>
-        <BrowserRouter> 
+        <BrowserRouter>
           <AuthProvider>
             <CartProvider>
-              <App /> 
+              <App />
             </CartProvider>
           </AuthProvider>
         </BrowserRouter>
@@ -25,6 +25,6 @@ if (!rootElement) {
     );
     console.log("React berhasil di-mount!");
   } catch (error) {
-    console.error(" Error saat mount React:", error);
+    console.error("Error saat mount React:", error);
   }
 }

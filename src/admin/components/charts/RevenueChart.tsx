@@ -1,192 +1,150 @@
-// // admin/components/charts/RevenueChart.tsx
-// import React from 'react';
-// import {
-//   LineChart,
-//   Line,
-//   AreaChart,
-//   Area,
-//   BarChart,
-//   Bar,
-//   XAxis,
-//   YAxis,
-//   CartesianGrid,
-//   Tooltip,
-//   Legend,
-//   ResponsiveContainer,
-//   PieChart,
-//   Pie,
-//   Cell,
-// } from 'recharts';
-// import type { RevenueData } from '../../types/index';
+import React from 'react';
+import {
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+ResponsiveContainer,
+  Legend,
+} from 'recharts';
+import { RevenueData } from '../../types/dashboard';
+import { ChartType } from '../../../types/chart';
+import { formatCurrency } from '../../../utils/formatters';
 
-// interface RevenueChartProps {
-//   data: RevenueData[];
-//   chartType?: 'line' | 'area' | 'bar';
-//   height?: number;
-// }
+interface RevenueChartProps {
+  data: RevenueData[];
+  chartType: ChartType;
+  height?: number;
+}
 
-// const CustomTooltip = ({ active, payload, label }: any) => {
-//   if (active && payload && payload.length) {
-//     return (
-//       <div className="bg-white p-3 shadow-lg rounded-lg border border-gray-200">
-//         <p className="text-sm font-medium text-gray-900 mb-1">{label}</p>
-//         <p className="text-sm text-gray-600">
-//           Revenue: <span className="font-semibold text-emerald-600">
-//             {new Intl.NumberFormat('id-ID', {
-//               style: 'currency',
-//               currency: 'IDR',
-//               minimumFractionDigits: 0,
-//             }).format(payload[0].value)}
-//           </span>
-//         </p>
-//         {payload[1] && (
-//           <p className="text-sm text-gray-600">
-//             Orders: <span className="font-semibold text-blue-600">{payload[1].value}</span>
-//           </p>
-//         )}
-//       </div>
-//     );
-//   }
-//   return null;
-// };
+const RevenueChart: React.FC<RevenueChartProps> = ({
+  data,
+  chartType,
+  height = 320,
+}) => {
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 shadow-lg rounded-lg border border-gray-100">
+          <p className="text-sm font-medium text-gray-900 mb-1">{label}</p>
+          <p className="text-xs text-gray-600">
+            Revenue: <span className="font-semibold text-red-700">
+              {formatCurrency(payload[0].value)}
+            </span>
+          </p>
+          <p className="text-xs text-gray-600">
+            Orders: <span className="font-semibold text-blue-600">
+              {payload[1]?.value || 0}
+            </span>
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
-// const RevenueChart: React.FC<RevenueChartProps> = ({ 
-//   data, 
-//   chartType = 'area',
-//   height = 300 
-// }) => {
-//   if (!data || data.length === 0) {
-//     return (
-//       <div className="h-full flex items-center justify-center flex-col">
-//         <p className="text-gray-400 mb-2">No revenue data available</p>
-//         <p className="text-xs text-gray-400">Try selecting a different date range</p>
-//       </div>
-//     );
-//   }
+  const renderChart = () => {
+    switch (chartType) {
+      case 'line':
+        return (
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis dataKey="date" tick={{ fontSize: 12 }} tickLine={false} />
+            <YAxis
+              yAxisId="left"
+              tick={{ fontSize: 12 }}
+              tickLine={false}
+              tickFormatter={(value) => formatCurrency(value)}
+            />
+            <YAxis yAxisId="right" orientation="right" hide />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="revenue"
+              name="Revenue"
+              stroke="#dc2626"
+              strokeWidth={2}
+              dot={{ r: 4 }}
+              activeDot={{ r: 6 }}
+            />
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="orders"
+              name="Orders"
+              stroke="#2563eb"
+              strokeWidth={2}
+              dot={{ r: 4 }}
+            />
+          </LineChart>
+        );
 
-//   const formatYAxis = (value: number) => {
-//     if (value >= 1000000) {
-//       return `Rp${(value / 1000000).toFixed(1)}M`;
-//     }
-//     if (value >= 1000) {
-//       return `Rp${(value / 1000).toFixed(0)}K`;
-//     }
-//     return `Rp${value}`;
-//   };
+      case 'area':
+        return (
+          <AreaChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis dataKey="date" tick={{ fontSize: 12 }} tickLine={false} />
+            <YAxis
+              tick={{ fontSize: 12 }}
+              tickLine={false}
+              tickFormatter={(value) => formatCurrency(value)}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            <Area
+              type="monotone"
+              dataKey="revenue"
+              name="Revenue"
+              stroke="#dc2626"
+              fill="#fee2e2"
+              strokeWidth={2}
+            />
+            <Area
+              type="monotone"
+              dataKey="orders"
+              name="Orders"
+              stroke="#2563eb"
+              fill="#dbeafe"
+              strokeWidth={2}
+            />
+          </AreaChart>
+        );
 
-//   const renderChart = () => {
-//     switch (chartType) {
-//       case 'line':
-//         return (
-//           <LineChart data={data}>
-//             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-//             <XAxis 
-//               dataKey="day_name" 
-//               tick={{ fontSize: 12, fill: '#6B7280' }}
-//               axisLine={{ stroke: '#E5E7EB' }}
-//             />
-//             <YAxis 
-//               tickFormatter={formatYAxis}
-//               tick={{ fontSize: 12, fill: '#6B7280' }}
-//               axisLine={{ stroke: '#E5E7EB' }}
-//             />
-//             <Tooltip content={<CustomTooltip />} />
-//             <Legend />
-//             <Line 
-//               type="monotone" 
-//               dataKey="revenue" 
-//               name="Revenue" 
-//               stroke="#EF4444" 
-//               strokeWidth={2}
-//               dot={{ fill: '#EF4444', r: 4 }}
-//               activeDot={{ r: 6, fill: '#EF4444' }}
-//             />
-//             <Line 
-//               type="monotone" 
-//               dataKey="orders" 
-//               name="Orders" 
-//               stroke="#3B82F6" 
-//               strokeWidth={2}
-//               dot={{ fill: '#3B82F6', r: 4 }}
-//               activeDot={{ r: 6, fill: '#3B82F6' }}
-//             />
-//           </LineChart>
-//         );
+      case 'bar':
+        return (
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis dataKey="date" tick={{ fontSize: 12 }} tickLine={false} />
+            <YAxis
+              tick={{ fontSize: 12 }}
+              tickLine={false}
+              tickFormatter={(value) => formatCurrency(value)}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            <Bar dataKey="revenue" name="Revenue" fill="#dc2626" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="orders" name="Orders" fill="#2563eb" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        );
 
-//       case 'bar':
-//         return (
-//           <BarChart data={data}>
-//             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-//             <XAxis 
-//               dataKey="day_name" 
-//               tick={{ fontSize: 12, fill: '#6B7280' }}
-//               axisLine={{ stroke: '#E5E7EB' }}
-//             />
-//             <YAxis 
-//               tickFormatter={formatYAxis}
-//               tick={{ fontSize: 12, fill: '#6B7280' }}
-//               axisLine={{ stroke: '#E5E7EB' }}
-//             />
-//             <Tooltip content={<CustomTooltip />} />
-//             <Legend />
-//             <Bar dataKey="revenue" name="Revenue" fill="#EF4444" radius={[4, 4, 0, 0]} />
-//             <Bar dataKey="orders" name="Orders" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-//           </BarChart>
-//         );
+      default:
+        return null;
+    }
+  };
 
-//       case 'area':
-//       default:
-//         return (
-//           <AreaChart data={data}>
-//             <defs>
-//               <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-//                 <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3}/>
-//                 <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
-//               </linearGradient>
-//               <linearGradient id="ordersGradient" x1="0" y1="0" x2="0" y2="1">
-//                 <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-//                 <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-//               </linearGradient>
-//             </defs>
-//             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-//             <XAxis 
-//               dataKey="day_name" 
-//               tick={{ fontSize: 12, fill: '#6B7280' }}
-//               axisLine={{ stroke: '#E5E7EB' }}
-//             />
-//             <YAxis 
-//               tickFormatter={formatYAxis}
-//               tick={{ fontSize: 12, fill: '#6B7280' }}
-//               axisLine={{ stroke: '#E5E7EB' }}
-//             />
-//             <Tooltip content={<CustomTooltip />} />
-//             <Legend />
-//             <Area 
-//               type="monotone" 
-//               dataKey="revenue" 
-//               name="Revenue" 
-//               stroke="#EF4444" 
-//               strokeWidth={2}
-//               fill="url(#revenueGradient)" 
-//             />
-//             <Area 
-//               type="monotone" 
-//               dataKey="orders" 
-//               name="Orders" 
-//               stroke="#3B82F6" 
-//               strokeWidth={2}
-//               fill="url(#ordersGradient)" 
-//             />
-//           </AreaChart>
-//         );
-//     }
-//   };
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      {renderChart()}
+    </ResponsiveContainer>
+  );
+};
 
-//   return (
-//     <ResponsiveContainer width="100%" height={height}>
-//       {renderChart()}
-//     </ResponsiveContainer>
-//   );
-// };
-
-// export default RevenueChart;
+export default RevenueChart;

@@ -1,420 +1,272 @@
-// import React, { useState, useEffect } from "react";
-// import { FaImage } from "react-icons/fa";
-// import api from "../../../api/axios";
-// import type { Menu, MenuFormData } from "../../types";
+import React, { useState, useEffect } from 'react';
+import { FaTimes, FaUpload, FaTrash } from 'react-icons/fa';
+import { Menu, MenuFormData } from '../../types/menu';
 
-// interface MenuFormProps {
-//   menu?: Menu | null;
-//   onClose: () => void;
-//   onSuccess: () => void;
-// }
+interface MenuFormProps {
+  menu: Menu | null;
+  categories: string[];
+  onClose: () => void;
+  onSave: (formData: FormData, isEdit: boolean, id?: number) => Promise<void>;
+}
 
-// interface Category {
-//   id?: number;
-//   name: string;
-// }
+const MenuForm: React.FC<MenuFormProps> = ({ menu, categories, onClose, onSave }) => {
+  const [formData, setFormData] = useState<MenuFormData>({
+    name: '',
+    description: '',
+    price: 0,
+    category: '',
+    stock: 0,
+    image: null,
+    is_available: true,
+  });
+  const [loading, setLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-// const MenuForm: React.FC<MenuFormProps> = ({ menu, onClose, onSuccess }) => {
-//   const [categories, setCategories] = useState<Category[]>([]);
-//   const [loadingCategories, setLoadingCategories] = useState(true);
-//   const [newCategory, setNewCategory] = useState("");
-//   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+  useEffect(() => {
+    if (menu) {
+      setFormData({
+        name: menu.name,
+        description: menu.description || '',
+        price: menu.price,
+        category: menu.category || '',
+        stock: menu.stock,
+        image: null,
+        is_available: menu.is_available,
+      });
+      setImagePreview(menu.image);
+    }
+  }, [menu]);
 
-//   const [formData, setFormData] = useState<MenuFormData>({
-//     name: menu?.name || "",
-//     description: menu?.description || "",
-//     price: menu?.price || 0,
-//     category: menu?.category || "",
-//     stock: menu?.stock || 0,
-//     image: null,
-//     is_available: menu?.is_available ?? true,
-//   });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'number' ? parseFloat(value) : value,
+    }));
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
 
-//   const [imagePreview, setImagePreview] = useState<string | null>(
-//     menu?.image || null,
-//   );
-//   const [loading, setLoading] = useState(false);
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: checked }));
+  };
 
-//   // Fetch categories on mount
-//   useEffect(() => {
-//     fetchCategories();
-//   }, []);
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData(prev => ({ ...prev, image: file }));
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
+  };
 
-//   const fetchCategories = async () => {
-//     try {
-//       setLoadingCategories(true);
-//       const response = await api.get("/admin/categories");
+  const handleRemoveImage = () => {
+    setFormData(prev => ({ ...prev, image: null }));
+    setImagePreview(null);
+  };
 
-//       // Handle berbagai format response
-//       let cats: Category[] = [];
-//       const data = response.data.data || response.data;
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (formData.price <= 0) newErrors.price = 'Price must be greater than 0';
+    if (!formData.category) newErrors.category = 'Category is required';
+    if (formData.stock < 0) newErrors.stock = 'Stock cannot be negative';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-//       if (Array.isArray(data)) {
-//         if (data.length > 0 && typeof data[0] === "string") {
-//           // Jika array of strings
-//           cats = data.map((cat, index) => ({ id: index, name: cat }));
-//         } else if (data.length > 0 && typeof data[0] === "object") {
-//           // Jika array of objects
-//           cats = data.map((cat: any) => ({
-//             id: cat.id || cat.category_id,
-//             name: cat.name || cat.category,
-//           }));
-//         }
-//       }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
 
-//       setCategories(cats);
-//     } catch (error) {
-//       console.error("Failed to fetch categories:", error);
-//       // Fallback categories
-//       setCategories([
-//         { id: 1, name: "Coffee" },
-//         { id: 2, name: "Tea" },
-//         { id: 3, name: "Pastry" },
-//         { id: 4, name: "Snacks" },
-//         { id: 5, name: "Beverages" },
-//       ]);
-//     } finally {
-//       setLoadingCategories(false);
-//     }
-//   };
+    setLoading(true);
+    const submitData = new FormData();
+    submitData.append('name', formData.name);
+    submitData.append('description', formData.description);
+    submitData.append('price', formData.price.toString());
+    submitData.append('category', formData.category);
+    submitData.append('stock', formData.stock.toString());
+    submitData.append('is_available', formData.is_available.toString());
+    if (formData.image) {
+      submitData.append('image', formData.image);
+    }
+    if (menu) {
+      submitData.append('_method', 'PUT');
+    }
 
-//   const handleChange = (
-//     e: React.ChangeEvent<
-//       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-//     >,
-//   ) => {
-//     const { name, value, type } = e.target;
-//     setFormData((prev) => ({
-//       ...prev,
-//       [name]: type === "number" ? Number(value) : value,
-//     }));
-//   };
+    await onSave(submitData, !!menu, menu?.id);
+    setLoading(false);
+  };
 
-//   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     if (e.target.files && e.target.files[0]) {
-//       const file = e.target.files[0];
-//       setFormData((prev) => ({ ...prev, image: file }));
-//       setImagePreview(URL.createObjectURL(file));
-//     }
-//   };
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      
+      <div className="relative bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+          <h3 className="text-xl font-bold text-gray-900">
+            {menu ? 'Edit Menu' : 'Add New Menu'}
+          </h3>
+          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
+            <FaTimes className="w-5 h-5" />
+          </button>
+        </div>
 
-//   const handleAddNewCategory = () => {
-//     if (newCategory.trim()) {
-//       const newCat = {
-//         id: Date.now(),
-//         name: newCategory.trim(),
-//       };
-//       setCategories((prev) => [...prev, newCat]);
-//       setFormData((prev) => ({ ...prev, category: newCategory.trim() }));
-//       setNewCategory("");
-//       setShowNewCategoryInput(false);
-//     }
-//   };
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Image Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Menu Image
+            </label>
+            <div className="flex items-center gap-4">
+              {imagePreview ? (
+                <div className="relative">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                  >
+                    <FaTrash className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
+                <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <FaUpload className="w-8 h-8 text-gray-400" />
+                </div>
+              )}
+              <label className="cursor-pointer px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                Choose Image
+                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+              </label>
+            </div>
+          </div>
 
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setLoading(true);
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className={`w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700 ${
+                errors.name ? 'border-red-500' : 'border-gray-200'
+              }`}
+            />
+            {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+          </div>
 
-//     try {
-//       const formDataToSend = new FormData();
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700"
+            />
+          </div>
 
-//       // Mapping data sesuai backend
-//       const fields = [
-//         { name: "name", value: formData.name },
-//         { name: "description", value: formData.description },
-//         { name: "price", value: String(formData.price) },
-//         { name: "category", value: formData.category },
-//         { name: "stock", value: String(Math.floor(formData.stock)) },
-//         { name: "is_available", value: formData.is_available ? "1" : "0" },
-//       ];
+          {/* Price & Category */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Price *</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  min={0}
+                  step={1000}
+                  className={`w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700 ${
+                    errors.price ? 'border-red-500' : 'border-gray-200'
+                  }`}
+                />
+              </div>
+              {errors.price && <p className="text-xs text-red-500 mt-1">{errors.price}</p>}
+            </div>
 
-//       // Append semua field text
-//       fields.forEach((field) => {
-//         if (
-//           field.value !== null &&
-//           field.value !== undefined &&
-//           field.value !== ""
-//         ) {
-//           formDataToSend.append(field.name, field.value);
-//         }
-//       });
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700 ${
+                  errors.category ? 'border-red-500' : 'border-gray-200'
+                }`}
+              >
+                <option value="">Select Category</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </option>
+                ))}
+              </select>
+              {errors.category && <p className="text-xs text-red-500 mt-1">{errors.category}</p>}
+            </div>
+          </div>
 
-//       // Append image jika ada
-//       if (formData.image instanceof File) {
-//         formDataToSend.append("image", formData.image);
-//       }
+          {/* Stock & Status */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+              <input
+                type="number"
+                name="stock"
+                value={formData.stock}
+                onChange={handleChange}
+                min={0}
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700"
+              />
+            </div>
 
-//       // Log untuk debugging
-//       console.log("📤 Sending FormData:");
-//       for (let pair of formDataToSend.entries()) {
-//         console.log(`  ${pair[0]}:`, pair[1]);
-//       }
+            <div className="flex items-center">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="is_available"
+                  checked={formData.is_available}
+                  onChange={handleCheckboxChange}
+                  className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
+                />
+                <span className="text-sm text-gray-700">Available for sale</span>
+              </label>
+            </div>
+          </div>
 
-//       const response = await api.post(
-//         menu ? `/admin/menus/${menu.id}` : "/admin/menus",
-//         formDataToSend,
-//         { headers: { "Content-Type": "multipart/form-data" } },
-//       );
+          {/* Buttons */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 px-4 py-2 bg-red-700 text-white rounded-lg font-medium hover:bg-red-800 disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : menu ? 'Update Menu' : 'Create Menu'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
 
-//       console.log("✅ Success:", response.data);
-//       onSuccess();
-//     } catch (error: any) {
-//       console.error("❌ Error:", error);
-
-//       if (error.response?.status === 422) {
-//         const errors = error.response.data.errors || {};
-//         const errorMessages = Object.values(errors).flat().join("\n");
-//         alert(`Validation Error:\n${errorMessages}`);
-//       } else {
-//         alert(
-//           error.response?.data?.message ||
-//             error.message ||
-//             "Failed to save menu",
-//         );
-//       }
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-//       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-//         <div className="p-6 border-b border-gray-100 sticky top-0 bg-white z-10">
-//           <h2 className="text-2xl font-bold text-gray-900">
-//             {menu ? "Edit Menu" : "Add New Menu"}
-//           </h2>
-//         </div>
-
-//         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-//           {/* Image Upload */}
-//           <div>
-//             <label className="block text-sm font-medium text-gray-700 mb-2">
-//               Menu Image
-//             </label>
-//             <div className="flex items-center gap-4">
-//               <div className="w-24 h-24 bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0">
-//                 {imagePreview ? (
-//                   <img
-//                     src={imagePreview}
-//                     alt="Preview"
-//                     className="w-full h-full object-cover"
-//                   />
-//                 ) : (
-//                   <FaImage className="w-8 h-8 text-gray-400" />
-//                 )}
-//               </div>
-//               <input
-//                 type="file"
-//                 accept="image/*"
-//                 onChange={handleImageChange}
-//                 className="flex-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
-//               />
-//             </div>
-//           </div>
-
-//           {/* Name */}
-//           <div>
-//             <label className="block text-sm font-medium text-gray-700 mb-2">
-//               Name *
-//             </label>
-//             <input
-//               type="text"
-//               name="name"
-//               value={formData.name}
-//               onChange={handleChange}
-//               required
-//               placeholder="e.g., Espresso, Cappuccino"
-//               className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200"
-//             />
-//           </div>
-
-//           {/* Description */}
-//           <div>
-//             <label className="block text-sm font-medium text-gray-700 mb-2">
-//               Description
-//             </label>
-//             <textarea
-//               name="description"
-//               value={formData.description}
-//               onChange={handleChange}
-//               rows={3}
-//               placeholder="Describe your menu item..."
-//               className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200"
-//             />
-//           </div>
-
-//           {/* Price and Category */}
-//           <div className="grid grid-cols-2 gap-4">
-//             <div>
-//               <label className="block text-sm font-medium text-gray-700 mb-2">
-//                 Price * (Rp)
-//               </label>
-//               <input
-//                 type="number"
-//                 name="price"
-//                 value={formData.price}
-//                 onChange={handleChange}
-//                 required
-//                 min="0"
-//                 step="1000"
-//                 placeholder="25000"
-//                 className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200"
-//               />
-//             </div>
-
-//             <div>
-//               <label className="block text-sm font-medium text-gray-700 mb-2">
-//                 Category *
-//               </label>
-
-//               {!showNewCategoryInput ? (
-//                 <div className="flex gap-2">
-//                   <select
-//                     name="category"
-//                     value={formData.category}
-//                     onChange={handleChange}
-//                     required
-//                     className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 bg-white">
-//                     <option value="" disabled>
-//                       Select a category
-//                     </option>
-//                     {loadingCategories ? (
-//                       <option value="" disabled>
-//                         Loading categories...
-//                       </option>
-//                     ) : (
-//                       categories.map((cat) => (
-//                         <option key={cat.id || cat.name} value={cat.name}>
-//                           {cat.name}
-//                         </option>
-//                       ))
-//                     )}
-//                   </select>
-//                   <button
-//                     type="button"
-//                     onClick={() => setShowNewCategoryInput(true)}
-//                     className="px-3 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-//                     title="Add new category">
-//                     +
-//                   </button>
-//                 </div>
-//               ) : (
-//                 <div className="flex gap-2">
-//                   <input
-//                     type="text"
-//                     value={newCategory}
-//                     onChange={(e) => setNewCategory(e.target.value)}
-//                     placeholder="New category name"
-//                     className="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200"
-//                     autoFocus
-//                   />
-//                   <button
-//                     type="button"
-//                     onClick={handleAddNewCategory}
-//                     className="px-3 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors"
-//                     title="Add">
-//                     ✓
-//                   </button>
-//                   <button
-//                     type="button"
-//                     onClick={() => {
-//                       setShowNewCategoryInput(false);
-//                       setNewCategory("");
-//                     }}
-//                     className="px-3 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
-//                     title="Cancel">
-//                     ✗
-//                   </button>
-//                 </div>
-//               )}
-//             </div>
-//           </div>
-
-//           {/* Stock */}
-//           <div>
-//             <label className="block text-sm font-medium text-gray-700 mb-2">
-//               Stock *
-//             </label>
-//             <input
-//               type="number"
-//               name="stock"
-//               value={formData.stock}
-//               onChange={handleChange}
-//               required
-//               min="0"
-//               placeholder="0"
-//               className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200"
-//             />
-//           </div>
-
-//           {/* Availability */}
-//           <div className="flex items-center gap-2">
-//             <input
-//               type="checkbox"
-//               id="is_available"
-//               name="is_available"
-//               checked={formData.is_available}
-//               onChange={(e) =>
-//                 setFormData((prev) => ({
-//                   ...prev,
-//                   is_available: e.target.checked,
-//                 }))
-//               }
-//               className="w-4 h-4 text-red-700 rounded border-gray-300 focus:ring-red-200"
-//             />
-//             <label
-//               htmlFor="is_available"
-//               className="text-sm font-medium text-gray-700">
-//               Available for ordering
-//             </label>
-//           </div>
-
-//           {/* Actions */}
-//           <div className="flex gap-3 pt-4 border-t border-gray-100">
-//             <button
-//               type="submit"
-//               disabled={loading}
-//               className="flex-1 px-4 py-2 bg-red-700 text-white rounded-xl font-medium hover:bg-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-//               {loading ? (
-//                 <span className="flex items-center justify-center gap-2">
-//                   <svg
-//                     className="animate-spin h-5 w-5 text-white"
-//                     xmlns="http://www.w3.org/2000/svg"
-//                     fill="none"
-//                     viewBox="0 0 24 24">
-//                     <circle
-//                       className="opacity-25"
-//                       cx="12"
-//                       cy="12"
-//                       r="10"
-//                       stroke="currentColor"
-//                       strokeWidth="4"></circle>
-//                     <path
-//                       className="opacity-75"
-//                       fill="currentColor"
-//                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-//                   </svg>
-//                   {menu ? "Updating..." : "Creating..."}
-//                 </span>
-//               ) : menu ? (
-//                 "Update Menu"
-//               ) : (
-//                 "Create Menu"
-//               )}
-//             </button>
-//             <button
-//               type="button"
-//               onClick={onClose}
-//               disabled={loading}
-//               className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors disabled:opacity-50">
-//               Cancel
-//             </button>
-//           </div>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default MenuForm;
+export default MenuForm;

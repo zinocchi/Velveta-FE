@@ -1,156 +1,123 @@
-// import React from "react";
-// import { NavLink, useNavigate } from "react-router-dom";
-// import {
-//   FaChartLine,
-//   FaCoffee,
-//   FaShoppingBag,
-//   FaFileAlt,
-//   FaCog,
-//   FaSignOutAlt,
-// } from "react-icons/fa";
-// import { useAuth } from "../../auth/useAuth";
-// import VelvetaLogo from "../../assets/icon/velveta.png";
-// interface AdminSidebarProps {
-//   ordersCount?: number; // 
-//   onBackToHome?: () => void;
-// }
+// src/admin/layouts/components/AdminSidebar.tsx
 
-// const AdminSidebar: React.FC<AdminSidebarProps> = ({
-//   ordersCount = 0,
-//   onBackToHome,
-// }) => {
-//   const { logout } = useAuth();
-//   const navigate = useNavigate();
+import React, { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { 
+  FaTachometerAlt, 
+  FaUtensils, 
+  FaShoppingBag, 
+  FaUsers,
+  FaCog,
+  FaSignOutAlt,
+  FaChevronLeft,
+  FaChevronRight
+} from 'react-icons/fa';
+import { useAuthContext } from '../../context/AuthContext';
+import { cn } from '../../libs/utils';
 
-//   const handleBackToHome = () => {
-//     if (onBackToHome) {
-//       onBackToHome();
-//     } else {
-//       navigate("/"); // Redirect ke home user
-//     }
-//   };
+interface MenuItem {
+  path: string;
+  label: string;
+  icon: React.ReactNode;
+}
 
-//   const menuItems = [
-//     {
-//       path: "/admin/dashboard",
-//       icon: FaChartLine,
-//       label: "Dashboard",
-//     },
-//     {
-//       path: "/admin/menus",
-//       icon: FaCoffee,
-//       label: "Menus",
-//     },
-//     {
-//       path: "/admin/orders",
-//       icon: FaShoppingBag,
-//       label: "Orders",
-//       hasBadge: true,
-//       badgeCount: ordersCount,
-//     },
-//     {
-//       path: "/admin/reports",
-//       icon: FaFileAlt,
-//       label: "Reports",
-//     },
-//     {
-//       path: "/admin/settings",
-//       icon: FaCog,
-//       label: "Settings",
-//     },
-//   ];
+const menuItems: MenuItem[] = [
+  {
+    path: '/admin/dashboard',
+    label: 'Dashboard',
+    icon: <FaTachometerAlt className="w-5 h-5" />,
+  },
+  {
+    path: '/admin/menus',
+    label: 'Menu Management',
+    icon: <FaUtensils className="w-5 h-5" />,
+  },
+  {
+    path: '/admin/orders',
+    label: 'Orders',
+    icon: <FaShoppingBag className="w-5 h-5" />,
+  },
+  // {
+  //   path: '/admin/users',
+  //   label: 'Users',
+  //   icon: <FaUsers className="w-5 h-5" />,
+  // },
+  // {
+  //   path: '/admin/settings',
+  //   label: 'Settings',
+  //   icon: <FaCog className="w-5 h-5" />,
+  // },
+];
 
-//   return (
-//     <aside className="">
-//       <div className="p-6">
-//         {/* Logo Section - Mirip dengan DashboardSidebar */}
-//         <div className="mb-6 flex items-center justify-center">
-//           <img src={VelvetaLogo} alt="Velveta Logo" className="h-14" />
-//         </div>
+const AdminSidebar = () => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { logout } = useAuthContext();
+  const navigate = useNavigate();
 
-//         {/* Back to Home Button - Sama persis dengan DashboardSidebar */}
-//         {/* <div className="mb-8 pb-6 border-b border-gray-100">
-//           <button
-//             onClick={handleBackToHome}
-//             className="flex items-center space-x-2 text-gray-700 hover:text-red-700 hover:bg-red-50 px-4 py-3 rounded-lg transition-all duration-300 w-full text-left group border border-gray-200 hover:border-red-200"
-//           >
-//             <svg
-//               className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform duration-300"
-//               fill="none"
-//               stroke="currentColor"
-//               viewBox="0 0 24 24"
-//             >
-//               <path
-//                 strokeLinecap="round"
-//                 strokeLinejoin="round"
-//                 strokeWidth="2"
-//                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
-//               />
-//             </svg>
-//             <span className="font-medium">Back to Home</span>
-//           </button>
-//         </div> */}
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
-//         {/* Navigation Menu - Style DashboardSidebar */}
-//         <nav className="space-y-1">
-//           {menuItems.map((item) => {
-//             const Icon = item.icon;
+  return (
+    <aside
+      className={cn(
+        'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 transition-all duration-300 z-30',
+        isCollapsed ? 'w-20' : 'w-64'
+      )}
+    >
+      {/* Collapse Toggle */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="absolute -right-3 top-6 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors"
+      >
+        {isCollapsed ? (
+          <FaChevronRight className="w-3 h-3 text-gray-500" />
+        ) : (
+          <FaChevronLeft className="w-3 h-3 text-gray-500" />
+        )}
+      </button>
 
-//             return (
-//               <NavLink
-//                 key={item.path}
-//                 to={item.path}
-//                 className={({ isActive }) =>
-//                   `flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 hover:text-red-700 transition-all duration-300 w-full text-left ${
-//                     isActive
-//                       ? "bg-red-50 text-red-700 border-l-4 border-red-500"
-//                       : "text-gray-700 border-l-4 border-transparent"
-//                   }`
-//                 }
-//               >
-//                 {({ isActive }) => (
-//                   <>
-//                     <div className={isActive ? "text-red-600" : "text-gray-500"}>
-//                       <Icon className="w-5 h-5" />
-//                     </div>
+      {/* Navigation */}
+      <nav className="p-4 space-y-1">
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200',
+                isActive
+                  ? 'bg-red-50 text-red-700'
+                  : 'text-gray-700 hover:bg-gray-100',
+                isCollapsed && 'justify-center'
+              )
+            }
+            title={isCollapsed ? item.label : undefined}
+          >
+            {item.icon}
+            {!isCollapsed && <span className="font-medium">{item.label}</span>}
+          </NavLink>
+        ))}
 
-//                     <span className="font-medium">{item.label}</span>
+        {/* Divider */}
+        <div className="my-4 border-t border-gray-200" />
 
-//                     {item.hasBadge && item.badgeCount > 0 && (
-//                       <span
-//                         className={`ml-auto text-xs font-medium px-2 py-1 rounded-full ${
-//                           isActive
-//                             ? "bg-red-600 text-white"
-//                             : "bg-red-100 text-red-800"
-//                         }`}
-//                       >
-//                         {item.badgeCount}
-//                       </span>
-//                     )}
-//                   </>
-//                 )}
-//               </NavLink>
-//             );
-//           })}
-//         </nav>
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className={cn(
+            'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-gray-700 hover:bg-red-50 hover:text-red-700',
+            isCollapsed && 'justify-center'
+          )}
+          title={isCollapsed ? 'Logout' : undefined}
+        >
+          <FaSignOutAlt className="w-5 h-5" />
+          {!isCollapsed && <span className="font-medium">Logout</span>}
+        </button>
+      </nav>
+    </aside>
+  );
+};
 
-//         {/* Logout Button - Mirip dengan DashboardSidebar style */}
-//         <div className="mt-8 pt-6 border-t border-gray-200">
-//           <button
-//             onClick={logout}
-//             className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-50 hover:text-red-700 transition-all duration-300 w-full text-left group border border-gray-200 hover:border-red-200"
-//           >
-//             <div className="text-gray-500 group-hover:text-red-600">
-//               <FaSignOutAlt className="w-5 h-5" />
-//             </div>
-//             <span className="font-medium text-gray-700 group-hover:text-red-700">
-//               Logout
-//             </span>
-//           </button>
-//         </div>
-//       </div>
-//     </aside>
-//   );
-// };
-
-// export default AdminSidebar;
+export default AdminSidebar;
