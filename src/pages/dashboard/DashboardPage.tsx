@@ -53,6 +53,7 @@ const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthContext();
   const { stats, loading, error, refetch } = useDashboard();
+  console.log("Dashboard Stats:", stats); 
 
   if (error) {
     return (

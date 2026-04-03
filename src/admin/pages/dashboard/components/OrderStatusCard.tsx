@@ -1,5 +1,5 @@
-import React from 'react';
-import { DashboardStats } from '../../../types/dashboard';
+import React from "react";
+import { DashboardStats } from "../../../types/dashboard";
 
 interface OrderStatusCardProps {
   stats: DashboardStats | null;
@@ -7,11 +7,29 @@ interface OrderStatusCardProps {
 
 const OrderStatusCard: React.FC<OrderStatusCardProps> = ({ stats }) => {
   const statuses = [
-    { label: 'Pending', value: stats?.ordersByStatus.pending || 0, color: 'bg-amber-500' },
-    { label: 'Processing', value: stats?.ordersByStatus.processing || 0, color: 'bg-blue-500' },
-    { label: 'Completed', value: stats?.ordersByStatus.completed || 0, color: 'bg-emerald-500' },
-    { label: 'Cancelled', value: stats?.ordersByStatus.cancelled || 0, color: 'bg-rose-500' },
+    {
+      label: "Pending",
+      value: stats?.ordersByStatus?.pending || 0,
+      color: "bg-amber-500",
+    },
+    {
+      label: "Processing",
+      value: stats?.ordersByStatus?.processing || 0,
+      color: "bg-blue-500",
+    },
+    {
+      label: "Completed",
+      value: stats?.ordersByStatus?.completed || 0,
+      color: "bg-emerald-500",
+    },
+    {
+      label: "Cancelled",
+      value: stats?.ordersByStatus?.cancelled || 0,
+      color: "bg-rose-500",
+    },
   ];
+
+  console.log("Order status data:", stats?.ordersByStatus);
 
   return (
     <div className="bg-white rounded-2xl p-6 border border-gray-100">
@@ -23,7 +41,9 @@ const OrderStatusCard: React.FC<OrderStatusCardProps> = ({ stats }) => {
               <div className={`w-2 h-2 ${status.color} rounded-full`}></div>
               <span className="text-sm text-gray-600">{status.label}</span>
             </div>
-            <span className="text-sm font-semibold text-gray-900">{status.value}</span>
+            <span className="text-sm font-semibold text-gray-900">
+              {status.value}
+            </span>
           </div>
         ))}
       </div>

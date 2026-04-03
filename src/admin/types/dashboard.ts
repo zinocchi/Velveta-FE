@@ -25,6 +25,7 @@ export interface RecentOrder {
 }
 
 export interface DashboardStats {
+  stats: null;
   totalOrders: number;
   totalRevenue: number;
   totalMenu: number;
@@ -33,7 +34,7 @@ export interface DashboardStats {
   ordersByStatus: {
     pending: number;
     processing: number;
-    completed: number;
+  completed: number;
     cancelled: number;
   };
   stockStats: {

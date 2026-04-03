@@ -98,7 +98,7 @@ const NavbarDesktop: React.FC<NavbarDesktopProps> = ({
               onLogout={onLogoutClick}
             />
           </>
-        ) : (
+      ) : (
           <div className="flex items-center space-x-2 md:space-x-3">
             <Link
               to="/login"

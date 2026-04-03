@@ -1,5 +1,7 @@
+// src/components/layout/Navbar/UserMenu.tsx
+
 import React, { useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserMenuProps } from "./types";
 
 const UserMenu: React.FC<UserMenuProps> = ({
@@ -9,6 +11,10 @@ const UserMenu: React.FC<UserMenuProps> = ({
   isOpen,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  // Tentukan dashboard URL berdasarkan role
+  const dashboardUrl = user?.role === "admin" ? "/admin/dashboard" : "/dashboard";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -26,6 +32,16 @@ const UserMenu: React.FC<UserMenuProps> = ({
     };
   }, [isOpen, onClose]);
 
+  const handleDashboardClick = () => {
+    navigate(dashboardUrl);
+    onClose();
+  };
+
+  const handleProfileClick = () => {
+    navigate("/profile");
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -38,12 +54,17 @@ const UserMenu: React.FC<UserMenuProps> = ({
           {user?.username || "User"}
         </p>
         <p className="text-xs text-gray-500 truncate">{user?.email || ""}</p>
+        {user?.role === "admin" && (
+          <span className="inline-block mt-1 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+            Admin
+          </span>
+        )}
       </div>
 
-      <Link
-        to="/dashboard"
+      {/* Dashboard - Conditional berdasarkan role */}
+      <button
+        onClick={handleDashboardClick}
         className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-100 text-sm text-gray-700 transition-colors duration-150"
-        onClick={onClose}
       >
         <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
@@ -53,13 +74,13 @@ const UserMenu: React.FC<UserMenuProps> = ({
             d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
           />
         </svg>
-        Dashboard
-      </Link>
+        {user?.role === "admin" ? "Admin Dashboard" : "Dashboard"}
+      </button>
 
-      <Link
-        to="/profile"
+      {/* Profile */}
+      <button
+        onClick={handleProfileClick}
         className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-100 text-sm text-gray-700 transition-colors duration-150"
-        onClick={onClose}
       >
         <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
@@ -70,8 +91,9 @@ const UserMenu: React.FC<UserMenuProps> = ({
           />
         </svg>
         Profile
-      </Link>
+      </button>
 
+      {/* Logout */}
       <button
         onClick={() => {
           onLogout();
