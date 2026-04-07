@@ -34,7 +34,7 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, categories, onClose, onSave }
         image: null,
         is_available: menu.is_available,
       });
-      setImagePreview(menu.image);
+      setImagePreview(menu.image_url);
     }
   }, [menu]);
 

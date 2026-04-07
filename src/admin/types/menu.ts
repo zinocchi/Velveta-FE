@@ -5,14 +5,14 @@ export interface Menu {
   price: number;
   category: string;
   stock: number;
-  image: string | null;
+  image_url: string | null;
   is_available: boolean;
   created_at: string;
   updated_at: string;
 }
 
 export interface MenuFormData {
-  name: string;
+name: string;
   description: string;
   price: number;
   category: string;

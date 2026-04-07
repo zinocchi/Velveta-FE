@@ -44,8 +44,8 @@ const MenuTableRow: React.FC<MenuTableRowProps> = ({
         {/* Image */}
         <td className="px-4 py-3">
           <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-            {menu.image ? (
-              <img src={menu.image} alt={menu.name} className="w-full h-full object-cover" />
+            {menu.image_url ? (
+              <img src={menu.image_url} alt={menu.name} className="w-full h-full object-cover" />
             ) : (
               <FaImage className="w-6 h-6 text-gray-400" />
             )}
