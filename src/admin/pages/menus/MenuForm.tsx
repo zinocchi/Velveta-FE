@@ -26,24 +26,40 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, categories, onClose, onSave }
   useEffect(() => {
     if (menu) {
       setFormData({
-        name: menu.name,
+        name: menu.name || '',
         description: menu.description || '',
-        price: menu.price,
+        price: menu.price || 0,
         category: menu.category || '',
-        stock: menu.stock,
+        stock: menu.stock ?? 0,
         image: null,
-        is_available: menu.is_available,
+        is_available: menu.is_available ?? true,
       });
-      setImagePreview(menu.image_url);
+      
+      if (menu.image_url) {
+        const baseUrl = 'http://localhost:8000/api';
+        const imageUrl = menu.image_url.startsWith('http') 
+          ? menu.image_url 
+          : `${baseUrl}/storage/${menu.image_url.replace(/^\/?storage\//, '')}`;
+        setImagePreview(imageUrl);
+      }
     }
   }, [menu]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'number' ? parseFloat(value) : value,
-    }));
+    
+    if (type === 'number') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value === '' ? '' : parseFloat(value),
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+    
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -70,10 +86,29 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, categories, onClose, onSave }
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (formData.price <= 0) newErrors.price = 'Price must be greater than 0';
-    if (!formData.category) newErrors.category = 'Category is required';
-    if (formData.stock < 0) newErrors.stock = 'Stock cannot be negative';
+    
+    if (!formData.name?.trim()) {
+      newErrors.name = 'Name is required';
+    }
+    
+    const priceValue = typeof formData.price === 'string' 
+      ? parseFloat(formData.price) 
+      : formData.price;
+    if (!priceValue || priceValue <= 0) {
+      newErrors.price = 'Price must be greater than 0';
+    }
+    
+    if (!formData.category) {
+      newErrors.category = 'Category is required';
+    }
+    
+    const stockValue = typeof formData.stock === 'string' 
+      ? parseFloat(formData.stock) 
+      : formData.stock;
+    if (stockValue !== undefined && stockValue !== '' && stockValue < 0) {
+      newErrors.stock = 'Stock cannot be negative';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -84,21 +119,39 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, categories, onClose, onSave }
 
     setLoading(true);
     const submitData = new FormData();
-    submitData.append('name', formData.name);
-    submitData.append('description', formData.description);
-    submitData.append('price', formData.price.toString());
-    submitData.append('category', formData.category);
-    submitData.append('stock', formData.stock.toString());
-    submitData.append('is_available', formData.is_available.toString());
-    if (formData.image) {
+    
+    submitData.append('name', formData.name || '');
+    submitData.append('description', formData.description || '');
+    submitData.append('category', formData.category || '');
+    submitData.append('is_available', (formData.is_available ?? true).toString());
+    
+    const finalPrice = typeof formData.price === 'string' 
+      ? parseFloat(formData.price) 
+      : formData.price;
+    submitData.append('price', (finalPrice || 0).toString());
+    
+    const finalStock = typeof formData.stock === 'string' 
+      ? parseFloat(formData.stock) 
+      : formData.stock;
+    submitData.append('stock', (finalStock ?? 0).toString());
+        if (formData.image) {
       submitData.append('image', formData.image);
     }
+    
     if (menu) {
       submitData.append('_method', 'PUT');
     }
 
-    await onSave(submitData, !!menu, menu?.id);
-    setLoading(false);
+    console.log('Submitting menu data:');
+    for (let pair of submitData.entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
+
+    try {
+      await onSave(submitData, !!menu, menu?.id);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -110,7 +163,11 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, categories, onClose, onSave }
           <h3 className="text-xl font-bold text-gray-900">
             {menu ? 'Edit Menu' : 'Add New Menu'}
           </h3>
-          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
+          <button 
+            type="button"
+            onClick={onClose} 
+            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+          >
             <FaTimes className="w-5 h-5" />
           </button>
         </div>
@@ -128,11 +185,15 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, categories, onClose, onSave }
                     src={imagePreview}
                     alt="Preview"
                     className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                    onError={(e) => {
+                      console.error('Image failed to load:', imagePreview);
+                      e.currentTarget.src = 'https://via.placeholder.com/96?text=No+Image';
+                    }}
                   />
                   <button
                     type="button"
                     onClick={handleRemoveImage}
-                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                   >
                     <FaTrash className="w-3 h-3" />
                   </button>
@@ -144,20 +205,27 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, categories, onClose, onSave }
               )}
               <label className="cursor-pointer px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
                 Choose Image
-                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleImageChange} 
+                  className="hidden" 
+                />
               </label>
             </div>
           </div>
 
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Name <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className={`w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700 ${
+              className={`w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700 transition-colors ${
                 errors.name ? 'border-red-500' : 'border-gray-200'
               }`}
             />
@@ -166,20 +234,24 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, categories, onClose, onSave }
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
               rows={3}
-              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700"
+              className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700 transition-colors"
             />
           </div>
 
           {/* Price & Category */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Price *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Price <span className="text-red-500">*</span>
+              </label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
                 <input
@@ -189,21 +261,24 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, categories, onClose, onSave }
                   onChange={handleChange}
                   min={0}
                   step={1000}
-                  className={`w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700 ${
+                  className={`w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700 transition-colors ${
                     errors.price ? 'border-red-500' : 'border-gray-200'
                   }`}
+                  placeholder="0"
                 />
               </div>
               {errors.price && <p className="text-xs text-red-500 mt-1">{errors.price}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Category <span className="text-red-500">*</span>
+              </label>
               <select
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700 ${
+                className={`w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700 transition-colors ${
                   errors.category ? 'border-red-500' : 'border-gray-200'
                 }`}
               >
@@ -221,15 +296,21 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, categories, onClose, onSave }
           {/* Stock & Status */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Stock
+              </label>
               <input
                 type="number"
                 name="stock"
                 value={formData.stock}
                 onChange={handleChange}
                 min={0}
-                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700"
+                className={`w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-700 transition-colors ${
+                  errors.stock ? 'border-red-500' : 'border-gray-200'
+                }`}
+                placeholder="0"
               />
+              {errors.stock && <p className="text-xs text-red-500 mt-1">{errors.stock}</p>}
             </div>
 
             <div className="flex items-center">
@@ -251,14 +332,14 @@ const MenuForm: React.FC<MenuFormProps> = ({ menu, categories, onClose, onSave }
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-red-700 text-white rounded-lg font-medium hover:bg-red-800 disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-red-700 text-white rounded-lg font-medium hover:bg-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? 'Saving...' : menu ? 'Update Menu' : 'Create Menu'}
             </button>

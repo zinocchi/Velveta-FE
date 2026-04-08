@@ -1,4 +1,3 @@
-// admin/types/index.ts
 export interface OrderItem {
   id: number;
   menu_id: number;

@@ -46,13 +46,14 @@ export interface ShippingAddress {
  */
 export interface Order {
   id: number;
-  order_number: string;
+  order_number: string | null;
   status: OrderStatus;
   total_price: number;
   payment_method: string;
   delivery_type: DeliveryType;
   created_at: string;
   items: OrderItem[];
+  
 }
 
 /**
