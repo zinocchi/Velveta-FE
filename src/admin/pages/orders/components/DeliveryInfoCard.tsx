@@ -1,5 +1,3 @@
-// src/admin/pages/orders/components/DeliveryInfoCard.tsx
-
 import React from 'react';
 import { Order } from '../../../types/order';
 import { FaMotorcycle, FaStore, FaClock, FaMapMarkerAlt, FaPhone, FaUser } from 'react-icons/fa';

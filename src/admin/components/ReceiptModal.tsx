@@ -1,8 +1,16 @@
-import React from "react";
-import { FaPrint, FaDownload, FaTimes, FaReceipt } from "react-icons/fa";
+// src/components/ReceiptModal.tsx
+
+import React, { useRef } from "react";
+import { FaPrint, FaDownload, FaTimes } from "react-icons/fa";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import type { Order } from "../types/order";
+import { Order } from "../types/order";
+import {
+  formatCurrency,
+  formatDateShort,
+  formatDateTime,
+  formatTimeOnly,
+} from "../utils/formatters";
 
 interface ReceiptModalProps {
   isOpen: boolean;
@@ -11,15 +19,9 @@ interface ReceiptModalProps {
 }
 
 const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) => {
-  if (!isOpen || !order) return null;
+  const receiptRef = useRef<HTMLDivElement>(null);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
+  if (!isOpen || !order) return null;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -30,35 +32,14 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
     });
   };
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const getPaymentMethodName = (method: any) => {
-    if (method && typeof method === 'object' && method.name) {
-      return method.name;
-    }
-    if (method && typeof method === 'object' && method.code) {
-      const methods: Record<string, string> = {
-        credit_card: "Credit Card",
-        e_wallet: "E-Wallet",
-        bank_transfer: "Bank Transfer",
-      };
-      return methods[method.code.toLowerCase()] || method.code;
-    }
-    if (typeof method === 'string') {
-      const methods: Record<string, string> = {
-        credit_card: "Credit Card",
-        e_wallet: "E-Wallet",
-        bank_transfer: "Bank Transfer",
-      };
-      return methods[method.toLowerCase()] || method.replace('_', ' ');
-    }
-    return "Cash";
+  const getPaymentMethodName = (method: string) => {
+    const methods: Record<string, string> = {
+      credit_card: "Credit Card",
+      e_wallet: "E-Wallet",
+      bank_transfer: "Bank Transfer",
+      cash: "Cash",
+    };
+    return methods[method?.toLowerCase()] || method?.replace('_', ' ') || "Cash";
   };
 
   const getStatusText = (status: string) => {
@@ -76,7 +57,8 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
     if (!printWindow) return;
 
     const formattedDate = formatDate(order.created_at);
-    const formattedTime = formatTime(order.created_at);
+    const formattedTime = formatTimeOnly(order.created_at);
+    const subtotal = order.total_price - (order.shipping_cost || 0);
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -166,13 +148,17 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
               <span>Cashier</span>
               <span>System</span>
             </div>
+            <div class="info-row">
+              <span>Customer</span>
+              <span>${order.user?.username || order.user?.username || "Guest"}</span>
+            </div>
             
             <div class="items">
               ${order.items.map((item) => `
                 <div class="item-row">
                   <div class="item-name">${item.menu.name}</div>
                   <div class="item-qty">${item.qty}x</div>
-                  <div class="item-price">${formatCurrency(item.price * item.qty).replace("Rp", "").trim()}</div>
+                  <div class="item-price">${formatCurrency(item.price * item.qty).replace(/Rp\s?/, "").trim()}</div>
                 </div>
               `).join("")}
             </div>
@@ -180,15 +166,15 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
             <div class="totals">
               <div class="total-row">
                 <span>Subtotal</span>
-                <span>${formatCurrency(order.total_price - (order.shipping_cost || 0)).replace("Rp", "").trim()}</span>
+                <span>${formatCurrency(subtotal).replace(/Rp\s?/, "").trim()}</span>
               </div>
               <div class="total-row">
                 <span>Shipping</span>
-                <span>${!order.shipping_cost || order.shipping_cost === 0 ? "FREE" : formatCurrency(order.shipping_cost).replace("Rp", "").trim()}</span>
+                <span>${!order.shipping_cost || order.shipping_cost === 0 ? "FREE" : formatCurrency(order.shipping_cost).replace(/Rp\s?/, "").trim()}</span>
               </div>
               <div class="grand-total">
                 <span>TOTAL</span>
-                <span>${formatCurrency(order.total_price).replace("Rp", "").trim()}</span>
+                <span>${formatCurrency(order.total_price).replace(/Rp\s?/, "").trim()}</span>
               </div>
             </div>
             
@@ -197,22 +183,22 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
                 <span>Payment Method</span>
                 <span>${getPaymentMethodName(order.payment_method).toUpperCase()}</span>
               </div>
-              ${order.payment_method?.code === "e_wallet" && (order.e_wallet_provider || order.payment_details?.provider) ? `
+              ${order.payment_details?.provider ? `
                 <div class="info-row">
                   <span>Provider</span>
-                  <span>${order.e_wallet_provider || order.payment_details?.provider}</span>
+                  <span>${order.payment_details.provider}</span>
                 </div>
               ` : ""}
-              ${order.payment_method?.code === "bank_transfer" && (order.bank_code || order.payment_details?.bank) ? `
+              ${order.payment_details?.bank ? `
                 <div class="info-row">
                   <span>Bank</span>
-                  <span>${(order.bank_code || order.payment_details?.bank).toUpperCase()}</span>
+                  <span>${order.payment_details.bank.toUpperCase()}</span>
                 </div>
               ` : ""}
-              ${order.payment_method?.code === "credit_card" && (order.card_last4 || order.payment_details?.card_last4) ? `
+              ${order.payment_details?.card_last4 ? `
                 <div class="info-row">
                   <span>Card</span>
-                  <span>•••• ${order.card_last4 || order.payment_details?.card_last4}</span>
+                  <span>•••• ${order.payment_details.card_last4}</span>
                 </div>
               ` : ""}
               <div class="info-row">
@@ -243,7 +229,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
   };
 
   const handleDownloadPDF = async () => {
-    const element = document.getElementById('receipt-content');
+    const element = receiptRef.current;
     if (!element) return;
 
     try {
@@ -288,7 +274,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
 
         {/* Receipt Content */}
         <div className="p-6">
-          <div id="receipt-content" className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 font-mono max-w-md mx-auto">
+          <div ref={receiptRef} className="bg-white p-6 rounded-xl border-2 border-dashed border-gray-300 font-mono max-w-md mx-auto">
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold uppercase tracking-wider text-gray-900">
                 Velveta Coffee
@@ -315,7 +301,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Time</span>
-                <span className="text-gray-900">{formatTime(order.created_at)}</span>
+                <span className="text-gray-900">{formatTimeOnly(order.created_at)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Cashier</span>
@@ -323,7 +309,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Customer</span>
-                <span className="text-gray-900">{order.user?.username || order.user?.name || "Guest"}</span>
+                <span className="text-gray-900">{order.user?.username || order.user?.username || "Guest"}</span>
               </div>
             </div>
 
@@ -339,7 +325,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
                   <div className="col-span-6 text-gray-900 truncate">{item.menu.name}</div>
                   <div className="col-span-2 text-center text-gray-700">{item.qty}x</div>
                   <div className="col-span-4 text-right font-medium text-gray-900">
-                    {formatCurrency(item.price * item.qty).replace("Rp", "").trim()}
+                    {formatCurrency(item.price * item.qty).replace(/Rp\s?/, "").trim()}
                   </div>
                 </div>
               ))}
@@ -349,7 +335,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
               <div className="flex justify-between text-gray-600">
                 <span>Subtotal</span>
                 <span className="text-gray-900">
-                  {formatCurrency(order.total_price - (order.shipping_cost || 0)).replace("Rp", "").trim()}
+                  {formatCurrency(order.total_price - (order.shipping_cost || 0)).replace(/Rp\s?/, "").trim()}
                 </span>
               </div>
               <div className="flex justify-between text-gray-600">
@@ -357,13 +343,13 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
                 <span className="text-gray-900">
                   {!order.shipping_cost || order.shipping_cost === 0
                     ? "FREE"
-                    : formatCurrency(order.shipping_cost).replace("Rp", "").trim()}
+                    : formatCurrency(order.shipping_cost).replace(/Rp\s?/, "").trim()}
                 </span>
               </div>
               <div className="flex justify-between font-bold text-lg pt-2 border-t border-dashed border-gray-400">
                 <span className="text-gray-900">TOTAL</span>
                 <span className="text-red-700">
-                  {formatCurrency(order.total_price).replace("Rp", "").trim()}
+                  {formatCurrency(order.total_price).replace(/Rp\s?/, "").trim()}
                 </span>
               </div>
             </div>
@@ -376,29 +362,29 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, order }) =
                 </span>
               </div>
 
-              {order.payment_method?.code === "e_wallet" && (order.e_wallet_provider || order.payment_details?.provider) && (
+              {order.payment_details?.provider && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">Provider</span>
                   <span className="font-medium text-gray-900">
-                    {order.e_wallet_provider || order.payment_details?.provider}
+                    {order.payment_details.provider}
                   </span>
                 </div>
               )}
 
-              {order.payment_method?.code === "bank_transfer" && (order.bank_code || order.payment_details?.bank) && (
+              {order.payment_details?.bank && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">Bank</span>
                   <span className="font-medium text-gray-900 uppercase">
-                    {order.bank_code || order.payment_details?.bank}
+                    {order.payment_details.bank}
                   </span>
                 </div>
               )}
 
-              {order.payment_method?.code === "credit_card" && (order.card_last4 || order.payment_details?.card_last4) && (
+              {order.payment_details?.card_last4 && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">Card</span>
                   <span className="font-medium text-gray-900">
-                    •••• {order.card_last4 || order.payment_details?.card_last4}
+                    •••• {order.payment_details.card_last4}
                   </span>
                 </div>
               )}

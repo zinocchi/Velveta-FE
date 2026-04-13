@@ -32,7 +32,12 @@ const OrderList: React.FC<OrderListProps> = ({
   onViewReceipt,
   onClearSelected,
 }) => {
-  const allSelected = selectedOrders.length === orders.length && orders.length > 0;
+  const selectableOrders = orders.filter(order => 
+    order.status !== 'COMPLETED' && order.status !== 'CANCELLED'
+  );
+  
+  const allSelectableSelected = selectableOrders.length > 0 && 
+    selectableOrders.every(order => selectedOrders.includes(order.id));
 
   if (loading) {
     return (
@@ -67,7 +72,7 @@ const OrderList: React.FC<OrderListProps> = ({
                 <div className="pt-1">
                   <input
                     type="checkbox"
-                    checked={allSelected}
+                    checked={allSelectableSelected}
                     onChange={(e) => onSelectAll(e.target.checked)}
                     className="w-4 h-4 text-red-700 rounded border-gray-300 focus:ring-red-200"
                   />
