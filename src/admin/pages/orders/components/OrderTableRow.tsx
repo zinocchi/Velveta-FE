@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 import { Order } from "../../../types/order";
 import OrderStatusBadge from "./OrderStatusBadges";
-import { formatCurrency, formatDateShort } from "../../../utils/formatters";
+import { formatCurrency, formatDateShort } from "../../../../utils/formatters";
 
 interface OrderTableRowProps {
   order: Order;

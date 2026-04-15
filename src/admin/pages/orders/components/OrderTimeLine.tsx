@@ -1,7 +1,7 @@
 import React from 'react';
 import { Order } from '../../../types/order';
 import { FaHistory, FaCalendarAlt, FaClock, FaCheckCircle, FaTimesCircle, FaHourglassHalf } from 'react-icons/fa';
-import { formatDateTime, formatTimeOnly } from '../../../utils/formatters';
+import { formatDateTime, formatTimeOnly } from '../../../../utils/formatters';
 
 interface OrderTimelineProps {
   order: Order;

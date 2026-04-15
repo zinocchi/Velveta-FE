@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaShoppingBag, FaChevronRight } from 'react-icons/fa';
 import StatusBadge from '../../../components/common/StatusBadge';
 import { DashboardStats } from '../../../types/dashboard';
-import { formatCurrency, formatDate } from '../../../../utils/formatters';
+import { formatCurrency, formatDateTime } from '../../../../utils/formatters';
 
 interface RecentOrdersCardProps {
   stats: DashboardStats | null;
@@ -46,7 +46,7 @@ const RecentOrdersCard: React.FC<RecentOrdersCardProps> = ({ stats }) => {
                     {order.user?.name || 'Unknown'}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {order.items?.length || 0} items • {formatDate(order.created_at)}
+                    {order.items?.length || 0} items • {formatDateTime(order.created_at)}
                   </p>
                 </div>
                 <p className="text-sm font-bold text-gray-900">

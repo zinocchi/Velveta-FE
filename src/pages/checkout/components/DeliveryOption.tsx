@@ -1,6 +1,6 @@
-import React from 'react';
-import { DeliveryOption, DeliveryEstimate } from '../../../types/checkout';
-import { FaClock, FaCheckCircle, FaMotorcycle } from 'react-icons/fa';
+import React from "react";
+import { DeliveryOption, DeliveryEstimate } from "../../../types/checkout";
+import { FaClock, FaCheckCircle, FaMotorcycle } from "react-icons/fa";
 
 interface DeliveryOptionsProps {
   options: DeliveryOption[];
@@ -31,16 +31,18 @@ const DeliveryOptions: React.FC<DeliveryOptionsProps> = ({
 
       <div className="space-y-3">
         {options.map((option) => {
-          const Icon = iconMap[option.icon as keyof typeof iconMap] || FaMotorcycle;
+          const Icon =
+            iconMap[option.icon as keyof typeof iconMap] || FaMotorcycle;
           const isSelected = selectedOption === option.id;
 
           return (
             <label
               key={option.id}
               className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                isSelected ? 'border-red-700 bg-red-50' : 'border-gray-200 hover:border-red-300'
-              }`}
-            >
+                isSelected
+                  ? "border-red-700 bg-red-50"
+                  : "border-gray-200 hover:border-red-300"
+              }`}>
               <input
                 type="radio"
                 name="delivery"
@@ -52,11 +54,10 @@ const DeliveryOptions: React.FC<DeliveryOptionsProps> = ({
               <div className="flex items-center gap-4 flex-1">
                 <div
                   className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                    isSelected ? 'bg-red-100' : 'bg-gray-100'
-                  }`}
-                >
+                    isSelected ? "bg-red-100" : "bg-gray-100"
+                  }`}>
                   <Icon
-                    className={`w-6 h-6 ${isSelected ? 'text-red-700' : 'text-gray-600'}`}
+                    className={`w-6 h-6 ${isSelected ? "text-red-700" : "text-gray-600"}`}
                   />
                 </div>
                 <div className="flex-1">
@@ -66,7 +67,11 @@ const DeliveryOptions: React.FC<DeliveryOptionsProps> = ({
                     <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
                       <FaClock className="w-3 h-3" />
                       Estimated to: {estimate.timeRange} (
-                      {formatEstimate(option.estimateMinutes.min, option.estimateMinutes.max)})
+                      {formatEstimate(
+                        option.estimateMinutes.min,
+                        option.estimateMinutes.max,
+                      )}
+                      )
                     </p>
                   )}
                 </div>

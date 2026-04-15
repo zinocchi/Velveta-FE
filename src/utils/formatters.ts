@@ -1,4 +1,5 @@
- export const formatCurrency = (amount: number): string => {
+
+export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
@@ -6,19 +7,58 @@
   }).format(amount);
 };
 
-export const formatDate = (dateString: string): string => {
+/**
+ * Format date to short format: "1 Jan, 14:30"
+ */
+export const formatDateShort = (dateString: string): string => {
   const date = new Date(dateString);
-  const now = new Date();
-  const diffTime = Math.abs(now.getTime() - date.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays === 2) return "2 days ago";
-  if (diffDays === 3) return "3 days ago";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString("id-ID", {
     day: "numeric",
     month: "short",
-    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
+};
+
+/**
+ * Format date to full format: "1 January 2024, 14:30"
+ */
+export const formatDateTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+/**
+ * Format time only: "14:30:00"
+ */
+export const formatTimeOnly = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+};
+
+/**
+ * Format relative time (e.g., "2 hours ago")
+ */
+export const formatRelativeTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins} min ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
 };

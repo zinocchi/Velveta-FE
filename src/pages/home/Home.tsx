@@ -342,23 +342,20 @@ const Home = () => {
                     ? "bg-green-50/95 border-green-200"
                     : "bg-red-50/95 border-red-200"
               }
-            `}
-          >
+            `}>
             <div className="flex items-start">
               <div className="flex-shrink-0">
                 <div
                   className={`
                   w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center
                   ${alertType === "info" ? "bg-red-100" : alertType === "success" ? "bg-green-100" : "bg-red-100"}
-                `}
-                >
+                `}>
                   {alertType === "info" ? (
                     <svg
                       className="h-4 w-4 sm:h-5 sm:w-5 text-red-600"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -371,8 +368,7 @@ const Home = () => {
                       className="h-4 w-4 sm:h-5 sm:w-5 text-green-600"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -385,8 +381,7 @@ const Home = () => {
                       className="h-4 w-4 sm:h-5 sm:w-5 text-red-600"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -408,8 +403,7 @@ const Home = () => {
                           ? "text-green-800"
                           : "text-red-800"
                     }
-                  `}
-                >
+                  `}>
                   {alertType === "info"
                     ? "Already Signed In"
                     : alertType === "success"
@@ -422,14 +416,12 @@ const Home = () => {
               </div>
               <button
                 onClick={() => setShowAlert(false)}
-                className="ml-2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
+                className="ml-2 text-gray-400 hover:text-gray-600 transition-colors">
                 <svg
                   className="h-4 w-4 sm:h-5 sm:w-5"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -474,8 +466,7 @@ const Home = () => {
               </p>
               <button
                 onClick={() => navigate("/menu")}
-                className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-red-700 transition-colors duration-300 text-sm sm:text-base active:scale-95 touch-manipulation"
-              >
+                className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-red-700 transition-colors duration-300 text-sm sm:text-base active:scale-95 touch-manipulation">
                 View the menu
               </button>
             </div>
@@ -493,8 +484,7 @@ const Home = () => {
                   : `url('https://content-prod-live.cert.starbucks.com/binary/v2/asset/137-97315.jpg')`,
                 position: "relative",
                 backgroundPosition: "center 30%",
-              }}
-            >
+              }}>
               {heroImageError && (
                 <div className="absolute inset-0 flex items-center justify-center text-white text-lg sm:text-xl md:text-2xl font-bold p-4 text-center">
                   Velveta Spring Collection
@@ -508,16 +498,13 @@ const Home = () => {
         <div className="hidden md:block">
           <div
             className="absolute top-1/4 left-10 w-8 h-8 rounded-full bg-amber-800 opacity-30 floating"
-            style={{ animationDelay: "0.2s" }}
-          ></div>
+            style={{ animationDelay: "0.2s" }}></div>
           <div
             className="absolute top-1/3 right-20 w-6 h-6 rounded-full bg-amber-600 opacity-40 floating"
-            style={{ animationDelay: "0.4s" }}
-          ></div>
+            style={{ animationDelay: "0.4s" }}></div>
           <div
             className="absolute bottom-1/4 left-1/4 w-5 h-5 rounded-full bg-amber-900 opacity-30 floating"
-            style={{ animationDelay: "0.6s" }}
-          ></div>
+            style={{ animationDelay: "0.6s" }}></div>
         </div>
       </section>
 
@@ -530,8 +517,7 @@ const Home = () => {
               backgroundImage:
                 "url('https://i.pinimg.com/736x/fe/dd/69/fedd693b88559124917599d42495b61e.jpg')",
               backgroundPosition: "center 40%",
-            }}
-          ></div>
+            }}></div>
           <div className="bg-amber-800 text-white px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12 lg:py-16 flex flex-col justify-center items-center text-center">
             <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold mb-3 sm:mb-4 md:mb-6 font-montserrat">
               It's a great day for free coffee
@@ -543,8 +529,7 @@ const Home = () => {
             </p>
             <button
               onClick={handleJoinClick}
-              className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-amber-800 transition-colors duration-300 text-sm sm:text-base active:scale-95 touch-manipulation"
-            >
+              className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-amber-800 transition-colors duration-300 text-sm sm:text-base active:scale-95 touch-manipulation">
               Join now
             </button>
           </div>
@@ -564,8 +549,7 @@ const Home = () => {
             </p>
             <button
               onClick={() => navigate("/menu")}
-              className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-gray-700 transition-colors duration-300 text-sm sm:text-base active:scale-95 touch-manipulation"
-            >
+              className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 border-2 border-white rounded-full font-semibold hover:bg-white hover:text-gray-700 transition-colors duration-300 text-sm sm:text-base active:scale-95 touch-manipulation">
               Order now
             </button>
           </div>
@@ -575,8 +559,7 @@ const Home = () => {
               backgroundImage:
                 "url('https://content-prod-live.cert.starbucks.com/binary/v2/asset/137-97469.jpg')",
               backgroundPosition: "center 40%",
-            }}
-          ></div>
+            }}></div>
         </div>
       </section>
 
@@ -594,8 +577,7 @@ const Home = () => {
                 backgroundImage:
                   "url('https://globalassets.starbucks.com/digitalassets/products/bev/IcedShakenEspresso.jpg?impolicy=1by1_wide_topcrop_630')",
                 backgroundPosition: "center",
-              }}
-            ></div>
+              }}></div>
             <div className="p-4 sm:p-5 md:p-6">
               <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2">
                 Iced Shaken Espresso
@@ -617,8 +599,7 @@ const Home = () => {
                 backgroundImage:
                   "url('https://globalassets.starbucks.com/digitalassets/products/bev/IcedMatchaTeaLatte.jpg?impolicy=1by1_wide_topcrop_630')",
                 backgroundPosition: "center",
-              }}
-            ></div>
+              }}></div>
             <div className="p-4 sm:p-5 md:p-6">
               <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2">
                 Matcha Latte
@@ -640,8 +621,7 @@ const Home = () => {
                 backgroundImage:
                   "url('https://globalassets.starbucks.com/digitalassets/products/bev/IcedBrownSugarOatmilkShakenEspresso.jpg?impolicy=1by1_wide_topcrop_630')",
                 backgroundPosition: "center",
-              }}
-            ></div>
+              }}></div>
             <div className="p-4 sm:p-5 md:p-6">
               <h3 className="text-base sm:text-lg md:text-xl font-bold mb-2">
                 Iced Brown Sugar Oatmilk Shaken Espresso

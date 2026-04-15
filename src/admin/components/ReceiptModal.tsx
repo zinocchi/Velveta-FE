@@ -10,7 +10,7 @@ import {
   formatDateShort,
   formatDateTime,
   formatTimeOnly,
-} from "../utils/formatters";
+} from "../../utils/formatters";
 
 interface ReceiptModalProps {
   isOpen: boolean;

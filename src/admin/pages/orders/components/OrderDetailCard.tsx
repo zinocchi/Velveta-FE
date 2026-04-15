@@ -1,7 +1,7 @@
 import React from 'react';
 import { Order } from '../../../types/order';
 import OrderStatusBadge from './OrderStatusBadges';
-import { formatCurrency, formatDateTime } from '../../../utils/formatters';
+import { formatCurrency, formatDateTime } from '../../../../utils/formatters';
 import { FaBox, FaCalendarAlt, FaMotorcycle, FaStore } from 'react-icons/fa';
 
 interface OrderDetailCardProps {
