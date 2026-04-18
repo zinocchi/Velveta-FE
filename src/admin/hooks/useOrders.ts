@@ -1,4 +1,6 @@
+
 import { useState, useEffect, useCallback } from 'react';
+import { useDebounce } from '../hooks/useDebounce';
 import api from '../../services/api/config';
 import { Order, OrderFilters } from '../types/order';
 
@@ -11,12 +13,16 @@ export const useOrders = () => {
   });
   const [selectedOrders, setSelectedOrders] = useState<number[]>([]);
 
+  // 🔥 Debounce search value
+  const debouncedSearch = useDebounce(filters.search, 500);
+
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
       if (filters.status !== 'all') params.append('status', filters.status.toUpperCase());
-      if (filters.search) params.append('search', filters.search);
+      // 🔥 Gunakan debouncedSearch
+      if (debouncedSearch) params.append('search', debouncedSearch);
 
       const response = await api.get(`/admin/orders?${params.toString()}`);
       setOrders(response.data.data.data || response.data.data);
@@ -25,7 +31,7 @@ export const useOrders = () => {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters.status, debouncedSearch]);
 
   useEffect(() => {
     fetchOrders();

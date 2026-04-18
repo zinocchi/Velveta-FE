@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Menu } from '../../types/menu';
 import MenuTableRow from './components/MenuTableRow';
 import MenuFilters from './components/MenuFilters';
@@ -31,6 +31,16 @@ const MenuList: React.FC<MenuListProps> = ({
   onUpdateStock,
   onEdit,
 }) => {
+  // State untuk mengetahui apakah sedang searching
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleSearchChange = (value: string) => {
+    setIsSearching(true);
+    onSearchChange(value);
+    // Reset searching indicator setelah 500ms (sama dengan debounce delay)
+    setTimeout(() => setIsSearching(false), 500);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -55,10 +65,11 @@ const MenuList: React.FC<MenuListProps> = ({
     <div>
       <MenuFilters
         search={search}
-        onSearchChange={onSearchChange}
+        onSearchChange={handleSearchChange}
         category={category}
         onCategoryChange={onCategoryChange}
         categories={categories}
+        isSearching={isSearching}
       />
 
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">

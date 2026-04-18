@@ -1,8 +1,8 @@
 // useDashboard.ts
-import { useState, useEffect, useCallback } from 'react';
-import { dashboardService } from '../services/dashboardService';
-import { DashboardStats, RevenueData } from '../types/dashboard';
-import { ChartType, DateRange } from '../../types/chart';
+import { useState, useEffect, useCallback } from "react";
+import { dashboardService } from "../services/dashboardService";
+import { DashboardStats, RevenueData } from "../types/dashboard";
+import { ChartType, DateRange } from "../../types/chart";
 
 interface UseDashboardReturn {
   stats: DashboardStats | null;
@@ -19,12 +19,10 @@ interface UseDashboardReturn {
   exportData: () => void;
 }
 
-// Helper function to transform API response to frontend format
 const transformStats = (apiStats: any): DashboardStats => {
   if (!apiStats) return {} as DashboardStats;
-  
+
   return {
-    // Keep original snake_case if your components expect it
     totalOrders: apiStats.total_orders || 0,
     totalRevenue: apiStats.total_revenue || 0,
     totalMenu: apiStats.total_menu || 0,
@@ -35,36 +33,36 @@ const transformStats = (apiStats: any): DashboardStats => {
       pending: 0,
       processing: 0,
       completed: 0,
-      cancelled: 0
+      cancelled: 0,
     },
     orders_by_delivery: apiStats.orders_by_delivery || {
       delivery: 0,
-      pickup: 0
+      pickup: 0,
     },
     stock_stats: apiStats.stock_stats || {
       total_items: 0,
       low_stock: 0,
       out_of_stock: 0,
-      available_items: 0
+      available_items: 0,
     },
     revenue: apiStats.revenue || {
       today: 0,
       this_week: 0,
       this_month: 0,
-      average_order_value: 0
-    }
+      average_order_value: 0,
+    },
   };
 };
 
 export const useDashboard = (): UseDashboardReturn => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
-  const [chartType, setChartType] = useState<ChartType>('area');
+  const [chartType, setChartType] = useState<ChartType>("area");
   const [dateRange, setDateRange] = useState<DateRange>({
     start: new Date(new Date().setDate(new Date().getDate() - 30))
       .toISOString()
-      .split('T')[0],
-    end: new Date().toISOString().split('T')[0],
+      .split("T")[0],
+    end: new Date().toISOString().split("T")[0],
   });
   const [loading, setLoading] = useState(true);
   const [chartLoading, setChartLoading] = useState(false);
@@ -76,17 +74,17 @@ export const useDashboard = (): UseDashboardReturn => {
       setError(null);
 
       const response = await dashboardService.getDashboardStats();
-      
-      console.log('Dashboard stats from API:', response);
+
+      console.log("Dashboard stats from API:", response);
 
       // Transform the data if needed
       const transformedStats = transformStats(response.stats);
-      
-      console.log('Transformed stats:', transformedStats);
-      
+
+      console.log("Transformed stats:", transformedStats);
+
       setStats(transformedStats);
     } catch (err) {
-      setError('Failed to load dashboard data');
+      setError("Failed to load dashboard data");
       console.error(err);
     } finally {
       setLoading(false);
@@ -100,7 +98,7 @@ export const useDashboard = (): UseDashboardReturn => {
       const data = await dashboardService.getRevenueReport({
         start_date: dateRange.start,
         end_date: dateRange.end,
-        group_by: 'day',
+        group_by: "day",
       });
 
       const formattedData = (data.chart_data || []).map((item) => ({
@@ -111,7 +109,7 @@ export const useDashboard = (): UseDashboardReturn => {
 
       setRevenueData(formattedData);
     } catch (err) {
-      console.error('Failed to fetch revenue data:', err);
+      console.error("Failed to fetch revenue data:", err);
     } finally {
       setChartLoading(false);
     }
@@ -135,7 +133,7 @@ export const useDashboard = (): UseDashboardReturn => {
   }, [fetchRevenueData]);
 
   const exportData = useCallback(() => {
-    const headers = ['Date', 'Revenue', 'Orders'];
+    const headers = ["Date", "Revenue", "Orders"];
 
     const csvData = revenueData.map((item) => [
       item.date,
@@ -144,14 +142,14 @@ export const useDashboard = (): UseDashboardReturn => {
     ]);
 
     const csvContent = [
-      headers.join(','),
-      ...csvData.map((row) => row.join(',')),
-    ].join('\n');
+      headers.join(","),
+      ...csvData.map((row) => row.join(",")),
+    ].join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
 
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `revenue-report-${dateRange.start}-to-${dateRange.end}.csv`;
     a.click();
