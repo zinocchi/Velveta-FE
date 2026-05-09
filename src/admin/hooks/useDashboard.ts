@@ -35,22 +35,14 @@ const transformStats = (apiStats: any): DashboardStats => {
       completed: 0,
       cancelled: 0,
     },
-    orders_by_delivery: apiStats.orders_by_delivery || {
-      delivery: 0,
-      pickup: 0,
+    stockStats: {
+      totalItems: apiStats.stock_stats?.total_items || 0,
+      lowStock: apiStats.stock_stats?.low_stock || 0,
+      outOfStock: apiStats.stock_stats?.out_of_stock || 0,
+      availableItems: apiStats.stock_stats?.available_items || 0,
     },
-    stock_stats: apiStats.stock_stats || {
-      total_items: 0,
-      low_stock: 0,
-      out_of_stock: 0,
-      available_items: 0,
-    },
-    revenue: apiStats.revenue || {
-      today: 0,
-      this_week: 0,
-      this_month: 0,
-      average_order_value: 0,
-    },
+    popularMenus: apiStats.popular_menus || [],
+    recentOrders: apiStats.recent_orders || [],
   };
 };
 

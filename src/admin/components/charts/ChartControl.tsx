@@ -14,7 +14,7 @@ interface ChartControlsProps {
 }
 
 const chartTypes: { value: ChartType; label: string }[] = [
-  { value: 'area', label: 'Area' },
+  { value: 'area', label: 'Daily Sales' },
   { value: 'line', label: 'Line' },
   { value: 'bar', label: 'Bar' },
 ];
@@ -29,18 +29,18 @@ const ChartControls: React.FC<ChartControlsProps> = ({
   loading = false,
 }) => {
   return (
-    <div className="flex flex-wrap items-center gap-4 mb-4">
-      {/* Chart Type Selector */}
-      <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+    <div className="flex flex-wrap items-center gap-3 mb-3 mt-3">
+      {/* Chart Type Toggle */}
+      <div className="flex items-center gap-0.5 bg-gray-50 p-0.5 rounded-lg">
         {chartTypes.map((type) => (
           <button
             key={type.value}
             onClick={() => onChartTypeChange(type.value)}
             className={cn(
-              'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
+              'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
               chartType === type.value
-                ? 'bg-white text-red-700 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-400 hover:text-gray-600'
             )}
           >
             {type.label}
@@ -48,43 +48,41 @@ const ChartControls: React.FC<ChartControlsProps> = ({
         ))}
       </div>
 
-      {/* Date Range Selector */}
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1">
-          <FaCalendarAlt className="w-4 h-4 text-gray-400" />
-          <input
-            type="date"
-            value={dateRange.start}
-            onChange={(e) => onDateRangeChange({ ...dateRange, start: e.target.value })}
-            className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-200"
-          />
-        </div>
-        <span className="text-gray-400">-</span>
+      {/* Date Range */}
+      <div className="flex items-center gap-1.5 ml-auto">
+        <FaCalendarAlt className="w-3.5 h-3.5 text-gray-300" />
+        <input
+          type="date"
+          value={dateRange.start}
+          onChange={(e) => onDateRangeChange({ ...dateRange, start: e.target.value })}
+          className="px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-red-200 text-gray-500 bg-white"
+        />
+        <span className="text-gray-300 text-xs">–</span>
         <input
           type="date"
           value={dateRange.end}
           onChange={(e) => onDateRangeChange({ ...dateRange, end: e.target.value })}
-          className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-200"
+          className="px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-red-200 text-gray-500 bg-white"
         />
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex items-center gap-2 ml-auto">
+      {/* Action buttons */}
+      <div className="flex items-center gap-1">
         <button
           onClick={onRefresh}
           disabled={loading}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+          className="p-1.5 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50"
           title="Refresh"
         >
-          <FaSyncAlt className={cn('w-4 h-4 text-gray-500', loading && 'animate-spin')} />
+          <FaSyncAlt className={cn('w-3.5 h-3.5 text-gray-300', loading && 'animate-spin')} />
         </button>
         {onExport && (
           <button
             onClick={onExport}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1.5 hover:bg-gray-50 rounded-lg transition-colors"
             title="Export as CSV"
           >
-            <FaDownload className="w-4 h-4 text-gray-500" />
+            <FaDownload className="w-3.5 h-3.5 text-gray-300" />
           </button>
         )}
       </div>

@@ -59,12 +59,10 @@ const Register: React.FC = () => {
     type: "success",
   });
 
-  // Password visibility
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showWorkPin, setShowWorkPin] = useState(false);
 
-  // Fetch available pins when mode is admin
   useEffect(() => {
     if (mode === "admin") {
       fetchAvailablePins();
