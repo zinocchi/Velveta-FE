@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
-import { useMenus } from '../../hooks/useMenus';
-import MenuList from './MenuList';
-import MenuForm from './MenuForm';
-import { Menu } from '../../types/menu';
+// src/admin/pages/menus/MenuPage.tsx
+
+import React, { useState } from "react";
+import { useMenus } from "../../hooks/useMenus";
+import MenuList from "./MenuList";
+import MenuForm from "./MenuForm";
+import { Menu } from "../../types/menu";
 
 const MenuPage: React.FC = () => {
   const {
     menus,
     loading,
+    isSearching,
     categories,
     filters,
     updateFilters,
@@ -21,46 +24,24 @@ const MenuPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingMenu, setEditingMenu] = useState<Menu | null>(null);
 
-  const handleEdit = (menu: Menu) => {
-    setEditingMenu(menu);
-    setShowForm(true);
-  };
+  // 🔥 Cek apakah categories masih loading (categories kosong dan loading true)
+  const categoriesLoading = loading && categories.length === 0;
 
-  const handleFormClose = () => {
-    setShowForm(false);
-    setEditingMenu(null);
-  };
-
-  const handleFormSave = async (formData: FormData, isEdit: boolean, id?: number) => {
-    let success = false;
-    if (isEdit && id) {
-      success = await updateMenu(id, formData);
-    } else {
-      success = await createMenu(formData);
-    }
-    if (success) {
-      handleFormClose();
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this menu?')) {
-      await deleteMenu(id);
-    }
-  };
+  // ... rest of code
 
   return (
     <div className="p-8">
-      {/* Header */}
+      {/* Header tetap sama */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Menu Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">
+            Menu Management
+          </h1>
           <p className="text-gray-500">Manage your coffee menu items</p>
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="px-4 py-2 bg-red-700 text-white rounded-xl font-medium hover:bg-red-800 transition-colors"
-        >
+          className="px-4 py-2 bg-red-700 text-white rounded-xl font-medium hover:bg-red-800 transition-colors">
           Add New Menu
         </button>
       </div>
@@ -70,24 +51,43 @@ const MenuPage: React.FC = () => {
         <MenuForm
           menu={editingMenu}
           categories={categories}
-          onClose={handleFormClose}
-          onSave={handleFormSave}
+          onClose={() => {
+            setShowForm(false);
+            setEditingMenu(null);
+          }}
+          onSave={async (formData, isEdit, id) => {
+            let success = false;
+            if (isEdit && id) {
+              success = await updateMenu(id, formData);
+            } else {
+              success = await createMenu(formData);
+            }
+            if (success) {
+              setShowForm(false);
+              setEditingMenu(null);
+            }
+          }}
         />
       )}
 
-      {/* Menu List */}
+      {/* Menu List dengan skeleton loading */}
       <MenuList
         menus={menus}
         loading={loading}
+        isSearching={isSearching}
+        categoriesLoading={categoriesLoading}
         search={filters.search}
         onSearchChange={(value) => updateFilters({ search: value })}
         category={filters.category}
         onCategoryChange={(value) => updateFilters({ category: value })}
         categories={categories}
-        onDelete={handleDelete}
+        onDelete={deleteMenu}
         onToggleAvailability={toggleAvailability}
         onUpdateStock={updateStock}
-        onEdit={handleEdit}
+        onEdit={(menu) => {
+          setEditingMenu(menu);
+          setShowForm(true);
+        }}
       />
     </div>
   );

@@ -1,8 +1,12 @@
+
 import React from 'react';
 import { Order } from '../../../types/order';
 import OrderTableRow from './OrderTableRow';
 import OrderFilters from './OrderFilters';
+import OrderFiltersSkeleton from './OrderFilterSkeleton';
+import OrderTableSkeleton from './OrderTableSkeleton';
 import BulkActionsBar from './BulkActionBar';
+import BulkActionsBarSkeleton from './BulkActionsBarSkeleton';
 import { FaSearch } from 'react-icons/fa';
 
 interface OrderListProps {
@@ -13,7 +17,7 @@ interface OrderListProps {
   selectedOrders: number[];
   onSelectOrder: (orderId: number, checked: boolean) => void;
   onSelectAll: (checked: boolean) => void;
-  onStatusUpdate: (orderId: number, newStatus: string) => void;
+  onStatusUpdate: (orderId: number, newStatus: string, currentStatus?: string, orderNumber?: string) => void;
   onBulkUpdate: (status: string) => void;
   onViewReceipt: (order: Order) => void;
   onClearSelected: () => void;
@@ -32,19 +36,15 @@ const OrderList: React.FC<OrderListProps> = ({
   onViewReceipt,
   onClearSelected,
 }) => {
-  const selectableOrders = orders.filter(order => 
-    order.status !== 'COMPLETED' && order.status !== 'CANCELLED'
-  );
-  
-  const allSelectableSelected = selectableOrders.length > 0 && 
-    selectableOrders.every(order => selectedOrders.includes(order.id));
+  const allSelected = selectedOrders.length === orders.length && orders.length > 0;
 
-  if (loading) {
+  // 🔥 Tampilkan skeleton saat loading pertama kali
+  if (loading && orders.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-700" />
-        <p className="mt-2 text-gray-500">Loading orders...</p>
-      </div>
+      <>
+        <OrderFiltersSkeleton />
+        <OrderTableSkeleton />
+      </>
     );
   }
 
@@ -57,11 +57,13 @@ const OrderList: React.FC<OrderListProps> = ({
         onSearchChange={(value) => onFilterChange({ search: value })}
       />
 
-      <BulkActionsBar
-        selectedCount={selectedOrders.length}
-        onBulkUpdate={onBulkUpdate}
-        onClearSelected={onClearSelected}
-      />
+      {selectedOrders.length > 0 && (
+        <BulkActionsBar
+          selectedCount={selectedOrders.length}
+          onBulkUpdate={onBulkUpdate}
+          onClearSelected={onClearSelected}
+        />
+      )}
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {orders.length > 0 ? (
@@ -72,7 +74,7 @@ const OrderList: React.FC<OrderListProps> = ({
                 <div className="pt-1">
                   <input
                     type="checkbox"
-                    checked={allSelectableSelected}
+                    checked={allSelected}
                     onChange={(e) => onSelectAll(e.target.checked)}
                     className="w-4 h-4 text-red-700 rounded border-gray-300 focus:ring-red-200"
                   />

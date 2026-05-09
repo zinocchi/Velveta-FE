@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Menu } from '../../types/menu';
 import MenuTableRow from './components/MenuTableRow';
 import MenuFilters from './components/MenuFilters';
+import MenuTableSkeleton from './components/MenuTableSkeleton';
 import { FaCoffee } from 'react-icons/fa';
 
 interface MenuListProps {
   menus: Menu[];
   loading: boolean;
+  isSearching?: boolean;
+  categoriesLoading?: boolean;
   search: string;
   onSearchChange: (value: string) => void;
   category: string;
@@ -21,6 +24,8 @@ interface MenuListProps {
 const MenuList: React.FC<MenuListProps> = ({
   menus,
   loading,
+  isSearching = false,
+  categoriesLoading = false,
   search,
   onSearchChange,
   category,
@@ -31,32 +36,43 @@ const MenuList: React.FC<MenuListProps> = ({
   onUpdateStock,
   onEdit,
 }) => {
-  // State untuk mengetahui apakah sedang searching
-  const [isSearching, setIsSearching] = useState(false);
-
-  const handleSearchChange = (value: string) => {
-    setIsSearching(true);
-    onSearchChange(value);
-    // Reset searching indicator setelah 500ms (sama dengan debounce delay)
-    setTimeout(() => setIsSearching(false), 500);
-  };
-
-  if (loading) {
+  // 🔥 Tampilkan skeleton table saat loading pertama kali
+  if (loading && !isSearching) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-700"></div>
+      <div>
+        <MenuFilters
+          search={search}
+          onSearchChange={onSearchChange}
+          category={category}
+          onCategoryChange={onCategoryChange}
+          categories={[]}
+          isSearching={false}
+          categoriesLoading={true}
+        />
+        <MenuTableSkeleton />
       </div>
     );
   }
 
-  if (menus.length === 0) {
+  if (menus.length === 0 && !loading) {
     return (
-      <div className="text-center py-12">
-        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <FaCoffee className="w-10 h-10 text-gray-400" />
+      <div>
+        <MenuFilters
+          search={search}
+          onSearchChange={onSearchChange}
+          category={category}
+          onCategoryChange={onCategoryChange}
+          categories={categories}
+          isSearching={isSearching}
+          categoriesLoading={categoriesLoading}
+        />
+        <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FaCoffee className="w-10 h-10 text-gray-400" />
+          </div>
+          <p className="text-gray-500 text-lg mb-2">No menus found</p>
+          <p className="text-gray-400 text-sm">Try adjusting your search or filter</p>
         </div>
-        <p className="text-gray-500 text-lg mb-2">No menus found</p>
-        <p className="text-gray-400 text-sm">Try adjusting your search or filter</p>
       </div>
     );
   }
@@ -65,12 +81,21 @@ const MenuList: React.FC<MenuListProps> = ({
     <div>
       <MenuFilters
         search={search}
-        onSearchChange={handleSearchChange}
+        onSearchChange={onSearchChange}
         category={category}
         onCategoryChange={onCategoryChange}
         categories={categories}
         isSearching={isSearching}
+        categoriesLoading={categoriesLoading}
       />
+
+      {/* Tampilkan loading indicator kecil saat searching */}
+      {isSearching && (
+        <div className="flex justify-center py-4">
+          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-red-700"></div>
+          <span className="ml-2 text-sm text-gray-500">Searching...</span>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">

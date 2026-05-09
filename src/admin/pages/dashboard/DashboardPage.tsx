@@ -1,15 +1,14 @@
+// src/admin/pages/dashboard/DashboardPage.tsx
+
 import React from 'react';
 import { useDashboard } from '../../hooks/useDashboard';
-
-import { LoadingSpinner } from '../../../components/ui/loading';
-import { ErrorState } from '../../components/ui/ErrorState';
+import DashboardSkeleton from './components/DashboardSkeleton';
 import StatsCards from './components/StatsCard';
-import MonthlyGoalsCard from './components/MonthlyGoalsCard';
-import RevenueChartCard from './components/RevenueChartCard';
-import TopProductsCard from './components/TopProductsCard';
-import BudgetUsageCard from './components/BudgetUsageCard';
-import CustomerReviewCard from './components/CustomerReviewCard';
+import OrderStatusCard from './components/OrderStatusCard';
 import StockStatusCard from './components/StockStatusCard';
+import PopularMenusCard from './components/PopularMenusCard';
+import RevenueChartCard from './components/RevenueChartCard';
+import RecentOrdersCard from './components/RecentOrderCard';
 
 const DashboardPage: React.FC = () => {
   const {
@@ -26,68 +25,68 @@ const DashboardPage: React.FC = () => {
     exportData,
   } = useDashboard();
 
-  if (loading) {
-    return (
-      <div className="p-8 flex items-center justify-center min-h-[80vh]">
-        <LoadingSpinner size="lg" message="Loading dashboard..." />
-      </div>
-    );
+  if (loading && !stats) {
+    return <DashboardSkeleton />;
   }
 
-  if (error || !stats) {
-    return (
-      <div className="p-8">
-        <ErrorState
-          message={error || 'Failed to load dashboard'}
-          onRetry={() => window.location.reload()}
-        />
-      </div>
-    );
-  }
+  // Tampilkan error jika ada (opsional - uncomment jika perlu)
+  // if (error || !stats) {
+  //   return (
+  //     <div className="p-8">
+  //       <ErrorState
+  //         message={error || 'Failed to load dashboard'}
+  //         onRetry={() => window.location.reload()}
+  //       />
+  //     </div>
+  //   );
+  // }
 
   return (
-    <div className="p-2">
-      {/* ===== ROW 1: Stats Cards + Monthly Goals ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        {/* Stats Cards (Revenue + Orders) - takes 2 cols */}
-        <div className="lg:col-span-2">
+    <div className="min-h-screen bg-gray-50">
+      <div className="px-6 py-8 lg:px-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
+            Dashboard Overview
+          </h1>
+          <p className="text-gray-500 text-sm md:text-base">
+            Welcome back, here's your business overview
+          </p>
+        </div>
+
+        {/* Stats Cards Grid */}
+        <div className="mb-8">
           <StatsCards stats={stats} />
         </div>
-        
-        {/* Monthly Goals - takes 1 col */}
-        <MonthlyGoalsCard
-          target={stats.totalRevenue > 0 ? Math.ceil(stats.totalRevenue * 1.3 / 100000) * 100000 : 250000}
-          achieved={stats.totalRevenue || 0}
-        />
-      </div>
 
-      {/* ===== ROW 2: Sales Analytics + Top Products ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
-        {/* Sales Analytics Chart - wider */}
-        <div className="lg:col-span-3">
-          <RevenueChartCard
-            revenueData={revenueData}
-            chartType={chartType}
-            onChartTypeChange={setChartType}
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-            onRefresh={refreshRevenue}
-            onExport={exportData}
-            chartLoading={chartLoading}
-          />
+        {/* Order Status & Stock Overview */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <OrderStatusCard stats={stats} />
+          <StockStatusCard stats={stats} />
+          <PopularMenusCard stats={stats} />
         </div>
-        
-        {/* Top Products Heatmap */}
-        <div className="lg:col-span-2">
-          <TopProductsCard stats={stats} />
-        </div>
-      </div>
 
-      {/* ===== ROW 3: Budget + Customer Review + Low Stock Alert ===== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <BudgetUsageCard stats={stats} />
-        <CustomerReviewCard stats={stats} />
-        <StockStatusCard stats={stats} />
+        {/* Revenue Chart & Recent Orders */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Revenue Chart - Lebih lebar */}
+          <div className="lg:col-span-2">
+            <RevenueChartCard
+              revenueData={revenueData}
+              chartType={chartType}
+              onChartTypeChange={setChartType}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+              onRefresh={refreshRevenue}
+              onExport={exportData}
+              chartLoading={chartLoading}
+            />
+          </div>
+          
+          {/* Recent Orders */}
+          <div className="lg:col-span-1">
+            <RecentOrdersCard stats={stats} />
+          </div>
+        </div>
       </div>
     </div>
   );
