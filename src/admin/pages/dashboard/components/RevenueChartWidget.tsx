@@ -1,28 +1,33 @@
-import React, { useState } from "react";
+// src/admin/pages/dashboard/components/RevenueChartWidget.tsx
+
+import React, { useState, useEffect } from "react";
+import {
+  FaChartLine,
+  FaChartArea,
+  FaChartBar,
+  FaDownload,
+} from "react-icons/fa";
 import RevenueChart from "../../../components/charts/RevenueChart";
-import ChartControls from "../../../components/charts/ChartControl";
 import DateRangePicker from "../../../../components/ui/DateRangePicker";
 import { RevenueData } from "../../../types/dashboard";
-import { ChartType } from "../../../types/chart";
 import { formatCurrency } from "../../../../utils/formatters";
 
-interface RevenueChartCardProps {
+interface RevenueChartWidgetProps {
   revenueData: RevenueData[];
-  chartType: ChartType;
-  onChartTypeChange: (type: ChartType) => void;
-  onRefresh: (startDate?: Date, endDate?: Date) => void;
-  onExport: () => void;
   chartLoading: boolean;
+  onRefresh?: (startDate?: Date, endDate?: Date) => void;
+  onExport?: () => void;
 }
 
-const RevenueChartCard: React.FC<RevenueChartCardProps> = ({
+type ChartType = "area" | "line" | "bar";
+
+const RevenueChartWidget: React.FC<RevenueChartWidgetProps> = ({
   revenueData,
-  chartType,
-  onChartTypeChange,
+  chartLoading,
   onRefresh,
   onExport,
-  chartLoading,
 }) => {
+  const [chartType, setChartType] = useState<ChartType>("area");
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
     date.setDate(date.getDate() - 7);
@@ -30,17 +35,43 @@ const RevenueChartCard: React.FC<RevenueChartCardProps> = ({
   });
   const [endDate, setEndDate] = useState(new Date());
 
+  const chartOptions = [
+    {
+      id: "area",
+      label: "Area",
+      icon: <FaChartArea className="w-3.5 h-3.5" />,
+    },
+    {
+      id: "line",
+      label: "Line",
+      icon: <FaChartLine className="w-3.5 h-3.5" />,
+    },
+    { id: "bar", label: "Bar", icon: <FaChartBar className="w-3.5 h-3.5" /> },
+  ];
+
   const handleDateRangeApply = () => {
-    onRefresh(startDate, endDate);
+    if (onRefresh) {
+      onRefresh(startDate, endDate);
+    }
   };
 
   const totalRevenue = revenueData.reduce((sum, item) => sum + item.revenue, 0);
   const totalOrders = revenueData.reduce((sum, item) => sum + item.orders, 0);
   const averageOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
+  // Format date untuk display di bawah chart
+  const formatChartDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return `${date.getDate()} ${date.toLocaleDateString("id-ID", { month: "short" })}`;
+  };
+
+  const firstDate = revenueData.length > 0 ? revenueData[0].date : "";
+  const lastDate =
+    revenueData.length > 0 ? revenueData[revenueData.length - 1].date : "";
+
   if (chartLoading && revenueData.length === 0) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
         <div className="flex items-center justify-center h-80">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-700 mx-auto mb-3"></div>
@@ -51,67 +82,66 @@ const RevenueChartCard: React.FC<RevenueChartCardProps> = ({
     );
   }
 
-  // Get first and last date for display
-  const firstDate = revenueData.length > 0 ? revenueData[0].date : "";
-  const lastDate =
-    revenueData.length > 0 ? revenueData[revenueData.length - 1].date : "";
-
-  const formatDisplayDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return `${date.getDate()} ${date.toLocaleDateString("id-ID", { month: "short" })}`;
-  };
-
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      {/* Header with Title and Date Picker */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            Revenue Overview
+            Revenue Analytics
           </h3>
           <p className="text-sm text-gray-500 mt-1">
             Pendapatan periode terakhir
           </p>
         </div>
 
-        {/* Date Range Picker */}
-        <DateRangePicker
-          startDate={startDate}
-          endDate={endDate}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
-          onApply={handleDateRangeApply}
-        />
+        {/* Actions */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <DateRangePicker
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
+            onApply={handleDateRangeApply}
+          />
+
+          {onExport && (
+            <button
+              onClick={onExport}
+              className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Export Data">
+              <FaDownload className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Chart Controls (Chart Type + Actions) */}
-      <ChartControls
-        chartType={chartType}
-        onChartTypeChange={onChartTypeChange}
-        onRefresh={() => onRefresh(startDate, endDate)}
-        onExport={onExport}
-        loading={chartLoading}
-      />
+      {/* Chart Type Selector */}
+      <div className="flex items-center gap-2 mb-4 pb-4 border-b border-gray-100">
+        <span className="text-xs text-gray-500 mr-2">Chart Type:</span>
+        {chartOptions.map((option) => (
+          <button
+            key={option.id}
+            onClick={() => setChartType(option.id as ChartType)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
+              chartType === option.id
+                ? "bg-red-600 text-white shadow-sm"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}>
+            {option.icon}
+            {option.label}
+          </button>
+        ))}
+      </div>
 
       {/* Chart Container */}
-      <div className="h-80 w-full mt-4">
+      <div className="h-80 w-full">
         {revenueData && revenueData.length > 0 ? (
           <RevenueChart data={revenueData} chartType={chartType} height={320} />
         ) : (
           <div className="flex items-center justify-center h-full bg-gray-50 rounded-xl">
             <div className="text-center">
-              <svg
-                className="w-12 h-12 text-gray-300 mx-auto mb-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
+              <FaChartLine className="w-12 h-12 text-gray-300 mx-auto mb-2" />
               <p className="text-gray-400 text-sm">
                 No revenue data available for selected period
               </p>
@@ -120,11 +150,11 @@ const RevenueChartCard: React.FC<RevenueChartCardProps> = ({
         )}
       </div>
 
-      {/* Date Range Label Below Chart */}
+      {/* Date Range Label */}
       {revenueData && revenueData.length > 0 && (
         <div className="flex justify-center mt-2">
           <div className="text-xs text-gray-400 bg-gray-50 px-3 py-1 rounded-full">
-            {formatDisplayDate(firstDate)} - {formatDisplayDate(lastDate)}
+            {formatChartDate(firstDate)} - {formatChartDate(lastDate)}
           </div>
         </div>
       )}
@@ -161,4 +191,4 @@ const RevenueChartCard: React.FC<RevenueChartCardProps> = ({
   );
 };
 
-export default RevenueChartCard;
+export default RevenueChartWidget;

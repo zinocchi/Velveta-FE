@@ -1,8 +1,8 @@
-import React from 'react';
-import { Menu } from '../../../types/menu';
-import { getCategoryInfo } from '../../../types/category';
-import QuantityControl from '../../../components/ui/QuantityControl';
-import { flyToCart } from '../../../utils/flyToCart';
+import React from "react";
+import { Menu } from "../../../types/menu";
+import { getCategoryInfo } from "../../../types/category";
+import QuantityControl from "../../../components/ui/QuantityControl";
+import { flyToCart } from "../../../utils/flyToCart";
 
 interface MenuCardProps {
   item: Menu;
@@ -25,19 +25,18 @@ const MenuCard: React.FC<MenuCardProps> = ({
   onIncrease,
   onDecrease,
 }) => {
-  const fallbackImage = getCategoryInfo(category || '').image;
+  const fallbackImage = getCategoryInfo(category || "").image;
 
   // Debug
   React.useEffect(() => {
-    console.log('MenuCard render:', item.name, 'category:', category);
+    console.log("MenuCard render:", item.name, "category:", category);
   }, [item, category]);
 
   return (
     <div
       className={`cart-source bg-white rounded-lg sm:rounded-xl shadow-sm overflow-hidden p-3 sm:p-4 md:p-5 h-full flex flex-col hover:shadow-md transition-shadow duration-300 ${
-        isAdminPreview ? 'opacity-90' : ''
-      }`}
-    >
+        isAdminPreview ? "opacity-90" : ""
+      }`}>
       {/* Image */}
       <div className="overflow-hidden rounded-md sm:rounded-lg mb-3 sm:mb-4">
         <img
@@ -67,24 +66,22 @@ const MenuCard: React.FC<MenuCardProps> = ({
       <div className="mt-auto">
         <div className="flex items-center justify-between mb-3">
           <p className="text-base sm:text-lg font-bold text-gray-900">
-            Rp {item.price.toLocaleString('id-ID')}
+            Rp {item.price.toLocaleString("id-ID")}
           </p>
 
           {/* Add Button - Show if not logged in or not in cart */}
           {!isLoggedIn && (
             <button
               className="bg-gray-400 hover:bg-gray-500 text-white text-xs sm:text-sm font-medium py-1.5 sm:py-2 px-3 sm:px-4 rounded-md sm:rounded-lg transition-colors duration-300"
-              onClick={(e) => onAddToCart(item, e)}
-            >
+              onClick={(e) => onAddToCart(item, e)}>
               Add
             </button>
           )}
-          
+
           {isLoggedIn && !isAdminPreview && quantity === 0 && (
             <button
               className="bg-red-700 hover:bg-red-800 text-white text-xs sm:text-sm font-medium py-1.5 sm:py-2 px-3 sm:px-4 rounded-md sm:rounded-lg transition-colors duration-300 active:scale-95"
-              onClick={(e) => onIncrease(item, e)}
-            >
+              onClick={(e) => onIncrease(item, e)}>
               Add
             </button>
           )}

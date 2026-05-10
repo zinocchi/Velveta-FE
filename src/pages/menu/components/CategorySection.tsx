@@ -1,13 +1,16 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { CategoryInfo } from '../../../types/category';
+import React from "react";
+import { Link } from "react-router-dom";
+import { CategoryInfo } from "../../../types/category";
 
 interface CategorySectionProps {
   title: string;
   categories: CategoryInfo[];
 }
 
-const CategorySection: React.FC<CategorySectionProps> = ({ title, categories }) => {
+const CategorySection: React.FC<CategorySectionProps> = ({
+  title,
+  categories,
+}) => {
   if (categories.length === 0) return null;
 
   return (
@@ -20,8 +23,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({ title, categories }) 
           <Link
             key={category.id}
             to={`/category/${category.id}`}
-            className="menu-page-item group"
-          >
+            className="menu-page-item group">
             <div className="bg-white rounded-xl shadow-sm overflow-hidden p-4 h-full flex flex-col hover:shadow-md transition-all duration-300 hover:-translate-y-1">
               <div className="relative overflow-hidden rounded-lg mb-4">
                 <img

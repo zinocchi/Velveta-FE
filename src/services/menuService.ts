@@ -1,4 +1,3 @@
-// services/menuService.ts
 import api from "./api/config";
 import { Menu, MenuFilters } from "../types/menu";
 import { ApiResponse } from "../types/api";

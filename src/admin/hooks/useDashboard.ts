@@ -83,20 +83,28 @@ export const useDashboard = (): UseDashboardReturn => {
     }
   }, []);
 
-  const fetchRevenueData = useCallback(async () => {
+  const fetchRevenueData = useCallback(async (start?: Date, end?: Date) => {
     try {
       setChartLoading(true);
+      const startDate = start || dateRange.start;
+      const endDate = end || dateRange.end;
 
       const data = await dashboardService.getRevenueReport({
-        start_date: dateRange.start,
-        end_date: dateRange.end,
+        start_date:
+          startDate instanceof Date
+            ? startDate.toISOString().split("T")[0]
+            : startDate,
+        end_date:
+          endDate instanceof Date
+            ? endDate.toISOString().split("T")[0]
+            : endDate,
         group_by: "day",
       });
 
-      const formattedData = (data.chart_data || []).map((item) => ({
+      const formattedData = data.chart_data.map((item) => ({
         ...item,
-        revenue: Number(item.revenue) || 0,
-        orders: Number(item.orders) || 0,
+        revenue: Number(item.revenue),
+        orders: Number(item.orders),
       }));
 
       setRevenueData(formattedData);
@@ -105,7 +113,7 @@ export const useDashboard = (): UseDashboardReturn => {
     } finally {
       setChartLoading(false);
     }
-  }, [dateRange]);
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
@@ -120,9 +128,19 @@ export const useDashboard = (): UseDashboardReturn => {
     await fetchRevenueData();
   }, [fetchDashboardData, fetchRevenueData]);
 
-  const refreshRevenue = useCallback(() => {
-    fetchRevenueData();
-  }, [fetchRevenueData]);
+  const refreshRevenue = useCallback(
+    (startDate?: Date, endDate?: Date) => {
+      if (startDate && endDate) {
+        // Update date range state
+        setDateRange({
+          start: startDate.toISOString().split("T")[0],
+          end: endDate.toISOString().split("T")[0],
+        });
+      }
+      fetchRevenueData();
+    },
+    [fetchRevenueData],
+  );
 
   const exportData = useCallback(() => {
     const headers = ["Date", "Revenue", "Orders"];

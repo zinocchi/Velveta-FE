@@ -1,6 +1,6 @@
-import React from 'react';
-import { Menu } from '../../../types/menu';
-import MenuCard from './MenuCard';
+import React from "react";
+import { Menu } from "../../../types/menu";
+import MenuCard from "./MenuCard";
 
 interface MenuGridProps {
   items: Menu[];
@@ -24,14 +24,16 @@ const MenuGrid: React.FC<MenuGridProps> = ({
   onDecrease,
 }) => {
   React.useEffect(() => {
-    console.log('MenuGrid - Items length:', items.length);
-    console.log('MenuGrid - Category:', category);
+    console.log("MenuGrid - Items length:", items.length);
+    console.log("MenuGrid - Category:", category);
   }, [items, category]);
 
   if (items.length === 0) {
     return (
       <div className="text-center py-12 bg-gray-50 rounded-xl">
-        <p className="text-gray-600">No menu items available in this category.</p>
+        <p className="text-gray-600">
+          No menu items available in this category.
+        </p>
       </div>
     );
   }

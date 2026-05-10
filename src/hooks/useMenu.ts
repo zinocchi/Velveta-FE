@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { menuService } from "../services/menuService";
 import { Menu, MenuFilters, MenuState, GroupedCategories } from "../types/menu";
 
@@ -12,34 +12,49 @@ export const useMenu = (initialFilters?: MenuFilters): UseMenuReturn => {
   const [items, setItems] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<MenuFilters | undefined>(
-    initialFilters,
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const fetchMenu = useCallback(
+    async (filters?: MenuFilters) => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await menuService.getAll(filters || initialFilters);
+
+        const filteredData =
+          filters?.category && filters.category !== "all"
+            ? data.filter((item) => item.category === filters.category)
+            : data;
+
+        setItems(filteredData);
+      } catch (err: any) {
+        if (err?.name === "AbortError" || err?.code === "ERR_CANCELED") return;
+        setError(err.response?.data?.message || "Failed to fetch menu");
+        console.error("Error fetching menu:", err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [initialFilters],
   );
 
   useEffect(() => {
-    setFilters(initialFilters);
-  }, [initialFilters?.category]); 
+    fetchMenu(initialFilters);
 
-  const fetchMenu = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [initialFilters?.category, initialFilters?.search]); // Langsung cek perubahan filter
 
-    try {
-      const data = await menuService.getAll(filters);
-      setItems(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to fetch menu");
-      console.error("Error fetching menu:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters]);
-
-  useEffect(() => {
-    fetchMenu();
-  }, [fetchMenu]);
-
-  const setGroupCategories = () => {
+  const setGroupCategories = useCallback(() => {
     return items.reduce((acc: GroupedCategories, menu) => {
       const category = menu.category?.trim() || "uncategorized";
       if (!acc[category]) {
@@ -48,19 +63,19 @@ export const useMenu = (initialFilters?: MenuFilters): UseMenuReturn => {
       acc[category].push(menu);
       return acc;
     }, {});
-  };
+  }, [items]);
 
   const groupedCategories = setGroupCategories();
 
-  // console.log('useMenu - Items fetched:', items.length);
-  // console.log('useMenu - Grouped categories:', (groupedCategories));
+  console.log("useMenu - Items fetched:", items.length);
+  console.log("useMenu - Grouped categories:", groupedCategories);
 
   return {
     items,
     groupedCategories,
     loading,
     error,
-    refetch: fetchMenu,
+    refetch: () => fetchMenu(initialFilters),
     regroup: setGroupCategories,
   };
 };
